@@ -85,6 +85,8 @@ for (t in 1:15) {
   #--------------------------------------------------------------------------------------
   text (x = as_datetime ('2018-05-10'), y = 4.8, labels = t, cex = 2)
 }
+legend (x = as_datetime ('2018-07-01'), y = 5, box.lty = 0, lty = 1:3, col = '#91b9a4', 
+        legend = c ('0.5 m','1.5 m','2.5 m'))
 
 # plot respiration versus air temperature
 #----------------------------------------------------------------------------------------
@@ -118,6 +120,28 @@ points (x = respDataObs [['airt.c']] [respDataObs [['treatment']] == 1],
 # legend 
 #----------------------------------------------------------------------------------------
 legend (x = 25, y = 4.5, box.lty = 0, col = addOpacity (tColours [['colour']] [1:2], 0.6),
+        pch = 19, legend = c ('observational','experimental'))
+
+# plot respiration versus soil moisture for control group only
+#----------------------------------------------------------------------------------------
+par (mfrow = c (1, 1))
+plot (x = respDataExp2018 [['vwc2']] [respDataExp2018 [['treatment']] == 1],
+      y = respDataExp2018 [['flux.raw']] [respDataExp2018 [['treatment']] == 1],
+      xlab = 'soil moisture (%)',
+      ylab = expression (paste ('stem ',CO[2],' efflux (',mu, mol,' ', m^-2,' ', s^-1,')', sep = ' ')),
+      xlim = c (0, 0.6), ylim = c (0, 4.5),
+      pch = 19, las = 1, 
+      col = addOpacity (tColours [['colour']] [1], 0.6))
+# add observational trees to the plot to get a larger temperature variation and sample size 
+#----------------------------------------------------------------------------------------
+points (x = respDataObs [['vwc2']] [respDataObs [['treatment']] == 1],
+        y = respDataObs [['flux.raw']] [respDataObs [['treatment']] == 1],
+        pch = 19, 
+        col = addOpacity (tColours [['colour']] [2], 0.6))
+
+# legend 
+#----------------------------------------------------------------------------------------
+legend (x = 0, y = 4.5, box.lty = 0, col = addOpacity (tColours [['colour']] [1:2], 0.6),
         pch = 19, legend = c ('observational','experimental'))
 #========================================================================================
 

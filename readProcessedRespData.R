@@ -58,3 +58,10 @@ respDataSoilResp2018 <- respDataAll %>% filter (study == 'SoilResp2018')
 respDataObs          <- respDataAll %>% filter (study == 'Obs2018' | study == 'Obs2019')
 # TR I could add control group from 2017 experiment for temperature function, but they 
 # are smaller trees
+
+# remove the observational data from the session of 2019-10-02, because there was an 
+# issue with the pump and all values were abnormally high. The session was also not 
+# finished due to a low battery and measurements taken on the 2019-10-03, once the 
+# battery was charged look good again.   
+#----------------------------------------------------------------------------------------
+respDataObs <- filter (respDataObs, session != '20191002_1300')
