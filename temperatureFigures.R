@@ -144,25 +144,3 @@ legend (x = as_datetime ('2018-06-07'), y = 38, box.lty = 0,
         col = tColours [['colour']] [c (2, 1, 4, 5)], 
         legend = c ('air temperature','control trees','compressed trees','chilled trees'),
         lwd = 1, cex = 0.6, bg = 'transparent')
-
-
-# plot (x = data [['TIMESTAMP']], y = data [['Acer19p02_2p0m']], typ = 'l')
-# plot (x = data [['TIMESTAMP'  ]], y = data [['Acer19p04_1p0m']], typ = 'l')
-# plot (x = data [['TIMESTAMP']], y = data [['Acer19p04_2p0m']], typ = 'l')
-# plot (x = data [['TIMESTAMP']], y = data [['Acer19p06_1p0m']], typ = 'l') # Sensor died in July 2019
-# plot (x = data [['TIMESTAMP']], y = data [['Acer19p06_2p0m']], typ = 'l') # Sensor died in September 2019
-# plot (x = data [['TIMESTAMP']], y = data [['Acer19p07_1p0m']], typ = 'l')
-# plot (x = data [['TIMESTAMP']], y = data [['Acer19p07_2p0m']], typ = 'l')
-# 
-# plot (x = data [['TIMESTAMP']], y = data [['Acer19p01_1p0m']], typ = 'l')
-# plot (x = data [['TIMESTAMP']], y = data [['Acer19p01_2p0m']], typ = 'l')
-# plot (x = data [['TIMESTAMP']], y = data [['Acer19p03_1p0m']], typ = 'l')
-# plot (x = data [['TIMESTAMP']], y = data [['Acer19p03_2p0m']], typ = 'l')
-# plot (x = data [['TIMESTAMP']], y = data [['Acer19p05_1p0m']], typ = 'l') 
-# plot (x = data [['TIMESTAMP']], y = data [['Acer19p05_2p0m']], typ = 'l') 
-# plot (x = data [['TIMESTAMP']], y = data [['Acer19p08_1p0m']], typ = 'l')
-# plot (x = data [['TIMESTAMP']], y = data [['Acer19p08_2p0m']], typ = 'l') # Sensors gave weird data after May and is probably useless.
-
-# Shed air temperature
-plot (x = data [['TIMESTAMP']], y = data [['Misc1']], typ = 'l') 
-plot (x = data [['TIMESTAMP']], y = data [['Misc2']], typ = 'l') 
