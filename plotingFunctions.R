@@ -48,18 +48,18 @@ criticalDates <- function (group, asDate = TRUE) {
   if (group == 4) { # double compressed
     if (asDate) {
       abline (v = as_date ('2018-06-26'), col = '#99999999', lty = 2) # start date
-      abline (v = as_date ('2018-10-08'), col = '#99999999', lty = 2) # end  # TR Needs to be updated
+      abline (v = as_date ('2018-09-04'), col = '#99999999', lty = 2) # end  # TR Needs to be updated
     } else {
       abline (v = as_datetime ('2018-06-26'), col = '#99999999', lty = 2) # start date
-      abline (v = as_datetime ('2018-10-08'), col = '#99999999', lty = 2) # end  # TR Needs to be updated
+      abline (v = as_datetime ('2018-09-04'), col = '#99999999', lty = 2) # end  # TR Needs to be updated
     }
   } else if (group == 5) { # chilled
     if (asDate) {
       abline (v = as_date ('2018-06-25'), col = '#99999999', lty = 2) # start date
-      abline (v = as_date ('2018-08-09'), col = '#99999999', lty = 2) # end date # TR Needs to be updated
+      abline (v = as_date ('2018-09-03'), col = '#99999999', lty = 2) # end date # TR Needs to be updated
     } else {
       abline (v = as_datetime ('2018-06-25'), col = '#99999999', lty = 2) # start date
-      abline (v = as_datetime ('2018-08-09'), col = '#99999999', lty = 2) # end date # TR Needs to be updated
+      abline (v = as_datetime ('2018-09-03'), col = '#99999999', lty = 2) # end date # TR Needs to be updated
     }
   } else { # control
     if (asDate) {
