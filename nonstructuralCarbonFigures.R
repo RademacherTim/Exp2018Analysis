@@ -22,6 +22,7 @@ stemData2018 <- stemData2018 %>%
 layout (matrix (1:15, nrow = 3, byrow = TRUE))
 for (t in 1:15) {
   # plot below treatment
+  #--------------------------------------------------------------------------------------
   con <- stemData2018 [['treeID']] == t & stemData2018 [['sampleHeight']] == 1
   plot (x = stemData2018 [['DateOfSampleCollection']] [con],
         y = stemData2018 [['ConcentrationSugarPerDW']] [con], typ = 'l',
@@ -29,15 +30,27 @@ for (t in 1:15) {
         ylim = c (0, 1.75), lty = 3, 
         col = tColours [['colour']] [unique (stemData2018 [['treatment']] [con])])
   # add in between the treatments
+  #--------------------------------------------------------------------------------------
   con <- stemData2018 [['treeID']] == t & stemData2018 [['sampleHeight']] == 2
   lines (x = stemData2018 [['DateOfSampleCollection']] [con],
          y = stemData2018 [['ConcentrationSugarPerDW']] [con], lty = 2, 
          col = tColours [['colour']] [unique (stemData2018 [['treatment']] [con])])
   # add in above the treatments
+  #--------------------------------------------------------------------------------------
   con <- stemData2018 [['treeID']] == t & stemData2018 [['sampleHeight']] == 3
   lines (x = stemData2018 [['DateOfSampleCollection']] [con],
          y = stemData2018 [['ConcentrationSugarPerDW']] [con], lty = 1, 
          col = tColours [['colour']] [unique (stemData2018 [['treatment']] [con])])
+  
+  # add critical dates
+  #--------------------------------------------------------------------------------------
+  criticalDates (group = unique (stemData2018 [['treatment']] [con]), asDate = FALSE)
+  
+  # add legend
+  #--------------------------------------------------------------------------------------
+  if (t == 15) {
+    legend (x = as.POSIXct ('2018-06-30'), cex = 0.6,
+            y = 0.75, box.lty = 0, lty = 1:3, lwd = 1, legend = c ('above','middle','below'))}
 }
 
 # plot the 2018 stem starch concentration data by tree
@@ -46,21 +59,36 @@ layout (matrix (1:15, nrow = 3, byrow = TRUE))
 for (t in 1:15) {
   # plot below treatment
   con <- stemData2018 [['treeID']] == t & stemData2018 [['sampleHeight']] == 1
+  #--------------------------------------------------------------------------------------
   plot (x = stemData2018 [['DateOfSampleCollection']] [con],
         y = stemData2018 [['ConcentrationStarchPerDW']] [con], typ = 'l',
-        xlab = 'date', ylab = 'sugar concentration (%DW)', las = 1,
-        ylim = c (0, 1.75), lty = 3, 
+        xlab = 'date', ylab = 'starch concentration (%DW)', las = 1,
+        ylim = c (0, 0.8), lty = 3, 
         col = tColours [['colour']] [unique (stemData2018 [['treatment']] [con])])
+  
   # add in between the treatments
+  #--------------------------------------------------------------------------------------
   con <- stemData2018 [['treeID']] == t & stemData2018 [['sampleHeight']] == 2
   lines (x = stemData2018 [['DateOfSampleCollection']] [con],
          y = stemData2018 [['ConcentrationStarchPerDW']] [con], lty = 2, 
          col = tColours [['colour']] [unique (stemData2018 [['treatment']] [con])])
+  
   # add in above the treatments
+  #--------------------------------------------------------------------------------------
   con <- stemData2018 [['treeID']] == t & stemData2018 [['sampleHeight']] == 3
   lines (x = stemData2018 [['DateOfSampleCollection']] [con],
          y = stemData2018 [['ConcentrationStarchPerDW']] [con], lty = 1, 
          col = tColours [['colour']] [unique (stemData2018 [['treatment']] [con])])
+  
+  # add critical dates
+  #--------------------------------------------------------------------------------------
+  criticalDates (group = unique (stemData2018 [['treatment']] [con]), asDate = FALSE)
+  
+  # Add legend
+  #--------------------------------------------------------------------------------------
+  if (t == 15) {
+    legend (x = as.POSIXct ('2018-06-30'), cex = 0.6,
+            y = 0.8, box.lty = 0, lty = 1:3, lwd = 1, legend = c ('above','middle','below'))}
 }
 
 # summarise the data by treatment and sampling height
@@ -107,11 +135,16 @@ for (t in c (1, 4, 5)) {
         y = 1.45, cex = 2, pos = 4, 
         labels = ifelse (t == 1, 'control', ifelse (t == 4, 'compressed', 'chilled')))
   
+  # add critical dates
+  #--------------------------------------------------------------------------------------
+  criticalDates (group = t, asDate = FALSE)
+  
   # add legend
   #--------------------------------------------------------------------------------------
   if (t == 5) {
     legend (x = as.POSIXct ('2018-05-30'),
             y = 0.3, box.lty = 0, lty = 1:3, lwd = 2, legend = c ('above','middle','below'))}
+
 }
 
 # plot the 2018 stem starch concentration data by treatment
@@ -141,13 +174,17 @@ for (t in c (1, 4, 5)) {
            lwd = 2, col = tColours [['colour']] [t])
   }
   
-  # Add panel descriptor
+  # add panel descriptor
   #--------------------------------------------------------------------------------------
   text (x = as.POSIXct ('2018-05-20'),
         y = 0.58, cex = 2, pos = 4, 
         labels = ifelse (t == 1, 'control', ifelse (t == 4, 'compressed', 'chilled')))
   
-  # Add legend
+  # add critical dates
+  #--------------------------------------------------------------------------------------
+  criticalDates (group = t, asDate = FALSE)
+  
+  # add legend
   #--------------------------------------------------------------------------------------
   if (t == 5) {
     legend (x = as.POSIXct ('2018-05-30'),
