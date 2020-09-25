@@ -14,32 +14,35 @@ library ('lubridate')
 #----------------------------------------------------------------------------------------
 source ('./readProcessedRespData.R')
 
+# drop unnecessary variable
+#----------------------------------------------------------------------------------------
+respDataExp2018 <- respDataExp2018 %>% 
+  select (treatment, tree, chamber, datetime, flux.raw)
+
 # make sure all variables are factors
 #----------------------------------------------------------------------------------------
 respDataExp2018 [['date']]      <- factor (as_date (respDataExp2018 [['datetime']]))
 respDataExp2018 [['treatment']] <- factor (respDataExp2018 [['treatment']], levels = c (5, 4, 1))
 respDataExp2018 [['tree']]      <- factor (respDataExp2018 [['tree']])
-respDataExp2018 [['height']]    <- factor (respDataExp2018 [['chamber']])
+respDataExp2018 [['height']]    <- factor (respDataExp2018 [['chamber']], levels = c (3, 1, 2))
 
-# fit mixed effects model with tree as random effect
+# add column based on period (e.g., before, during, and after treatment)
 #----------------------------------------------------------------------------------------
-M1 <- lmer (formula = flux.raw ~ (1 | tree) + date + height + date:treatment:height, 
+period <- ifelse (respDataExp2018 [['datetime']] < startDate, 'before', 
+                  ifelse (respDataExp2018 [['datetime']] > endDate, 'after','during'))
+periodAlt <- ifelse (respDataExp2018 [['datetime']] < startDate | 
+                     respDataExp2018 [['datetime']] > endDate,'non-chilling','chilling')
+respDataExp2018 <- respDataExp2018 %>% 
+  mutate (period    = factor (period,    levels = c ('during','after','before')), 
+          periodAlt = factor (periodAlt, levels = c ('non-chilling','chilling')))
+
+# fit mixed effects model with tree and height as random effects to account for 
+# idiosyncratic differences due to factors such as variations in exact azimuth or solar 
+# exposure due to varying thickness of overlaying canopy 
+#----------------------------------------------------------------------------------------
+M1 <- lmer (formula = flux.raw ~ (tree | height) + date + period:treatment:height, 
             data = respDataExp2018,
             REML = TRUE)
 summary (M1)
-
-# divide period into before, during and after
-#----------------------------------------------------------------------------------------
-respDataExp2018 [['period']] <- 2
-respDataExp2018 [['period']] [respDataExp2018 [['datetime']] <= as_datetime ('2018-08-09')] <- 1
-respDataExp2018 [['period']] [respDataExp2018 [['datetime']] <= as_datetime ('2018-06-25')] <- 0
-respDataExp2018 [['period']] <- factor (respDataExp2018 [['period']], levels = 0:2)
-
-# fit mixed effects model with tree as random effect
-#----------------------------------------------------------------------------------------
-M2 <- lmer (formula = flux.raw ~ (1 | tree) + period + height + period:treatment:height, 
-            data = respDataExp2018,
-            REML = TRUE)
-summary (M2)
 
 #========================================================================================

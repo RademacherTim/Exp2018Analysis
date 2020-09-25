@@ -108,19 +108,19 @@ plot (x = respDataExp2018 [['airt.c']] [respDataExp2018 [['treatment']] == 1],
       ylab = expression (paste ('stem ',CO[2],' efflux (',mu, mol,' ', m^-2,' ', s^-1,')', sep = ' ')),
       xlim = c (0, 30), ylim = c (0, 4.5),
       pch = 19, las = 1, 
-      col = addOpacity (tColours [['colour']] [respDataExp2018 [['treatment']] [respDataExp2018 [['treatment']] == 1]], 0.6))
+      col = addOpacity (tColours [['colour']] [2], 0.6))
 
 # add observational trees to the plot to get a larger temperature variation and sample size 
 #----------------------------------------------------------------------------------------
 points (x = respDataObs [['airt.c']] [respDataObs [['treatment']] == 1],
         y = respDataObs [['flux.raw']] [respDataObs [['treatment']] == 1],
         pch = 19, 
-        col = addOpacity (tColours [['colour']] [2], 0.6))
+        col = addOpacity (tColours [['colour']] [1], 0.6))
 
 # legend 
 #----------------------------------------------------------------------------------------
-legend (x = 25, y = 4.5, box.lty = 0, col = addOpacity (tColours [['colour']] [1:2], 0.6),
-        pch = 19, legend = c ('observational','experimental'))
+legend (x = 24, y = 4.5, box.lty = 0, col = addOpacity (tColours [['colour']] [1:2], 0.6),
+        pch = 19, legend = c ('observational study','experimental study'))
 
 # plot respiration versus soil moisture for control group only
 #----------------------------------------------------------------------------------------
@@ -131,18 +131,18 @@ plot (x = respDataExp2018 [['vwc2']] [respDataExp2018 [['treatment']] == 1],
       ylab = expression (paste ('stem ',CO[2],' efflux (',mu, mol,' ', m^-2,' ', s^-1,')', sep = ' ')),
       xlim = c (0, 0.6), ylim = c (0, 4.5),
       pch = 19, las = 1, 
-      col = addOpacity (tColours [['colour']] [1], 0.6))
+      col = addOpacity (tColours [['colour']] [2], 0.6))
 # add observational trees to the plot to get a larger temperature variation and sample size 
 #----------------------------------------------------------------------------------------
 points (x = respDataObs [['vwc2']] [respDataObs [['treatment']] == 1],
         y = respDataObs [['flux.raw']] [respDataObs [['treatment']] == 1],
         pch = 19, 
-        col = addOpacity (tColours [['colour']] [2], 0.6))
+        col = addOpacity (tColours [['colour']] [1], 0.6))
 
 # legend 
 #----------------------------------------------------------------------------------------
 legend (x = 0, y = 4.5, box.lty = 0, col = addOpacity (tColours [['colour']] [1:2], 0.6),
-        pch = 19, legend = c ('observational','experimental'))
+        pch = 19, legend = c ('observational study','experimental study'))
 
 # wrangle respiration data to get group means and standard errors
 #----------------------------------------------------------------------------------------

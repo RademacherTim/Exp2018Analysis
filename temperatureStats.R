@@ -137,8 +137,8 @@ dailyAverage <- dailyAverage %>%
 #----------------------------------------------------------------------------------------
 period <- ifelse (dailyAverage [['datetime']] < startDate, 'before', 
                   ifelse (dailyAverage [['datetime']] > endDate, 'after','during'))
-periodAlt <- ifelse (dailyAverage [['datetime']] < startDate | dailyAverage [['datetime']] > endDate,
-                     'non-chilling','chilling')
+periodAlt <- ifelse (dailyAverage [['datetime']] < startDate | 
+                     dailyAverage [['datetime']] > endDate,'non-chilling','chilling')
 dailyAverage <- dailyAverage %>% mutate (period, periodAlt)
 
 # add a treatment group

@@ -27,20 +27,24 @@ for (t in 1:15) {
   plot (x = stemData2018 [['DateOfSampleCollection']] [con],
         y = stemData2018 [['ConcentrationSugarPerDW']] [con], typ = 'l',
         xlab = 'date', ylab = 'sugar concentration (%DW)', las = 1,
-        ylim = c (0, 1.75), lty = 3, 
+        ylim = c (0, 1.75), lty = 3, lwd = 2,
         col = tColours [['colour']] [unique (stemData2018 [['treatment']] [con])])
   # add in between the treatments
   #--------------------------------------------------------------------------------------
   con <- stemData2018 [['treeID']] == t & stemData2018 [['sampleHeight']] == 2
   lines (x = stemData2018 [['DateOfSampleCollection']] [con],
-         y = stemData2018 [['ConcentrationSugarPerDW']] [con], lty = 2, 
+         y = stemData2018 [['ConcentrationSugarPerDW']] [con], lty = 2, lwd = 2,
          col = tColours [['colour']] [unique (stemData2018 [['treatment']] [con])])
   # add in above the treatments
   #--------------------------------------------------------------------------------------
   con <- stemData2018 [['treeID']] == t & stemData2018 [['sampleHeight']] == 3
   lines (x = stemData2018 [['DateOfSampleCollection']] [con],
-         y = stemData2018 [['ConcentrationSugarPerDW']] [con], lty = 1, 
+         y = stemData2018 [['ConcentrationSugarPerDW']] [con], lty = 1, lwd = 2,
          col = tColours [['colour']] [unique (stemData2018 [['treatment']] [con])])
+  
+  # add a tree panel identifier
+  #--------------------------------------------------------------------------------------
+  text (x = as_datetime ('2018-05-25'), y = 1.55, labels = t, cex = 2)
   
   # add critical dates
   #--------------------------------------------------------------------------------------
@@ -63,22 +67,26 @@ for (t in 1:15) {
   plot (x = stemData2018 [['DateOfSampleCollection']] [con],
         y = stemData2018 [['ConcentrationStarchPerDW']] [con], typ = 'l',
         xlab = 'date', ylab = 'starch concentration (%DW)', las = 1,
-        ylim = c (0, 0.8), lty = 3, 
+        ylim = c (0, 0.8), lty = 3, lwd = 2,
         col = tColours [['colour']] [unique (stemData2018 [['treatment']] [con])])
   
   # add in between the treatments
   #--------------------------------------------------------------------------------------
   con <- stemData2018 [['treeID']] == t & stemData2018 [['sampleHeight']] == 2
   lines (x = stemData2018 [['DateOfSampleCollection']] [con],
-         y = stemData2018 [['ConcentrationStarchPerDW']] [con], lty = 2, 
+         y = stemData2018 [['ConcentrationStarchPerDW']] [con], lty = 2, lwd = 2,
          col = tColours [['colour']] [unique (stemData2018 [['treatment']] [con])])
   
   # add in above the treatments
   #--------------------------------------------------------------------------------------
   con <- stemData2018 [['treeID']] == t & stemData2018 [['sampleHeight']] == 3
   lines (x = stemData2018 [['DateOfSampleCollection']] [con],
-         y = stemData2018 [['ConcentrationStarchPerDW']] [con], lty = 1, 
+         y = stemData2018 [['ConcentrationStarchPerDW']] [con], lty = 1, lwd = 2,
          col = tColours [['colour']] [unique (stemData2018 [['treatment']] [con])])
+  
+  # add a tree panel identifier
+  #--------------------------------------------------------------------------------------
+  text (x = as_datetime ('2018-05-25'), y = 0.75, labels = t, cex = 2)
   
   # add critical dates
   #--------------------------------------------------------------------------------------
@@ -142,8 +150,8 @@ for (t in c (1, 4, 5)) {
   # add legend
   #--------------------------------------------------------------------------------------
   if (t == 5) {
-    legend (x = as.POSIXct ('2018-05-30'),
-            y = 0.3, box.lty = 0, lty = 1:3, lwd = 2, legend = c ('above','middle','below'))}
+    legend (x = as.POSIXct ('2018-09-03'), bg = 'transparent',
+            y = 1.45, box.lty = 0, lty = 1:3, lwd = 2, legend = c ('above','middle','below'))}
 
 }
 
@@ -187,7 +195,7 @@ for (t in c (1, 4, 5)) {
   # add legend
   #--------------------------------------------------------------------------------------
   if (t == 5) {
-    legend (x = as.POSIXct ('2018-05-30'),
-            y = 0.15, box.lty = 0, lty = 1:3, lwd = 2, legend = c ('above','middle','below'))}
+    legend (x = as.POSIXct ('2018-09-03'),
+            y = 0.58, box.lty = 0, lty = 1:3, lwd = 2, legend = c ('above','middle','below'))}
 }   
 #========================================================================================
