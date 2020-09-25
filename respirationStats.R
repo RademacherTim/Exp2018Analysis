@@ -34,7 +34,7 @@ periodAlt <- ifelse (respDataExp2018 [['datetime']] < startDate |
                      respDataExp2018 [['datetime']] > endDate,'non-chilling','chilling')
 respDataExp2018 <- respDataExp2018 %>% 
   mutate (period    = factor (period,    levels = c ('during','after','before')), 
-          periodAlt = factor (periodAlt, levels = c ('non-chilling','chilling')))
+          periodAlt = factor (periodAlt, levels = c ('chilling', 'non-chilling')))
 
 # fit mixed effects model with tree and height as random effects to account for 
 # idiosyncratic differences due to factors such as variations in exact azimuth or solar 
