@@ -18,7 +18,7 @@ se <-  function (x) {
 
 # set colours for treatments: control, girdled, compressed, double compressed and chilled
 #----------------------------------------------------------------------------------------
-tColours <- tibble (colour = c ('#91b9a4','#C0334D','#F18904','#5C4A72','#23345C'),
+tColours <- tibble (colour = c ('#91b9a4','#C0334D','#F18904','#5C4A72','#0073cf'),
                     treatment = c ('control','girdled','compressed','double compressed',
                                    'chilled'))
 
@@ -41,7 +41,37 @@ yPositions <- c (0.8, 1.8, 2.3, 3.3, 3.8, 4.8, 5.3, 5.8)
 
 # Function to plot critical dates
 #----------------------------------------------------------------------------------------
-criticalDates <- function (group, asDate = TRUE) {
+criticalDates <- function (group, asDate = TRUE, startOnly = FALSE, endOnly = FALSE) {
+  
+  # if only start date is requested, return start date
+  #--------------------------------------------------------------------------------------
+  if (startOnly) {
+    if (asDate & group %in% c (1, 5)) {
+      return (as_date ('2018-06-25'))
+    } else if (asDate & group == 4) {
+      return (as_date ('2018-06-26'))
+    } else if (!asDate & group %in% c (1, 5)) {
+      return (as_datetime ('2018-06-25'))
+    } else if (!asDate & group == 4) {
+      return (as_datetime ('2018-06-26'))
+    }
+  }
+  
+  # if only end date is requested, return end date
+  #--------------------------------------------------------------------------------------
+  if (endOnly) {
+    if (asDate & group == 5) {
+      return (as_date ('2018-09-03'))
+    } else if (asDate & group == 4) {
+      return (as_date ('2018-09-04'))
+    } else if (!asDate & group == 5) {
+      return (as_datetime ('2018-09-03'))
+    } else if (!asDate & group == 4) {
+      return (as_datetime ('2018-09-04'))
+    } else {
+      stop ('Error: the specified group had no end date.') 
+    }
+  }
   
   # plot critical dates (control groups have no end dates)
   #--------------------------------------------------------------------------------------

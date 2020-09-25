@@ -21,13 +21,16 @@ plot (x = tempData [['datetime']],
       col = tColours [['colour']] [5])
 
 # add desired chilling zone
+#----------------------------------------------------------------------------------------
 rect (xleft = as_datetime ('2018-06-25'), xright = as_datetime ('2018-09-03'),
       ybottom = 0, ytop = 5, col = addOpacity ('#666666', 0.3), lty = 0)
 
 # add critical dates
+#----------------------------------------------------------------------------------------
 res <- criticalDates (group = 5, asDate = FALSE)
 
 # add more chilled trees
+#----------------------------------------------------------------------------------------
 lines (x = tempData [['datetime']], 
        y = tempData [['t.02.2p0m']],
        col = tColours [['colour']] [5])
@@ -42,11 +45,13 @@ lines (x = tempData [['datetime']],
        col = tColours [['colour']] [5])
 
 # add air temperature
+#----------------------------------------------------------------------------------------
 lines (x = tempData [['datetime']], 
        y = tempData [['t.oak.1p5m']],
        col = tColours [['colour']] [2])
 
 # add temperatures at 1.5 m
+#----------------------------------------------------------------------------------------
 par (mar = c (1, 8, 1, 1))
 plot (x = tempData [['datetime']], 
       y = tempData [['t.01.1p5m']], 
@@ -56,12 +61,14 @@ plot (x = tempData [['datetime']],
       xaxt = 'n', xlab = '', ylab = '1.5 m',
       col = tColours [['colour']] [5])
 mtext (text = expression (paste ('phloem temperature (',degree,'C)', sep = '')), 
-       side = 2, line = 5, cex = 1.8)
+       side = 2, line = 5, cex = 1.4)
 
 # add critical dates
+#----------------------------------------------------------------------------------------
 res <- criticalDates (group = 5, asDate = FALSE)
 
 # add more chilled trees
+#----------------------------------------------------------------------------------------
 lines (x = tempData [['datetime']], 
        y = tempData [['t.02.1p5m']],
        col = tColours [['colour']] [5])
@@ -76,6 +83,7 @@ lines (x = tempData [['datetime']],
        col = tColours [['colour']] [5])
 
 # add existing measurements from compressed and control trees
+#----------------------------------------------------------------------------------------
 lines (x = tempData [['datetime']], 
        y = tempData [['t.06.1p5m']],
        col = tColours [['colour']] [4])
@@ -90,12 +98,14 @@ lines (x = tempData [['datetime']],
        col = tColours [['colour']] [1])
 
 # add air temperature
+#----------------------------------------------------------------------------------------
 lines (x = tempData [['datetime']], 
        y = tempData [['t.oak.1p5m']],
        col = tColours [['colour']] [2])
 
 
 # add temperatures at 1.0 m
+#----------------------------------------------------------------------------------------
 par (mar = c (3, 8, 1, 1))
 plot (x = tempData [['datetime']], 
       y = tempData [['t.01.1p0m']], 
@@ -106,18 +116,22 @@ plot (x = tempData [['datetime']],
       col = tColours [['colour']] [5])
 
 # add x axis
+#----------------------------------------------------------------------------------------
 axis (side = 1, at = seq (as_datetime ('2018-06-01'), as_datetime ('2018-11-01'), 
                           length.out = 6), label = c ('June','July','August',
                                                       'September','October','November'))
 
 # add desired chilling zone
+#----------------------------------------------------------------------------------------
 rect (xleft = as_datetime ('2018-06-25'), xright = as_datetime ('2018-09-03'),
       ybottom = 0, ytop = 5, col = addOpacity ('#666666', 0.3), lty = 0)
 
 # add critical dates
+#----------------------------------------------------------------------------------------
 res <- criticalDates (group = 5, asDate = FALSE)
 
 # add more chilled trees
+#----------------------------------------------------------------------------------------
 lines (x = tempData [['datetime']], 
        y = tempData [['t.02.1p0m']],
        col = tColours [['colour']] [5])
@@ -132,11 +146,13 @@ lines (x = tempData [['datetime']],
        col = tColours [['colour']] [5])
 
 # add air temperature
+#----------------------------------------------------------------------------------------
 lines (x = tempData [['datetime']], 
        y = tempData [['t.oak.1p5m']],
        col = tColours [['colour']] [2])
 
 # add legend 
+#----------------------------------------------------------------------------------------
 legend (x = as_datetime ('2018-09-24'), y = 35, box.lty = 0, 
         col = tColours [['colour']] [c (2, 1, 4, 5)], 
         legend = c ('air temperature','control trees','compressed trees','chilled trees'),
