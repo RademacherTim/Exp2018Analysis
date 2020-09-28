@@ -63,7 +63,7 @@ tempData <- read_csv (file = './data/temperatureData_HF_Exp2018.csv', na = "NA",
                                         t.08.1p5m.air = col_double (),
                                         t.10.1p5m     = col_double ()))
 
-# average temperature data over one hour intervals
+# average temperature data over ten minute intervals
 #----------------------------------------------------------------------------------------
 tempData <- tempData %>% 
   group_by (datetime = cut (datetime, breaks = '10 min')) %>% 

@@ -3,10 +3,6 @@
 # at Harvard Forest.
 #----------------------------------------------------------------------------------------
 
-# load dependencies
-#----------------------------------------------------------------------------------------
-
-
 # source water potential data
 #----------------------------------------------------------------------------------------
 source ('./readWaterPotential.R')
@@ -16,7 +12,7 @@ source ('./plotingFunctions.R')
 #----------------------------------------------------------------------------------------
 par (mfrow = c (1, 1))
 plot (x = phi [['date']],
-      y = phi [['phi.branch']] / 10,
+      y = phi [['phi.branch']],
       col = addOpacity (tColours [['colour']] [phi [['treatment']]], 0.7),
       xlab = 'date', ylab = expression (paste (phi[branch],'(MPa)', sep = '')),
       las = 1, pch = 19, 
