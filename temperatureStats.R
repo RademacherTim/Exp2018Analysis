@@ -17,7 +17,7 @@ source ('./readTemperatureData.R')
 
 # average temperature data over one hour intervals
 #----------------------------------------------------------------------------------------
-tempData <- tempData %>% 
+hourlyData <- tempData %>% 
   group_by (datetime = cut (datetime, breaks = '1 hour')) %>% 
   summarise (u.battery  = mean (u.battery,  na.rm = TRUE),
              t.panel    = mean (t.panel,    na.rm = TRUE),
@@ -42,8 +42,8 @@ tempData <- tempData %>%
              t.05.l3    = mean (t.05.l3,    na.rm = TRUE),
              t.05.l2    = mean (t.05.l2,    na.rm = TRUE),
              t.05.l1    = mean (t.05.l1,    na.rm = TRUE),
-             t.end.of.line.01 = mean (t.end.of.line.01.blue.tape, na.rm = TRUE),
-             t.end.of.line.03 = mean (t.end.of.line.03.red.tape,  na.rm = TRUE),
+             t.end.of.line.01 = mean (t.end.of.line.01, na.rm = TRUE),
+             t.end.of.line.03 = mean (t.end.of.line.03,  na.rm = TRUE),
              t.line.backflow  = mean (t.line.backflow, na.rm = TRUE),
              t.line.outflow   = mean (t.line.outflow,  na.rm = TRUE),
              t.air.2p0m = mean (t.air.2p0m, na.rm = TRUE),
@@ -67,35 +67,35 @@ tempData <- tempData %>%
              t.07.1p5m.air = mean (t.07.1p5m.air, na.rm = TRUE),
              t.08.1p5m     = mean (t.08.1p5m,     na.rm = TRUE),
              t.08.1p5m.air = mean (t.08.1p5m.air, na.rm = TRUE),
-             t.10.1p5m     = mean (t.10.1p5m,     na.rm = TRUE))
+             t.10.1p5m     = mean (t.10.1p5m,     na.rm = TRUE),
+             t.air.1p5m    = mean (t.air.1p5m,    na.rm = TRUE))
 
 # convert datetime back from factor to datetime
 #----------------------------------------------------------------------------------------
-tempData [['datetime']] <- as_datetime (tempData [['datetime']])
+hourlyData [['datetime']] <- as_datetime (hourlyData [['datetime']])
 
 # check how often the datalogger battery voltage dropped below 11.0 watts at some point
 #----------------------------------------------------------------------------------------
-res <- sum (tempData [['u.battery']] < 11.0, na.rm = TRUE)
+res <- sum (hourlyData [['u.battery']] < 11.0, na.rm = TRUE)
 rm (res)
 
 # select only relevant temperature variables
 #----------------------------------------------------------------------------------------
-tempData <- tempData %>% select (datetime, t.oak.1p5m, t.air.2p0m, t.01.2p0m, t.01.1p5m, 
-                                 t.01.1p0m, t.02.2p0m, t.02.1p5m, t.02.1p0m, t.03.2p0m, 
-                                 t.03.1p5m, t.03.1p0m, t.04.2p0m, t.04.1p5m, t.04.1p0m, 
-                                 t.05.2p0m, t.05.1p5m, t.05.1p0m, t.06.1p5m, t.07.1p5m, 
-                                 t.08.1p5m, t.10.1p5m)
+hourlyData <- hourlyData %>% 
+  select (-u.battery, -t.panel, -t.end.of.line.01, -t.end.of.line.03, -t.line.backflow, 
+          -t.line.outflow)
 
 # select date span with continuous measurements
 #----------------------------------------------------------------------------------------
-tempData <- filter (tempData, datetime > as_datetime ('2018-06-01'),
-                              datetime < as_datetime ('2018-10-01'))
+hourlyData <- filter (hourlyData, datetime > as_datetime ('2018-06-01'),
+                                  datetime < as_datetime ('2018-10-01'))
 
 # average daily values 
 #----------------------------------------------------------------------------------------
-dailyAverage <- tempData %>% group_by (datetime = cut (datetime, breaks = '1 day')) %>% 
+dailyAverage <- hourlyData %>% group_by (datetime = cut (datetime, breaks = '1 day')) %>% 
   summarise (t.oak.1p5m = mean (t.oak.1p5m, na.rm = TRUE),
-             t.air.1p5m = mean (t.air.2p0m, na.rm = TRUE), # renamed temperature to average the two air temperatures
+             t.air.2p0m = mean (t.air.2p0m, na.rm = TRUE), 
+             t.air.1p5m = mean (t.air.1p5m, na.rm = TRUE), 
              t.01.2p0m  = mean (t.01.2p0m, na.rm = TRUE),
              t.01.1p5m  = mean (t.01.1p5m, na.rm = TRUE),
              t.01.1p0m  = mean (t.01.1p0m, na.rm = TRUE),
@@ -185,4 +185,23 @@ sum (temp [['temp < 5']] [temp [['height']] == '1p0m'], na.rm = TRUE) /
   length (temp [['temp < 5']] [temp [['height']] == '1p0m']) * 100.0
 sum (temp [['temp < 5']] [temp [['height']] == '2p0m'], na.rm = TRUE) / 
   length (temp [['temp < 5']] [temp [['height']] == '2p0m']) * 100.0
+
+# calculate mean temperature during chilling
+#----------------------------------------------------------------------------------------
+temp <- tempData %>% filter (datetime > startDate, datetime < endDate) %>% 
+  select (datetime, t.01.2p0m, t.01.1p0m, t.02.2p0m, t.02.1p0m, t.03.2p0m, t.03.1p0m, 
+          t.04.2p0m, t.04.1p0m, t.05.2p0m, t.05.1p0m) %>% 
+  pivot_longer (cols = !datetime, 
+                names_to =  c ('tree','height'), 
+                names_prefix = 't.', 
+                names_pattern = '(.*)\\.(.*)', 
+                values_to = 'temp') %>%
+  filter (!is.na (temp), !is.nan (temp)) 
+mean (temp [['temp']] [temp [['height']] == '1p0m'], na.rm = TRUE)
+sd   (temp [['temp']] [temp [['height']] == '1p0m'], na.rm = TRUE)
+se   (temp [['temp']] [temp [['height']] == '1p0m'])
+mean (temp [['temp']] [temp [['height']] == '2p0m'], na.rm = TRUE)
+sd   (temp [['temp']] [temp [['height']] == '2p0m'], na.rm = TRUE)
+se   (temp [['temp']] [temp [['height']] == '2p0m'])
+
 #========================================================================================

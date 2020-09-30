@@ -47,7 +47,7 @@ lines (x = tempData [['datetime']],
 # add air temperature
 #----------------------------------------------------------------------------------------
 lines (x = tempData [['datetime']], 
-       y = tempData [['t.oak.1p5m']],
+       y = tempData [['t.air.1p5m']],
        col = tColours [['colour']] [2])
 
 # add temperatures at 1.5 m
@@ -100,7 +100,7 @@ lines (x = tempData [['datetime']],
 # add air temperature
 #----------------------------------------------------------------------------------------
 lines (x = tempData [['datetime']], 
-       y = tempData [['t.oak.1p5m']],
+       y = tempData [['t.air.1p5m']],
        col = tColours [['colour']] [2])
 
 
@@ -148,7 +148,7 @@ lines (x = tempData [['datetime']],
 # add air temperature
 #----------------------------------------------------------------------------------------
 lines (x = tempData [['datetime']], 
-       y = tempData [['t.oak.1p5m']],
+       y = tempData [['t.air.1p5m']],
        col = tColours [['colour']] [2])
 
 # add legend 
