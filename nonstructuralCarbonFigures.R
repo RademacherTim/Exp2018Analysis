@@ -9,7 +9,7 @@ source ('./plotingFunctions.R')
 
 # source processed data
 #----------------------------------------------------------------------------------------
-source ('./readNSCData.R') 
+source ('./readNonstructuralCarbonData.R') 
 
 # sort the stemData2018 tibble to makes lines in graphs look decent
 #----------------------------------------------------------------------------------------

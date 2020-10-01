@@ -13,7 +13,7 @@ source ('./plotingFunctions.R')
 
 # source processed data
 #----------------------------------------------------------------------------------------
-source ('./readNSCData.R') 
+source ('./readNonstructuralCarbonData.R') 
 
 # select only necessary columns and wrangle data to contain factors
 #----------------------------------------------------------------------------------------
