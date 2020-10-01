@@ -26,6 +26,11 @@ respDataExp2018 [['treatment']] <- factor (respDataExp2018 [['treatment']], leve
 respDataExp2018 [['tree']]      <- factor (respDataExp2018 [['tree']])
 respDataExp2018 [['height']]    <- factor (respDataExp2018 [['chamber']], levels = c (3, 1, 2))
 
+# get start and end dates for each treatment
+#----------------------------------------------------------------------------------------
+startDate <- criticalDates (group = 5, asDate = FALSE, startOnly = TRUE) 
+endDate   <- criticalDates (group = 5, asDate = FALSE, endOnly   = TRUE)
+
 # add column based on period (e.g., before, during, and after treatment)
 #----------------------------------------------------------------------------------------
 period <- ifelse (respDataExp2018 [['datetime']] < startDate, 'before', 
