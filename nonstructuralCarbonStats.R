@@ -13,7 +13,7 @@ source ('./plotingFunctions.R')
 
 # source processed data
 #----------------------------------------------------------------------------------------
-source ('./processNSCData.R') 
+source ('./readNSCData.R') 
 
 # select only necessary columns and wrangle data to contain factors
 #----------------------------------------------------------------------------------------
