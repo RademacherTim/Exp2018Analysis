@@ -11,6 +11,10 @@ library ('tidyverse')
 library ('lubridate')
 library ('rjson')
 
+# create %notin% funtion
+#----------------------------------------------------------------------------------------
+`%notin%` <- Negate (`%in%`)
+
 # Set working directory to read json files for the follow-up microcores
 #----------------------------------------------------------------------------------------
 setwd ('/media/tim/dataDisk/PlantGrowth/data/microcores/woodAnatomy/Exp2018/ringWidthTRIAD/')
@@ -45,12 +49,23 @@ for (j in 1: length (jsonFiles)) {
   t <- as.numeric (temp [['plotID']]) # treatment
   growingSeason <- temp [['sampleYearGrowth']]
   
+  # check metadata
+  #--------------------------------------------------------------------------------------
+  if (temp$status != 'Confirmed')      stop ('Error: Metadata status was not confirmed!')  
+  if (temp$species != 'Pinus strobus') stop ('Error: Species is not Pinus strobus!') 
+  if (temp$sampleYearGrowth %notin% c ('some','all')) stop ('Error: Sample year growth is not "some" or "all"!')  
+  if (temp$sampleDPI !=  38100)        stop ('Error: DPI is not 38100!')  
+  if (!temp$barkFirst [[1]])           stop ('Error: Bark was not first!')  
+  if (temp$siteLocID != 'BigChill')    stop ('Error: Site location ID was not "BigChill"!')
+  if (temp$plotID %notin% c (1,4,5))   stop ('Error: Plot ID is not correct.')
+  if (temp$collection != 'Experiment 2018')  stop ('Error: Collection is not "Experiment 2018"')
+
   # For now jump measurements from November 2018 or compressed trees
   #--------------------------------------------------------------------------------------
   if (sampleDate == '2018-11-15') next
   if (sampleDate == '2019-10-24' & growingSeason != 'all') {
     stop (paste0 ('Error with growing season',treeID,growingSeason))
-  } else if (sampleDate == '2019-06-19' & growingSeason != 'some') {
+  } else if ((sampleDate == '2018-06-19' | sampleDate == '2018-09-06') & growingSeason != 'some') {
     stop (paste0 ('Error with growing season',treeID,growingSeason))
   }
   if (t == 4) next
@@ -97,8 +112,8 @@ for (j in 1: length (jsonFiles)) {
     growth <- c (NA, growth, rep (NA, 30-length (growth)))
     years  <- c (2019, years,  seq (years [length (years)]-1, 1988))
   }
-  print (growth)
-  print (years)
+  #print (growth)
+  #print (years)
   
   # add to tibble with all growth for all years years
   #--------------------------------------------------------------------------------------
@@ -122,9 +137,12 @@ for (j in 1: length (jsonFiles)) {
 
 # Standardise ring width using the 2015 ring
 #----------------------------------------------------------------------------------------
-ringWidths <- ringWidths %>% mutate (RWI2019 = Y2019 / Y2015,
-                                     RWI2018 = Y2018 / Y2015,
-                                     RWI2017 = Y2017 / Y2015)
+ringWidths <- ringWidths %>% mutate (RWI12019 = Y2019 / Y2015,
+                                     RWI12018 = Y2018 / Y2015,
+                                     RWI12017 = Y2017 / Y2015,
+                                     RWI22019 = Y2019 / Y2017,
+                                     RWI22018 = Y2018 / Y2017,
+                                     RWI22017 = Y2017 / Y2017)
 
 # Summarise growth
 #----------------------------------------------------------------------------------------
@@ -139,15 +157,74 @@ summaryData <- ringWidths %>% group_by (treatment, sampleDate, sampleHeight) %>%
              seY16   = se   (Y2016),
              meanY15 = mean (Y2015, na.rm = TRUE),
              seY15   = se   (Y2015),
-             meanRWI2019 = mean (RWI2019, na.rm = TRUE),
-             seRWI2019   = se (RWI2019),
-             meanRWI2018 = mean (RWI2018, na.rm = TRUE),
-             seRWI2018   = se (RWI2018),
-             meanRWI2017 = mean (RWI2017, na.rm = TRUE),
-             seRWI2017   = se (RWI2017)) 
+             meanRWI12019 = mean (RWI12019, na.rm = TRUE),
+             seRWI12019   = se (RWI12019),
+             meanRWI12018 = mean (RWI12018, na.rm = TRUE),
+             seRWI12018   = se (RWI12018),
+             meanRWI12017 = mean (RWI12017, na.rm = TRUE),
+             seRWI12017   = se (RWI12017),
+             meanRWI22019 = mean (RWI22019, na.rm = TRUE),
+             seRWI22019   = se (RWI22019),
+             meanRWI22018 = mean (RWI22018, na.rm = TRUE),
+             seRWI22018   = se (RWI22018),
+             meanRWI22017 = mean (RWI22017, na.rm = TRUE),
+             seRWI22017   = se (RWI22017)) 
 
-boxplot (RWI2019 ~ treatment + sampleDate + sampleHeight, ringWidths,
-         las = 1, xaxt = 'n', xlab = '')
+# Plot ring width in 2018 and 2019in two plots next to each other
+layout (matrix (1:3, byrow = TRUE, nrow = 1), widths = c (1.15, 1, 1))
+par (mar = c (5, 5, 1, 1))
+barplot (height = summaryData [['meanRWI12017']] [summaryData [['sampleDate']] == as_date ('2019-10-24')] [c (1, 5, 2, 6, 3, 7, 4, 8)],
+         las = 1, xlab = 'Ring width fraction', ylab = 'Height (m)', axes = FALSE, horiz = TRUE, main = '', 
+         col = addOpacity (rep (c (tColours [['colour']] [1], tColours[['colour']] [5]), 4), 0.9),
+         border = 0, space = c (rep (c (2, 1), 3), 3, 1), xlim = c (0, 1.2), ylim = c (0, 26))
+axis (side = 1, at = seq (0, 1, by = 0.5))
+axis (side = 2, at = c (3.5),  labels = c (0.5), las = 1)
+axis (side = 2, at = c (8.5),  labels = c (1.5), las = 1)
+axis (side = 2, at = c (13.5), labels = c (2.5), las = 1)
+axis (side = 2, at = c (19.5), labels = c (4.0), las = 1)
+text (x = 0, y = 25, '2017', pos = 4, cex = 1.6)
+
+par (mar = c (5, 1, 1, 1))
+barplot (height = summaryData [['meanRWI12018']] [summaryData [['sampleDate']] == as_date ('2019-10-24')] [c (1, 5, 2, 6, 3, 7, 4, 8)],
+         las = 1, xlab = 'Ring width fraction', ylab = 'Height (m)', axes = FALSE, horiz = TRUE, main = '', 
+         col = addOpacity (rep (c (tColours [['colour']] [1], tColours[['colour']] [5]), 4), 0.3),
+         border = 0, space = c (rep (c (2, 1), 3), 3, 1), xlim = c (0, 1.2), ylim = c (0, 26))
+barplot (height = summaryData [['meanRWI12018']] [summaryData [['sampleDate']] == as_date ('2018-09-06')] [c (1, 5, 2, 6, 3, 7, 4, 8)],
+         las = 1, xlab = '', ylab = '', axes = FALSE, horiz = TRUE, main = '', 
+         col = addOpacity (rep (c (tColours [['colour']] [1], tColours[['colour']] [5]), 4), 0.6),
+         border = 0, space = c (rep (c (2, 1), 3), 3, 1), add = TRUE)
+barplot (height = summaryData [['meanRWI12018']] [summaryData [['sampleDate']] == as_date ('2018-06-19')] [c (1, 5, 2, 6, 3, 7, 4, 8)],
+         las = 1, xlab = '', ylab = '', axes = FALSE, horiz = TRUE, main = '', 
+         col = addOpacity (rep (c (tColours [['colour']] [1], tColours[['colour']] [5]), 4), 0.9),
+         border = 0, space = c (rep (c (2, 1), 3), 3, 1), add = TRUE)
+axis (side = 1, at = seq (0, 1, by = 0.5))
+text (x = 0, y = 25, '2018', pos = 4, cex = 1.6)
+
+# Add second graph for 2019 ring widths
+par (mar =  c (5, 1, 1, 2))
+barplot (height = summaryData [['meanRWI12019']] [summaryData [['sampleDate']] == as_date ('2019-10-24')] [c (1, 5, 2, 6, 3, 7, 4, 8)],
+         las = 1, xlab = 'Ring width fraction', ylab = '', axes = FALSE, horiz = TRUE, main = '', 
+         col = addOpacity (rep (c (tColours [['colour']] [1], tColours[['colour']] [5]), 4), 0.3),
+         border = 0, space = c (rep (c (2, 1), 3), 3, 1), xlim = c (0, 1.2), ylim = c (0, 26))
+axis (side = 1, at = seq (0, 1, by = 0.5))
+text (x = 0, y = 25, '2019', pos = 4, cex = 1.6)
+legend (x = 0.42, y = 25.5, pch = 0, legend = c ('chilled','control'), cex = 1, 
+        col = 'white', box.lty = 0, bg = 'transparent')
+legend (x = 0.66, y = 25.5, pch = 15, legend = '', cex = 2.0, 
+        col = addOpacity (tColours [['colour']] [1], 0.9), box.lty = 0, bg = 'transparent')
+legend (x = 0.66, y = 26.5, pch = 15, legend = '', cex = 2.0, 
+        col = addOpacity (tColours [['colour']] [5], 0.9), box.lty = 0, bg = 'transparent')
+legend (x = 0.82, y = 25.5, pch = 15, legend = '', cex = 2.0, 
+        col = addOpacity (tColours [['colour']] [1], 0.6), box.lty = 0, bg = 'transparent')
+legend (x = 0.82, y = 26.5, pch = 15, legend = '', cex = 2.0, 
+        col = addOpacity (tColours [['colour']] [5], 0.6), box.lty = 0, bg = 'transparent')
+legend (x = 0.99, y = 25.5, pch = 15, legend = '', cex = 2.0, 
+        col = addOpacity (tColours [['colour']] [1], 0.3), box.lty = 0, bg = 'transparent')
+legend (x = 0.99, y = 26.5, pch = 15, legend = '', cex = 2.0, 
+        col = addOpacity (tColours [['colour']] [5], 0.3), box.lty = 0, bg = 'transparent')
+text (x = 0.74, y = 25.9, cex = 0.9, 'before')
+text (x = 0.90, y = 25.8, cex = 0.9, 'during')
+text (x = 1.07, y = 25.9, cex = 0.9, 'after')
 
 # Pivot data into long format
 #----------------------------------------------------------------------------------------

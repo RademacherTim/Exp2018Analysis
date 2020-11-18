@@ -149,12 +149,10 @@ rm (rawDataWood2018, rawDataWoodLCS2018)
 #----------------------------------------------------------------------------------------
 PLOTCAL <- FALSE
 if (PLOTCAL) {
-  if (EXP2018) {
-    res <- plotCalibrationCurves (data = processedDataWoodLCS2018)
-    if (res != 0) print ('Error: plotCalibrationCurves () did not work.')
-    res <- plotCalibrationCurves (data = processedDataWood2018)
-    if (res != 0) print ('Error: plotCalibrationCurves () did not work.')
-  }
+  res <- plotCalibrationCurves (data = processedDataWoodLCS2018)
+  if (res != 0) print ('Error: plotCalibrationCurves () did not work.')
+  res <- plotCalibrationCurves (data = processedDataWood2018)
+  if (res != 0) print ('Error: plotCalibrationCurves () did not work.')
   rm (res)
 }
 rm (PLOTCAL)
