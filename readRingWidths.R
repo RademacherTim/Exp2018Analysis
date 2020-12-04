@@ -3,6 +3,12 @@
 
 # Comments:
 #    - sample 03 I, II has only the 2018 and 2017 ring complete. Maybe there is a second sample we could cut?
+#    - sample 07 III has a density anomaly in 2018 in the slide from 2019-09-24
+
+
+# To-do:
+#    - Check whether outliers are measurements issues
+#    - fit growth curves
 
 
 # Load dependencies
@@ -213,77 +219,77 @@ summaryData <- ringWidths %>% group_by (treatment, sampleDate, sampleHeight) %>%
              seRWI2016_15   = se (RWI2016_15)) 
 
 # Plot ring width in 2018 and 2019in two plots next to each other
-layout (matrix (1:3, byrow = TRUE, nrow = 1), widths = c (1.15, 1, 1))
-par (mar = c (5, 5, 1, 1))
-barplot (height = summaryData [['meanRWI22017']] [summaryData [['sampleDate']] == as_date ('2019-10-24')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
-         las = 1, xlab = 'Ring width fraction', ylab = 'Height (m)', axes = FALSE, horiz = TRUE, main = '', 
-         col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 0.9),
-         border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), xlim = c (0, 1.3), ylim = c (0, 33))
-axis (side = 1, at = seq (0, 1, by = 0.5))
-axis (side = 2, at = 4.5,  labels = c (0.5), las = 1)
-axis (side = 2, at = c (11.5),  labels = c (1.5), las = 1)
-axis (side = 2, at = c (18.5), labels = c (2.5), las = 1)
-axis (side = 2, at = c (26.5), labels = c (4.0), las = 1)
-text (x = 0, y = 31, '2017', pos = 4, cex = 1.6)
-
-par (mar = c (5, 1, 1, 1))
-barplot (height = summaryData [['meanRWI22018']] [summaryData [['sampleDate']] == as_date ('2019-10-24')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
-         las = 1, xlab = 'Ring width fraction', ylab = 'Height (m)', axes = FALSE, horiz = TRUE, main = '', 
-         col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 0.2),
-         border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), xlim = c (0, 1.3), ylim = c (0, 33))
-barplot (height = summaryData [['meanRWI22018']] [summaryData [['sampleDate']] == as_date ('2018-11-15')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
-         las = 1, xlab = '', ylab = '', axes = FALSE, horiz = TRUE, main = '', 
-         col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 0.4),
-         border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), add = TRUE)
-barplot (height = summaryData [['meanRWI22018']] [summaryData [['sampleDate']] == as_date ('2018-09-06')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
-         las = 1, xlab = '', ylab = '', axes = FALSE, horiz = TRUE, main = '', 
-         col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 0.6),
-         border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), add = TRUE)
-barplot (height = summaryData [['meanRWI22018']] [summaryData [['sampleDate']] == as_date ('2018-07-19')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
-         las = 1, xlab = '', ylab = '', axes = FALSE, horiz = TRUE, main = '', 
-         col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 0.8),
-         border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), add = TRUE)
-barplot (height = summaryData [['meanRWI22018']] [summaryData [['sampleDate']] == as_date ('2018-06-19')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
-         las = 1, xlab = '', ylab = '', axes = FALSE, horiz = TRUE, main = '', 
-         col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 1.0),
-         border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), add = TRUE)
-axis (side = 1, at = seq (0, 1, by = 0.5))
-text (x = 0, y = 31, '2018', pos = 4, cex = 1.6)
-
-# Add second graph for 2019 ring widths
-par (mar =  c (5, 1, 1, 2))
-barplot (height = summaryData [['meanRWI22019']] [summaryData [['sampleDate']] == as_date ('2019-10-24')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
-         las = 1, xlab = 'Ring width fraction', ylab = '', axes = FALSE, horiz = TRUE, main = '', 
-         col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 0.3),
-         border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), xlim = c (0, 1.3), ylim = c (0, 33))
-axis (side = 1, at = seq (0, 1, by = 0.5))
-text (x = 0, y = 31, '2019', pos = 4, cex = 1.6)
-legend (x = 0.29, y = 33.5, pch = 0, legend = c ('chilled','compressed','control'), cex = 1, 
-        col = 'white', box.lty = 0, bg = 'transparent')
-legend (x = 0.66, y = 32.5, pch = 15, legend = '', cex = 2.0, 
-        col = addOpacity (tColours [['colour']] [1], 0.9), box.lty = 0, bg = 'transparent')
-legend (x = 0.66, y = 33.5, pch = 15, legend = '', cex = 2.0, 
-        col = addOpacity (tColours [['colour']] [4], 0.9), box.lty = 0, bg = 'transparent')
-legend (x = 0.66, y = 34.5, pch = 15, legend = '', cex = 2.0, 
-        col = addOpacity (tColours [['colour']] [5], 0.9), box.lty = 0, bg = 'transparent')
-
-legend (x = 0.82, y = 32.5, pch = 15, legend = '', cex = 2.0, 
-        col = addOpacity (tColours [['colour']] [1], 0.6), box.lty = 0, bg = 'transparent')
-legend (x = 0.82, y = 33.5, pch = 15, legend = '', cex = 2.0, 
-        col = addOpacity (tColours [['colour']] [4], 0.6), box.lty = 0, bg = 'transparent')
-legend (x = 0.82, y = 34.5, pch = 15, legend = '', cex = 2.0, 
-        col = addOpacity (tColours [['colour']] [5], 0.6), box.lty = 0, bg = 'transparent')
-
-
-legend (x = 0.99, y = 32.5, pch = 15, legend = '', cex = 2.0, 
-        col = addOpacity (tColours [['colour']] [1], 0.6), box.lty = 0, bg = 'transparent')
-legend (x = 0.99, y = 33.5, pch = 15, legend = '', cex = 2.0, 
-        col = addOpacity (tColours [['colour']] [4], 0.3), box.lty = 0, bg = 'transparent')
-legend (x = 0.99, y = 34.5, pch = 15, legend = '', cex = 2.0, 
-        col = addOpacity (tColours [['colour']] [5], 0.3), box.lty = 0, bg = 'transparent')
-text (x = 0.74, y = 33.9, cex = 0.9, 'before')
-text (x = 0.90, y = 33.8, cex = 0.9, 'during')
-text (x = 1.07, y = 33.9, cex = 0.9, 'after')
+# layout (matrix (1:3, byrow = TRUE, nrow = 1), widths = c (1.15, 1, 1))
+# par (mar = c (5, 5, 1, 1))
+# barplot (height = summaryData [['meanRWI22017']] [summaryData [['sampleDate']] == as_date ('2019-10-24')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
+#          las = 1, xlab = 'Ring width fraction', ylab = 'Height (m)', axes = FALSE, horiz = TRUE, main = '', 
+#          col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 0.9),
+#          border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), xlim = c (0, 1.3), ylim = c (0, 33))
+# axis (side = 1, at = seq (0, 1, by = 0.5))
+# axis (side = 2, at = 4.5,  labels = c (0.5), las = 1)
+# axis (side = 2, at = c (11.5),  labels = c (1.5), las = 1)
+# axis (side = 2, at = c (18.5), labels = c (2.5), las = 1)
+# axis (side = 2, at = c (26.5), labels = c (4.0), las = 1)
+# text (x = 0, y = 31, '2017', pos = 4, cex = 1.6)
+# 
+# par (mar = c (5, 1, 1, 1))
+# barplot (height = summaryData [['meanRWI22018']] [summaryData [['sampleDate']] == as_date ('2019-10-24')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
+#          las = 1, xlab = 'Ring width fraction', ylab = 'Height (m)', axes = FALSE, horiz = TRUE, main = '', 
+#          col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 0.2),
+#          border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), xlim = c (0, 1.3), ylim = c (0, 33))
+# barplot (height = summaryData [['meanRWI22018']] [summaryData [['sampleDate']] == as_date ('2018-11-15')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
+#          las = 1, xlab = '', ylab = '', axes = FALSE, horiz = TRUE, main = '', 
+#          col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 0.4),
+#          border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), add = TRUE)
+# barplot (height = summaryData [['meanRWI22018']] [summaryData [['sampleDate']] == as_date ('2018-09-06')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
+#          las = 1, xlab = '', ylab = '', axes = FALSE, horiz = TRUE, main = '', 
+#          col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 0.6),
+#          border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), add = TRUE)
+# barplot (height = summaryData [['meanRWI22018']] [summaryData [['sampleDate']] == as_date ('2018-07-19')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
+#          las = 1, xlab = '', ylab = '', axes = FALSE, horiz = TRUE, main = '', 
+#          col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 0.8),
+#          border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), add = TRUE)
+# barplot (height = summaryData [['meanRWI22018']] [summaryData [['sampleDate']] == as_date ('2018-06-19')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
+#          las = 1, xlab = '', ylab = '', axes = FALSE, horiz = TRUE, main = '', 
+#          col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 1.0),
+#          border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), add = TRUE)
+# axis (side = 1, at = seq (0, 1, by = 0.5))
+# text (x = 0, y = 31, '2018', pos = 4, cex = 1.6)
+# 
+# # Add second graph for 2019 ring widths
+# par (mar =  c (5, 1, 1, 2))
+# barplot (height = summaryData [['meanRWI22019']] [summaryData [['sampleDate']] == as_date ('2019-10-24')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
+#          las = 1, xlab = 'Ring width fraction', ylab = '', axes = FALSE, horiz = TRUE, main = '', 
+#          col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 0.3),
+#          border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), xlim = c (0, 1.3), ylim = c (0, 33))
+# axis (side = 1, at = seq (0, 1, by = 0.5))
+# text (x = 0, y = 31, '2019', pos = 4, cex = 1.6)
+# legend (x = 0.29, y = 33.5, pch = 0, legend = c ('chilled','compressed','control'), cex = 1, 
+#         col = 'white', box.lty = 0, bg = 'transparent')
+# legend (x = 0.66, y = 32.5, pch = 15, legend = '', cex = 2.0, 
+#         col = addOpacity (tColours [['colour']] [1], 0.9), box.lty = 0, bg = 'transparent')
+# legend (x = 0.66, y = 33.5, pch = 15, legend = '', cex = 2.0, 
+#         col = addOpacity (tColours [['colour']] [4], 0.9), box.lty = 0, bg = 'transparent')
+# legend (x = 0.66, y = 34.5, pch = 15, legend = '', cex = 2.0, 
+#         col = addOpacity (tColours [['colour']] [5], 0.9), box.lty = 0, bg = 'transparent')
+# 
+# legend (x = 0.82, y = 32.5, pch = 15, legend = '', cex = 2.0, 
+#         col = addOpacity (tColours [['colour']] [1], 0.6), box.lty = 0, bg = 'transparent')
+# legend (x = 0.82, y = 33.5, pch = 15, legend = '', cex = 2.0, 
+#         col = addOpacity (tColours [['colour']] [4], 0.6), box.lty = 0, bg = 'transparent')
+# legend (x = 0.82, y = 34.5, pch = 15, legend = '', cex = 2.0, 
+#         col = addOpacity (tColours [['colour']] [5], 0.6), box.lty = 0, bg = 'transparent')
+# 
+# 
+# legend (x = 0.99, y = 32.5, pch = 15, legend = '', cex = 2.0, 
+#         col = addOpacity (tColours [['colour']] [1], 0.6), box.lty = 0, bg = 'transparent')
+# legend (x = 0.99, y = 33.5, pch = 15, legend = '', cex = 2.0, 
+#         col = addOpacity (tColours [['colour']] [4], 0.3), box.lty = 0, bg = 'transparent')
+# legend (x = 0.99, y = 34.5, pch = 15, legend = '', cex = 2.0, 
+#         col = addOpacity (tColours [['colour']] [5], 0.3), box.lty = 0, bg = 'transparent')
+# text (x = 0.74, y = 33.9, cex = 0.9, 'before')
+# text (x = 0.90, y = 33.8, cex = 0.9, 'during')
+# text (x = 1.07, y = 33.9, cex = 0.9, 'after')
 
 # Plot relative ring width for a tree over time 
 #----------------------------------------------------------------------------------------
@@ -302,7 +308,7 @@ for (i in 1:15) {
         y = ringWidths [['RWI2018']] [con],
         xlab = 'date', ylab = 'Growth increment index', las = 1, typ = 'p', pch = 25,
         col = tColours [['colour']] [tColours [['treatment']] == ifelse (t == 1, 'control',ifelse (t == 4, 'double compressed', 'chilled'))],
-        xlim = as_date (c ('2018-01-01','2019-01-01')), ylim = c (0, 2.0))
+        xlim = as_date (c ('2018-01-01','2019-01-01')), ylim = c (0, 2.7))
   
   # Add data for 1.5m
   con <- ringWidths [['treeId']] == i & ringWidths [['sampleHeight']] == 1.5
