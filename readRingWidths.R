@@ -11,11 +11,16 @@
 #    - fit growth curves
 
 
+# Start from clean slate
+#----------------------------------------------------------------------------------------
+#rm (list = ls ())
+
 # Load dependencies
 #----------------------------------------------------------------------------------------
 library ('tidyverse')
 library ('lubridate')
 library ('rjson')
+source ('plotingFunctions.R')
 
 # create %notin% funtion
 #----------------------------------------------------------------------------------------
@@ -149,24 +154,32 @@ for (j in 1: length (jsonFiles)) {
 
 }  # end json file loop
 
-# Add 60 lines for no growth in the beginning of May
+# Add lines for no growth in the beginning of May for all slides that I only visually 
+# inspected and did not measure
 #----------------------------------------------------------------------------------------
 for (i in 1:15) {
   for (h in c (0.5, 1.5, 2.5, 4.0)) {
     # Condition to extract relevant data
-    con <- ringWidths [['treeId']] == i & ringWidths [['sampleHeight']] == h
+    con <- ringWidths [['treeId']] == i & 
+      ringWidths [['sampleHeight']] == h 
     
     # Extract treatment
-    t <- unique (ringWidths [['treatment']] [con]) 
-    ringWidths <- ringWidths %>% add_row (treeId = i, treatment = t, 
-                                          sampleDate = as_date ('2018-05-01'),
-                                          sampleHeight = h, Y2019 = NA, Y2018 = 0, 
-                                          Y2017 = 1, Y2016 = 1, Y2015 = 1, Y2014 = 1, 
-                                          Y2013 = 1, Y2012 = 1, Y2011 = 1)    
+    t <- unique (ringWidths [['treatment']] [con])
+    
+    # Check that there is not an actual measurement for beginning of may
+    if (dim (filter (ringWidths, con, sampleDate == as_date ('2018-05-01'))) [1] < 1) {
+      ringWidths <- ringWidths %>% add_row (treeId = i, treatment = t, 
+                                            sampleDate = as_date ('2018-05-01'),
+                                            sampleHeight = h, Y2019 = NA, Y2018 = 0, 
+                                            Y2017 = 1, Y2016 = 1, Y2015 = 1, Y2014 = 1, 
+                                            Y2013 = 1, Y2012 = 1, Y2011 = 1)
+    } else {
+      ringWidths [['Y2018']] [con & ringWidths [['sampleDate']] == as_date ('2018-05-01')] <- 0 # For the measured image I indicated that the growing season did not start yet, WIAD does not create a ring, but it should be 0 
+    }
   }
 }
 
-# Arrange in advacning order by date, tree, sampling height
+# Arrange in advancing order by date, tree, sampling height
 #----------------------------------------------------------------------------------------
 ringWidths <- ringWidths %>% arrange (sampleDate, treeId, sampleHeight)
 
@@ -293,7 +306,8 @@ summaryData <- ringWidths %>% group_by (treatment, sampleDate, sampleHeight) %>%
 
 # Plot relative ring width for a tree over time 
 #----------------------------------------------------------------------------------------
-layout (matrix (1:15, nrow = 3, byrow = TRUE), widths = c (1.2, 1, 1, 1, 1))
+layout (matrix (1:15, nrow = 3, byrow = TRUE), widths = c (1.2, 1, 1, 1, 1), 
+        heights = c (1, 1, 1.3))
 for (i in 1:15) {
   
   # Condition to extract relevant data
@@ -303,12 +317,31 @@ for (i in 1:15) {
   t <- unique (ringWidths [['treatment']] [con]) 
   
   # Plot data for 0.5 m
-  par (mar = c (5, 5, 1, 1))
+  if (i %% 5 == 1 & i <= 10) {
+    par (mar = c (1, 5, 1, 1))
+  } else if (i %% 5 == 1 & i > 10) {
+    par (mar = c (5, 5, 1, 1))
+  } else if (i <= 10) {
+    par (mar = c (1, 1, 1, 1))
+  } else if (i > 10) {
+    par (mar = c (5, 1, 1, 1))
+  }
   plot (x = ringWidths [['sampleDate']] [con],
         y = ringWidths [['RWI2018']] [con],
-        xlab = 'date', ylab = 'Growth increment index', las = 1, typ = 'p', pch = 25,
+        xlab = '', ylab = '', las = 1, typ = 'p', pch = 25,
         col = tColours [['colour']] [tColours [['treatment']] == ifelse (t == 1, 'control',ifelse (t == 4, 'double compressed', 'chilled'))],
-        xlim = as_date (c ('2018-01-01','2019-01-01')), ylim = c (0, 2.7))
+        xlim = as_date (c ('2018-02-01','2019-02-01')), ylim = c (0, 2.7), axes = FALSE)
+  axis (side = 1, at = as_date (c ('2018-02-01','2018-03-01','2018-04-01','2018-05-01','2018-06-01','2018-07-01','2018-08-01','2018-09-01','2018-10-01','2018-11-01','2018-12-01')), 
+        labels = c ('F','M','A','M','J','J','A','S','O','N','D'))
+  axis (side = 2, las = 1)
+  axis (side = 1, at = as_date ('2019-01-15'), labels = 'C')
+  if (i %% 5 == 1) mtext (text = 'Growth increment index', side = 2, line = 3, cex = 0.8)
+  if (i > 10)      mtext (text = 'Date', side = 1, line = 3, cex = 0.8)
+  
+  # Add panel descriptor
+  text (x = as_date ('2018-12-10'),
+        y = 2.55,
+        labels = i, cex = 1.4)
   
   # Add data for 1.5m
   con <- ringWidths [['treeId']] == i & ringWidths [['sampleHeight']] == 1.5
@@ -327,14 +360,21 @@ for (i in 1:15) {
   points (x = ringWidths [['sampleDate']] [con],
           y = ringWidths [['RWI2018']] [con], pch = 21,
           col = tColours [['colour']] [tColours [['treatment']] == ifelse (t == 1, 'control',ifelse (t == 4, 'double compressed', 'chilled'))])
-        
+ 
+  # Add the 2018 growth increment index for the from the 2019 sample
+  con <- ringWidths [['treeId']] == i & ringWidths [['sampleDate']] == as_date ('2019-10-24')
+  points (x = rep (as_date ('2019-01-15'), 4),
+          y = ringWidths [['RWI2018']] [con], pch = c (25, 23, 24, 21),
+          col = tColours [['colour']] [tColours [['treatment']] == ifelse (t == 1, 'control',ifelse (t == 4, 'double compressed', 'chilled'))])
 }
 
-# Pivot data into long format
+# Add a legend 
 #----------------------------------------------------------------------------------------
-data2018 <- dataFollowUp %>% pivot_longer ()
+legend (x = as_date ('2018-02-01'),
+        y = 2.6, box.lty = 0, pch = c (21, 24, 23, 25), legend = c ('4.0m','2.5m','1.5m','0.5m'))
 
 # Clean unnecessary variables from loop
 #----------------------------------------------------------------------------------------
 rm (temp, treeID, t, i, j, k, jsonFiles, sampleDate, sampleHeight, growth, types, years, 
-    con, len)
+    con, len, summaryData, growingSeason, sampleH2, yPositions, h)
+
