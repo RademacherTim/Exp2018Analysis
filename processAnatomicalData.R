@@ -21,6 +21,12 @@ setwd ('/media/tim/dataDisk/PlantGrowth/data/microcores/woodAnatomy/Exp2018/')
 #----------------------------------------------------------------------------------------
 anatomicalData <- read.table (file = '20muband_ALL.txt', header = TRUE)
 
+# Change sample height to the actual height in meters above ground
+#----------------------------------------------------------------------------------------
+anatomicalData <- anatomicalData %>% 
+  mutate (sampleHeight = case_when ((POS == 'I')   ~ 0.5, (POS == 'II') ~ 1.5,
+                                    (POS == 'III') ~ 2.5, (POS == 'IV') ~ 4.0,))
+
 # Change working directory
 #----------------------------------------------------------------------------------------
 #setwd ('/media/tim/dataDisk/PlantGrowth/data/allometry/Exp2018/')
@@ -64,7 +70,7 @@ for (i in 1:dim (anatomicalData) [1]) {
   # Get tree ID, treatment and sample height of the sample
   #--------------------------------------------------------------------------------------
   treeID       <- as.numeric (substr (anatomicalData [['TREE']] [i], 1, 2))
-  sampleHeight <- anatomicalData [['POS']] [i]
+  sampleHeight <- anatomicalData [['sampleHeight']] [i]
   treatment    <- anatomicalData [['PLOT']] [i]
   
   # associate fractional position with a period
@@ -74,102 +80,48 @@ for (i in 1:dim (anatomicalData) [1]) {
     con <- ringWidths [['treeId']] == treeID &
       ringWidths [['sampleHeight']] == sampleHeight
     
-    # Check whether 
-    if () 
-      
-      
-    if (!is.na (fJul) & !is.na (fAug) & !is.na (fOct)) {
-      if (data [['RRADDISTR']] [i] / 100 <= fJul) {
-        periodDate <- as_date ('2017-07-03')
-        lowerFraction <- 0
-        upperFraction <- fJul
-      } else if (data [['RRADDISTR']] [i] / 100 <= fAug) {
-        periodDate <- as_date ('2017-08-09')
-        lowerFraction <- fJul
-        upperFraction <- fAug
-      } else if (data [['RRADDISTR']] [i] / 100 <= fOct) {
-        periodDate <- as_date ('2017-10-09')
-        lowerFraction <- fAug
-        upperFraction <- fOct
-      } else {
-        periodDate <- as_date ('2017-11-03')
-        lowerFraction <- fOct
-        upperFraction <- 1
-      }
-    } else if (treeID == 16 & sampleHeight == 'B') {
-      if (data [['RRADDISTR']] [i] / 100 <= fJul) {
-        periodDate <- as_date ('2017-07-03')
-      } else if (data [['RRADDISTR']] [i] / 100 <= fAug) {
-        periodDate <- as_date ('2017-08-09')
-      }
-    }
-  } else {
-    fraction <- data [['RADDISTR.BAND']] [i] / data [['MRW']] [i]
-    if (!is.na (fJul) & !is.na (fAug) & !is.na (fOct)) {
-      if (fraction <= fJul) {
-        periodDate <- as_date ('2017-07-03')
-      } else if (fraction  <= fAug) {
-        periodDate <- as_date ('2017-08-09')
-      } else if (fraction  <= fOct) {
-        periodDate <- as_date ('2017-10-09')
-      } else {
-        periodDate <- as_date ('2017-11-03')
-      }
-    }
+    # Get all dates and growth fractions
+    fractions <- ringWidths %>% filter (con) %>% select (sampleDate, fraction) %>% 
+      filter (sampleDate != as_date ('2019-10-24')) %>% arrange (sampleDate)
+    
+    # Get index of fraction that is the lattest date at which the fraction grown is still lower than the fraction of the ring
+    j <- min (which (fractions [['fraction']] >= anatomicalData [['RRADDISTR']] [i] / 100), na.rm = TRUE)
+    
+    # Determine date of that fraction as period of growth
+    anatomicalData [['period']] [i] <- fractions [['sampleDate']] [j]
+    # print (sprintf ('Period: %s, growth: %s, and fractions: %s and %s',
+    #                 anatomicalData [['period']] [i], anatomicalData [['RRADDISTR']] [i],
+    #                 round (fractions [['fraction']] [c (j-1)], 2),
+    #                 round (fractions [['fraction']] [c (j)],  2)))
+ 
+    # TR - I could linearly interpolate between sampling date to get more precise 
+    #      estimate of tme of formation for each sector
   }
-  # Fill in period date
-  #--------------------------------------------------------------------------------------
-  data [['period']] [i] <- periodDate
-  
-  # Determine start date of the period
-  #--------------------------------------------------------------------------------------
-  if (periodDate == as_date ('2017-07-03')) {
-    startDate <- as_date ('2017-03-01') 
-  } else if (periodDate == as_date ('2017-08-09')) {
-    startDate <- as_date ('2017-03-01') 
-  } else if (periodDate == as_date ('2017-10-09')) {
-    startDate <- as_date ('2017-08-09') 
-  } else if (periodDate == as_date ('2017-08-09')) {
-    startDate <- as_date ('2017-03-01') 
-  }
-  
-  # Determine the date time increment
-  #--------------------------------------------------------------------------------------
-  inc <- periodDate - startDate
-  
-  # Add a linear estimate of the date of formation
-  #--------------------------------------------------------------------------------------
-  data [['formationDate']] [i] <- startDate + (data [['RRADDISTR']] [i] / 100.0 ) / (upperFraction - lowerFraction) * inc
 }
 
 # Clean unnecessary variables from loop
 #----------------------------------------------------------------------------------------
-rm (i, fAug, fJul, fOct, fraction, sampleHeight, treatment, treeID)
+rm (referenceIndex, i, j, r, con, fractions, sampleHeight, treatment, treeID)
 
 # Add cell width column to data
 #----------------------------------------------------------------------------------------
-data <- add_column (data, cellRadWidth = NA)
-data <- add_column (data, cellTanWidth = NA)
+anatomicalData <- add_column (anatomicalData, cellRadWidth = NA)
+anatomicalData <- add_column (anatomicalData, cellTanWidth = NA)
 
 # Calculate zonal average tangential and radial cell width (microns)
 #----------------------------------------------------------------------------------------
-data [['cellRadWidth']] <- data [['DRAD']] + 2 * data [['CWTTAN']]
-data [['cellTanWidth']] <- data [['DTAN']] + 2 * data [['CWTRAD']]
-
-# Rename column POS to height
-#----------------------------------------------------------------------------------------
-data <- rename (data, height = POS, treatment = PLOT, year = YEAR)
-data [['tree']] <- as.numeric (substr (data [['TREE']], 1, 2))
-data [['treatment']] <- as.numeric (substr (data [['treatment']], 2, 2)) 
-data <- select (data, -TREE)
+anatomicalData [['cellRadWidth']] <- anatomicalData [['DRAD']] + 2 * anatomicalData [['CWTTAN']]
+anatomicalData [['cellTanWidth']] <- anatomicalData [['DTAN']] + 2 * anatomicalData [['CWTRAD']]
 
 # Estimate the number of cell in each sector
 #----------------------------------------------------------------------------------------
-data <- add_column (data, nCells = 20.0 / data [['cellRadWidth']])
+anatomicalData <- add_column (anatomicalData, nCells = 20.0 / 
+                                                       anatomicalData [['cellRadWidth']])
 
-# Provide column with cumulative cell wall arrange_all
+# Provide column with cumulative cell-wall area
 #----------------------------------------------------------------------------------------
-data <- data %>% group_by (tree, height, year) %>% mutate (cumCWA = cumsum (CWA)) 
+anatomicalData <- anatomicalData %>% group_by (TREE, sampleHeight, YEAR) %>% 
+  mutate (cumCWA = cumsum (CWA)) 
 
 # Switch back to original working directory
 #----------------------------------------------------------------------------------------
