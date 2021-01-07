@@ -231,147 +231,78 @@ summaryData <- ringWidths %>% group_by (treatment, sampleDate, sampleHeight) %>%
              meanRWI2016_15 = mean (RWI2016_15, na.rm = TRUE),
              seRWI2016_15   = se (RWI2016_15)) 
 
-# Plot ring width in 2018 and 2019in two plots next to each other
-# layout (matrix (1:3, byrow = TRUE, nrow = 1), widths = c (1.15, 1, 1))
-# par (mar = c (5, 5, 1, 1))
-# barplot (height = summaryData [['meanRWI22017']] [summaryData [['sampleDate']] == as_date ('2019-10-24')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
-#          las = 1, xlab = 'Ring width fraction', ylab = 'Height (m)', axes = FALSE, horiz = TRUE, main = '', 
-#          col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 0.9),
-#          border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), xlim = c (0, 1.3), ylim = c (0, 33))
-# axis (side = 1, at = seq (0, 1, by = 0.5))
-# axis (side = 2, at = 4.5,  labels = c (0.5), las = 1)
-# axis (side = 2, at = c (11.5),  labels = c (1.5), las = 1)
-# axis (side = 2, at = c (18.5), labels = c (2.5), las = 1)
-# axis (side = 2, at = c (26.5), labels = c (4.0), las = 1)
-# text (x = 0, y = 31, '2017', pos = 4, cex = 1.6)
-# 
-# par (mar = c (5, 1, 1, 1))
-# barplot (height = summaryData [['meanRWI22018']] [summaryData [['sampleDate']] == as_date ('2019-10-24')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
-#          las = 1, xlab = 'Ring width fraction', ylab = 'Height (m)', axes = FALSE, horiz = TRUE, main = '', 
-#          col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 0.2),
-#          border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), xlim = c (0, 1.3), ylim = c (0, 33))
-# barplot (height = summaryData [['meanRWI22018']] [summaryData [['sampleDate']] == as_date ('2018-11-15')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
-#          las = 1, xlab = '', ylab = '', axes = FALSE, horiz = TRUE, main = '', 
-#          col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 0.4),
-#          border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), add = TRUE)
-# barplot (height = summaryData [['meanRWI22018']] [summaryData [['sampleDate']] == as_date ('2018-09-06')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
-#          las = 1, xlab = '', ylab = '', axes = FALSE, horiz = TRUE, main = '', 
-#          col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 0.6),
-#          border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), add = TRUE)
-# barplot (height = summaryData [['meanRWI22018']] [summaryData [['sampleDate']] == as_date ('2018-07-19')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
-#          las = 1, xlab = '', ylab = '', axes = FALSE, horiz = TRUE, main = '', 
-#          col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 0.8),
-#          border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), add = TRUE)
-# barplot (height = summaryData [['meanRWI22018']] [summaryData [['sampleDate']] == as_date ('2018-06-19')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
-#          las = 1, xlab = '', ylab = '', axes = FALSE, horiz = TRUE, main = '', 
-#          col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 1.0),
-#          border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), add = TRUE)
-# axis (side = 1, at = seq (0, 1, by = 0.5))
-# text (x = 0, y = 31, '2018', pos = 4, cex = 1.6)
-# 
-# # Add second graph for 2019 ring widths
-# par (mar =  c (5, 1, 1, 2))
-# barplot (height = summaryData [['meanRWI22019']] [summaryData [['sampleDate']] == as_date ('2019-10-24')] [c (1, 5, 9, 2, 6, 10, 3, 7, 11, 4, 8, 12)],
-#          las = 1, xlab = 'Ring width fraction', ylab = '', axes = FALSE, horiz = TRUE, main = '', 
-#          col = addOpacity (rep (tColours [['colour']] [c (1, 4, 5)], 4), 0.3),
-#          border = 0, space = c (rep (c (2, 1, 1), 3), 3, 1, 1), xlim = c (0, 1.3), ylim = c (0, 33))
-# axis (side = 1, at = seq (0, 1, by = 0.5))
-# text (x = 0, y = 31, '2019', pos = 4, cex = 1.6)
-# legend (x = 0.29, y = 33.5, pch = 0, legend = c ('chilled','compressed','control'), cex = 1, 
-#         col = 'white', box.lty = 0, bg = 'transparent')
-# legend (x = 0.66, y = 32.5, pch = 15, legend = '', cex = 2.0, 
-#         col = addOpacity (tColours [['colour']] [1], 0.9), box.lty = 0, bg = 'transparent')
-# legend (x = 0.66, y = 33.5, pch = 15, legend = '', cex = 2.0, 
-#         col = addOpacity (tColours [['colour']] [4], 0.9), box.lty = 0, bg = 'transparent')
-# legend (x = 0.66, y = 34.5, pch = 15, legend = '', cex = 2.0, 
-#         col = addOpacity (tColours [['colour']] [5], 0.9), box.lty = 0, bg = 'transparent')
-# 
-# legend (x = 0.82, y = 32.5, pch = 15, legend = '', cex = 2.0, 
-#         col = addOpacity (tColours [['colour']] [1], 0.6), box.lty = 0, bg = 'transparent')
-# legend (x = 0.82, y = 33.5, pch = 15, legend = '', cex = 2.0, 
-#         col = addOpacity (tColours [['colour']] [4], 0.6), box.lty = 0, bg = 'transparent')
-# legend (x = 0.82, y = 34.5, pch = 15, legend = '', cex = 2.0, 
-#         col = addOpacity (tColours [['colour']] [5], 0.6), box.lty = 0, bg = 'transparent')
-# 
-# 
-# legend (x = 0.99, y = 32.5, pch = 15, legend = '', cex = 2.0, 
-#         col = addOpacity (tColours [['colour']] [1], 0.6), box.lty = 0, bg = 'transparent')
-# legend (x = 0.99, y = 33.5, pch = 15, legend = '', cex = 2.0, 
-#         col = addOpacity (tColours [['colour']] [4], 0.3), box.lty = 0, bg = 'transparent')
-# legend (x = 0.99, y = 34.5, pch = 15, legend = '', cex = 2.0, 
-#         col = addOpacity (tColours [['colour']] [5], 0.3), box.lty = 0, bg = 'transparent')
-# text (x = 0.74, y = 33.9, cex = 0.9, 'before')
-# text (x = 0.90, y = 33.8, cex = 0.9, 'during')
-# text (x = 1.07, y = 33.9, cex = 0.9, 'after')
-
 # Plot relative ring width for a tree over time 
 #----------------------------------------------------------------------------------------
-layout (matrix (1:15, nrow = 3, byrow = TRUE), widths = c (1.2, 1, 1, 1, 1), 
-        heights = c (1, 1, 1.3))
-for (i in 1:15) {
-  
-  # Condition to extract relevant data
-  con <- ringWidths [['treeId']] == i & ringWidths [['sampleHeight']] == 0.5
-  
-  # Extract treatment
-  t <- unique (ringWidths [['treatment']] [con]) 
-  
-  # Plot data for 0.5 m
-  if (i %% 5 == 1 & i <= 10) {
-    par (mar = c (1, 5, 1, 1))
-  } else if (i %% 5 == 1 & i > 10) {
-    par (mar = c (5, 5, 1, 1))
-  } else if (i <= 10) {
-    par (mar = c (1, 1, 1, 1))
-  } else if (i > 10) {
-    par (mar = c (5, 1, 1, 1))
+PLOT <- 'FALSE'
+if (PLOT) {
+  layout (matrix (1:15, nrow = 3, byrow = TRUE), widths = c (1.2, 1, 1, 1, 1), 
+          heights = c (1, 1, 1.3))
+    for (i in 1:15) {
+    
+    # Condition to extract relevant data
+    con <- ringWidths [['treeId']] == i & ringWidths [['sampleHeight']] == 0.5
+    
+    # Extract treatment
+    t <- unique (ringWidths [['treatment']] [con]) 
+    
+    # Plot data for 0.5 m
+    if (i %% 5 == 1 & i <= 10) {
+      par (mar = c (1, 5, 1, 1))
+    } else if (i %% 5 == 1 & i > 10) {
+      par (mar = c (5, 5, 1, 1))
+    } else if (i <= 10) {
+      par (mar = c (1, 1, 1, 1))
+    } else if (i > 10) {
+      par (mar = c (5, 1, 1, 1))
+    }
+    plot (x = ringWidths [['sampleDate']] [con],
+          y = ringWidths [['RWI2018']] [con],
+          xlab = '', ylab = '', las = 1, typ = 'p', pch = 25,
+          col = tColours [['colour']] [tColours [['treatment']] == ifelse (t == 1, 'control',ifelse (t == 4, 'double compressed', 'chilled'))],
+          xlim = as_date (c ('2018-02-01','2019-02-01')), ylim = c (0, 2.7), axes = FALSE)
+    axis (side = 1, at = as_date (c ('2018-02-01','2018-03-01','2018-04-01','2018-05-01','2018-06-01','2018-07-01','2018-08-01','2018-09-01','2018-10-01','2018-11-01','2018-12-01')), 
+          labels = c ('F','M','A','M','J','J','A','S','O','N','D'))
+    axis (side = 2, las = 1)
+    axis (side = 1, at = as_date ('2019-01-15'), labels = 'C')
+    if (i %% 5 == 1) mtext (text = 'Growth increment index', side = 2, line = 3, cex = 0.8)
+    if (i > 10)      mtext (text = 'Date', side = 1, line = 3, cex = 0.8)
+    
+    # Add panel descriptor
+    text (x = as_date ('2018-12-10'),
+          y = 2.55,
+          labels = i, cex = 1.4)
+    
+    # Add data for 1.5m
+    con <- ringWidths [['treeId']] == i & ringWidths [['sampleHeight']] == 1.5
+    points (x = ringWidths [['sampleDate']] [con],
+            y = ringWidths [['RWI2018']] [con], pch = 23,
+            col = tColours [['colour']] [tColours [['treatment']] == ifelse (t == 1, 'control',ifelse (t == 4, 'double compressed', 'chilled'))])
+    
+    # Add data for 2.5m
+    con <- ringWidths [['treeId']] == i & ringWidths [['sampleHeight']] == 2.5
+    points (x = ringWidths [['sampleDate']] [con],
+            y = ringWidths [['RWI2018']] [con], pch = 24,
+            col = tColours [['colour']] [tColours [['treatment']] == ifelse (t == 1, 'control',ifelse (t == 4, 'double compressed', 'chilled'))])
+    
+    # Add data for 4.0m
+    con <- ringWidths [['treeId']] == i & ringWidths [['sampleHeight']] == 4.0
+    points (x = ringWidths [['sampleDate']] [con],
+            y = ringWidths [['RWI2018']] [con], pch = 21,
+            col = tColours [['colour']] [tColours [['treatment']] == ifelse (t == 1, 'control',ifelse (t == 4, 'double compressed', 'chilled'))])
+   
+    # Add the 2018 growth increment index for the from the 2019 sample
+    con <- ringWidths [['treeId']] == i & ringWidths [['sampleDate']] == as_date ('2019-10-24')
+    points (x = rep (as_date ('2019-01-15'), 4),
+            y = ringWidths [['RWI2018']] [con], pch = c (25, 23, 24, 21),
+            col = tColours [['colour']] [tColours [['treatment']] == ifelse (t == 1, 'control',ifelse (t == 4, 'double compressed', 'chilled'))])
   }
-  plot (x = ringWidths [['sampleDate']] [con],
-        y = ringWidths [['RWI2018']] [con],
-        xlab = '', ylab = '', las = 1, typ = 'p', pch = 25,
-        col = tColours [['colour']] [tColours [['treatment']] == ifelse (t == 1, 'control',ifelse (t == 4, 'double compressed', 'chilled'))],
-        xlim = as_date (c ('2018-02-01','2019-02-01')), ylim = c (0, 2.7), axes = FALSE)
-  axis (side = 1, at = as_date (c ('2018-02-01','2018-03-01','2018-04-01','2018-05-01','2018-06-01','2018-07-01','2018-08-01','2018-09-01','2018-10-01','2018-11-01','2018-12-01')), 
-        labels = c ('F','M','A','M','J','J','A','S','O','N','D'))
-  axis (side = 2, las = 1)
-  axis (side = 1, at = as_date ('2019-01-15'), labels = 'C')
-  if (i %% 5 == 1) mtext (text = 'Growth increment index', side = 2, line = 3, cex = 0.8)
-  if (i > 10)      mtext (text = 'Date', side = 1, line = 3, cex = 0.8)
-  
-  # Add panel descriptor
-  text (x = as_date ('2018-12-10'),
-        y = 2.55,
-        labels = i, cex = 1.4)
-  
-  # Add data for 1.5m
-  con <- ringWidths [['treeId']] == i & ringWidths [['sampleHeight']] == 1.5
-  points (x = ringWidths [['sampleDate']] [con],
-          y = ringWidths [['RWI2018']] [con], pch = 23,
-          col = tColours [['colour']] [tColours [['treatment']] == ifelse (t == 1, 'control',ifelse (t == 4, 'double compressed', 'chilled'))])
-  
-  # Add data for 2.5m
-  con <- ringWidths [['treeId']] == i & ringWidths [['sampleHeight']] == 2.5
-  points (x = ringWidths [['sampleDate']] [con],
-          y = ringWidths [['RWI2018']] [con], pch = 24,
-          col = tColours [['colour']] [tColours [['treatment']] == ifelse (t == 1, 'control',ifelse (t == 4, 'double compressed', 'chilled'))])
-  
-  # Add data for 4.0m
-  con <- ringWidths [['treeId']] == i & ringWidths [['sampleHeight']] == 4.0
-  points (x = ringWidths [['sampleDate']] [con],
-          y = ringWidths [['RWI2018']] [con], pch = 21,
-          col = tColours [['colour']] [tColours [['treatment']] == ifelse (t == 1, 'control',ifelse (t == 4, 'double compressed', 'chilled'))])
- 
-  # Add the 2018 growth increment index for the from the 2019 sample
-  con <- ringWidths [['treeId']] == i & ringWidths [['sampleDate']] == as_date ('2019-10-24')
-  points (x = rep (as_date ('2019-01-15'), 4),
-          y = ringWidths [['RWI2018']] [con], pch = c (25, 23, 24, 21),
-          col = tColours [['colour']] [tColours [['treatment']] == ifelse (t == 1, 'control',ifelse (t == 4, 'double compressed', 'chilled'))])
-}
 
-# Add a legend 
-#----------------------------------------------------------------------------------------
-legend (x = as_date ('2018-02-01'),
-        y = 2.6, box.lty = 0, pch = c (21, 24, 23, 25), legend = c ('4.0m','2.5m','1.5m','0.5m'))
+  # Add a legend 
+  #--------------------------------------------------------------------------------------
+  legend (x = as_date ('2018-02-01'),
+          y = 2.6, box.lty = 0, pch = c (21, 24, 23, 25), 
+          legend = c ('4.0m','2.5m','1.5m','0.5m'))
+}
 
 # Clean unnecessary variables from loop
 #----------------------------------------------------------------------------------------
