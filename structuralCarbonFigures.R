@@ -6,9 +6,28 @@
 #----------------------------------------------------------------------------------------
 source ('processAnatomicalData.R')
 
-# Plot growth index for each group for 2018 and 2019
+# Plot 2018 ring width from the TRIAD and ROXAS measurements
 #----------------------------------------------------------------------------------------
-
+par (mfrow = c (1, 1), mar = c (5, 5, 1, 1)) 
+plot (x = ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
+        select (Y2018) %>% filter (!is.na (Y2018)) %>% unlist (),
+      y = anatomicalData %>% group_by (TREE, sampleHeight, YEAR) %>% 
+        filter (YEAR == 2018) %>% summarise (maxRW = max (MRW)) %>% ungroup %>% 
+        select (maxRW) %>% unlist (),
+      xlab = 'ROXAS', ylab = 'WIAD', col = '#8dd3c799', pch = 19)
+points (x =  ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
+          select (Y2019) %>% filter (!is.na (Y2019)) %>% unlist (),
+        y = anatomicalData %>% group_by (TREE, sampleHeight, YEAR) %>% 
+          filter (YEAR == 2019) %>% summarise (maxRW = max (MRW)) %>% ungroup %>% 
+          select (maxRW) %>% unlist (), col = '#bebada99', pch = 19)
+points (x =  ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
+          select (Y2017) %>% filter (!is.na (Y2017)) %>% unlist (),
+        y = anatomicalData %>% group_by (TREE, sampleHeight, YEAR) %>% 
+          filter (YEAR == 2017) %>% summarise (maxRW = max (MRW)) %>% ungroup %>% 
+          select (maxRW) %>% unlist (), col = '#ffffb399', pch = 19)
+abline (a = 0, b = 1, col = '#99999999')
+legend (x = 0, y = 2500, box.lty = 0, pch = 19, col = c ('#ffffb399','#8dd3c799','#bebada99'),
+        legend = c ('2017','2018', '2019'))
 
 # Plot cell-wall thickness by period of formation
 #----------------------------------------------------------------------------------------

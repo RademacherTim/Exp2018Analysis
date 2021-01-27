@@ -58,7 +58,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5))
           xlab = ifelse (h == 0.5, 'day of year',''), 
           ylab = ifelse (i == 1, 'radial growth index', ''), 
           yaxt = ifelse (i == 1, 't','n'),
-          pch = 19, col = tColours [['colour']] [t], ylim = c (0, 2.6)#,
+          pch = 19, col = tColours [['colour']] [t], ylim = c (0, 2.3)#,
           )#main = paste ('Tree',i,' height',h))
     
     lines (x = 1:365, y = exp (predict (fit.gam, newdata = data.frame (doy = c (1:365)))),
@@ -120,7 +120,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5))
           xlab = ifelse (h == 0.5, 'day of year',''), 
           ylab = ifelse (i == 6, 'radial growth index', ''), 
           yaxt = ifelse (i == 6, 't','n'),
-          pch = 19, col = tColours [['colour']] [t], ylim = c (0, 2.6)#,
+          pch = 19, col = tColours [['colour']] [t], ylim = c (0, 2.3)#,
     )#main = paste ('Tree',i,' height',h))
     
     lines (x = 1:365, y = exp (predict (fit.gam, newdata = data.frame (doy = c (1:365)))),
@@ -182,7 +182,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5))
           xlab = ifelse (h == 0.5, 'day of year',''), 
           ylab = ifelse (i == 11, 'radial growth index', ''), 
           yaxt = ifelse (i == 11, 't','n'),
-          pch = 19, col = tColours [['colour']] [t], ylim = c (0, 2.6)#,
+          pch = 19, col = tColours [['colour']] [t], ylim = c (0, 2.3)#,
     )#main = paste ('Tree',i,' height',h))
     
     lines (x = 1:365, y = exp (predict (fit.gam, newdata = data.frame (doy = c (1:365)))),
