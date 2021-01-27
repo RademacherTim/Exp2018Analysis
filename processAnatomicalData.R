@@ -27,16 +27,6 @@ anatomicalData <- anatomicalData %>%
   mutate (sampleHeight = case_when ((POS == 'I')   ~ 0.5, (POS == 'II') ~ 1.5,
                                     (POS == 'III') ~ 2.5, (POS == 'IV') ~ 4.0,))
 
-# Change working directory
-#----------------------------------------------------------------------------------------
-#setwd ('/media/tim/dataDisk/PlantGrowth/data/allometry/Exp2018/')
-
-# Read the allometric data
-#----------------------------------------------------------------------------------------
-# allometricData <- read_excel (path = paste0 (getwd (),'/allometricDataExp2018.xlsx'), 
-#                               sheet = 'allometricData', 
-#                               na = "NA")
-
 # Read ring width data
 #----------------------------------------------------------------------------------------
 setwd ('/home/tim/projects/PlantGrowth/Exp2018Analysis/')
@@ -95,7 +85,7 @@ for (i in 1:dim (anatomicalData) [1]) {
     #                 round (fractions [['fraction']] [c (j)],  2)))
  
     # TR - I could linearly interpolate between sampling date to get more precise 
-    #      estimate of tme of formation for each sector
+    #      estimate of time of formation for each sector
   }
 }
 

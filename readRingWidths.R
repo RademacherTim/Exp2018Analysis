@@ -1,16 +1,6 @@
 # Script to read in the TRIAD rin width measurements
 #----------------------------------------------------------------------------------------
 
-# Comments:
-#    - sample 03 I, II has only the 2018 and 2017 ring complete. Maybe there is a second sample we could cut?
-#    - sample 07 III has a density anomaly in 2018 in the slide from 2019-09-24
-
-
-# To-do:
-#    - Check whether outliers are measurements issues
-#    - fit growth curves
-
-
 # Start from clean slate
 #----------------------------------------------------------------------------------------
 #rm (list = ls ())
@@ -48,7 +38,8 @@ ringWidths <- tibble (treeId = numeric (), treatment = numeric (), sampleDate = 
 k <- 0
 # Loop over json files and read them
 #----------------------------------------------------------------------------------------
-for (j in 1: length (jsonFiles)) {
+for (j in 1: length (jsonFiles)) 
+{
   
   # Read in TRIAD outputs
   #--------------------------------------------------------------------------------------
@@ -78,12 +69,18 @@ for (j in 1: length (jsonFiles)) {
     stop ('Error: Treatment is not correct!')
   }
   
-  # For now jump measurements from November 2018 or compressed trees
+  # Check that the growing season measurements are correct
   #--------------------------------------------------------------------------------------
   if ((sampleDate == '2019-10-24' | sampleDate == '2018-11-15') & growingSeason != 'all') {
     stop (paste0 ('Error with growing season',treeID,growingSeason))
-  } else if ((sampleDate == '2018-06-19' | sampleDate == '2018-07-19' | sampleDate == '2018-09-06') & growingSeason != 'some') {
-    stop (paste0 ('Error with growing season',treeID,growingSeason))
+  } else if (sampleDate == '2018-05-01' & growingSeason != 'none') {
+    stop (paste0 ('Error with growing season ',treeID,growingSeason))
+  } else if ((sampleDate == '2018-06-14' | sampleDate == '2018-06-19' | 
+              sampleDate == '2018-07-05' | sampleDate == '2018-07-19' | 
+              sampleDate == '2018-08-02' | sampleDate == '2018-08-16' | 
+              sampleDate == '2018-08-30' | sampleDate == '2018-09-06' | 
+              sampleDate == '2018-09-27') & growingSeason != 'some') {
+    stop (paste0 ('Error with growing season ',treeID,growingSeason))
   }
   #if (t == 4) next
   k <- k + 1
@@ -96,7 +93,7 @@ for (j in 1: length (jsonFiles)) {
       (sampleH2 == 'II'  & sampleHeight != 1.5) | 
       (sampleH2 == 'III' & sampleHeight != 2.5) | 
       (sampleH2 == 'IV'  & sampleHeight != 4.0)) {
-    stop (paste0 ('Error with sample height',treeID,sampleH2)) 
+    stop (paste0 ('Error with sample height ',treeID,sampleH2)) 
   }
   
   # Extract growth measurement, associated years and types of markers
@@ -198,6 +195,18 @@ ringWidths <- ringWidths %>% mutate (RWI2019 = Y2019 / Y2017,
                                      RWI2018_15 = Y2018 / Y2015,
                                      RWI2017_15 = Y2017 / Y2015,
                                      RWI2016_15 = Y2016 / Y2015)
+
+# Remove images (or leave them as NA, if comented out):
+#       04 III for 2018-11-15 because only the 2018 ring is completee in the sample
+#       09 I   for 2019-10-24 because only the 2019 ring is complete in the sample
+#       15 I   for 2018-08-16 because only the 2019 ring is complete in the sample
+#       15 I   for 2019-10-24 because only the 2018 and 2019 rings are complete in the sample
+#----------------------------------------------------------------------------------------
+#ringWidths <- ringWidths %>% 
+#  filter (!(treeId == 4  & sampleHeight == 2.5 & sampleDate == as_date ('2018-11-15'))) %>% 
+#  filter (!(treeId == 9  & sampleHeight == 0.5 & sampleDate == as_date ('2019-10-24'))) %>% 
+#  filter (!(treeId == 15 & sampleHeight == 0.5 & sampleDate == as_date ('2018-08-16'))) %>% 
+#  filter (!(treeId == 15 & sampleHeight == 0.5 & sampleDate == as_date ('2019-10-24')))
 
 # Summarise growth
 #----------------------------------------------------------------------------------------
