@@ -18,7 +18,7 @@ source ('plotingFunctions.R')
 
 # Set working directory to read json files for the follow-up microcores
 #----------------------------------------------------------------------------------------
-setwd ('/media/tim/dataDisk/PlantGrowth/data/microcores/woodAnatomy/Exp2018/ringWidthTRIAD/new/')
+setwd ('/media/tim/dataDisk/PlantGrowth/data/incrementCores/ringWidths/Exp2018/')
 
 # List all json output file from TRIAD
 #----------------------------------------------------------------------------------------
@@ -26,15 +26,39 @@ jsonFiles <- list.files (path = './', pattern = '.json')
 
 # Create tibble with ring measurements from the 2018 micrcore 
 #----------------------------------------------------------------------------------------
-ringWidths <- tibble (treeId = numeric (), treatment = numeric (), sampleDate = as_date (NA),
-                      sampleHeight = numeric (), Y2019 = numeric (), 
-                      Y2018 = numeric (), Y2017 = numeric (), Y2016 = numeric (), 
-                      Y2015 = numeric (), Y2014 = numeric (), Y2013 = numeric (), 
-                      Y2012 = numeric (), Y2011 = numeric (), Y2010 = numeric ())#, 
-                      # Y2009 = numeric (), Y2008 = numeric (), Y2007 = numeric (), 
-                      # Y2006 = numeric (), Y2005 = numeric (), Y2004 = numeric (), 
-                      # Y2003 = numeric (), Y2002 = numeric (), Y2001 = numeric (), 
-                      # Y2000 = numeric (), Y1999 = numeric (), Y1998 = numeric ())
+incrementRingWidths <- tibble (treeId = numeric (), treatment = numeric (), 
+  sampleDate = as_date (NA), sampleHeight = numeric (), 
+  Y2018 = numeric (), Y2017 = numeric (), Y2016 = numeric (), Y2015 = numeric (), 
+  Y2014 = numeric (), Y2013 = numeric (), Y2012 = numeric (), Y2011 = numeric (), 
+  Y2010 = numeric (), Y2009 = numeric (), Y2008 = numeric (), Y2007 = numeric (), 
+  Y2006 = numeric (), Y2005 = numeric (), Y2004 = numeric (), Y2003 = numeric (), 
+  Y2002 = numeric (), Y2001 = numeric (), Y2000 = numeric (), Y1999 = numeric (), 
+  Y1998 = numeric (), Y1997 = numeric (), Y1996 = numeric (), Y1995 = numeric (), 
+  Y1994 = numeric (), Y1993 = numeric (), Y1992 = numeric (), Y1991 = numeric (), 
+  Y1990 = numeric (), Y1989 = numeric (), Y1988 = numeric (), Y1987 = numeric (), 
+  Y1986 = numeric (), Y1985 = numeric (), Y1984 = numeric (), Y1983 = numeric (), 
+  Y1982 = numeric (), Y1981 = numeric (), Y1980 = numeric (), Y1979 = numeric (), 
+  Y1978 = numeric (), Y1977 = numeric (), Y1976 = numeric (), Y1975 = numeric (), 
+  Y1974 = numeric (), Y1973 = numeric (), Y1972 = numeric (), Y1971 = numeric (), 
+  Y1970 = numeric (), Y1969 = numeric (), Y1968 = numeric (), Y1967 = numeric (), 
+  Y1966 = numeric (), Y1965 = numeric (), Y1964 = numeric (), Y1963 = numeric (), 
+  Y1962 = numeric (), Y1961 = numeric (), Y1960 = numeric (), Y1959 = numeric (), 
+  Y1958 = numeric (), Y1957 = numeric (), Y1956 = numeric (), Y1955 = numeric (), 
+  Y1954 = numeric (), Y1953 = numeric (), Y1952 = numeric (), Y1951 = numeric (), 
+  Y1950 = numeric (), Y1949 = numeric (), Y1948 = numeric (), Y1947 = numeric (), 
+  Y1946 = numeric (), Y1945 = numeric (), Y1944 = numeric (), Y1943 = numeric (), 
+  Y1942 = numeric (), Y1941 = numeric (), Y1940 = numeric (), Y1939 = numeric (), 
+  Y1938 = numeric (), Y1937 = numeric (), Y1936 = numeric (), Y1935 = numeric (), 
+  Y1934 = numeric (), Y1933 = numeric (), Y1932 = numeric (), Y1931 = numeric (), 
+  Y1930 = numeric (), Y1929 = numeric (), Y1928 = numeric (), Y1927 = numeric (), 
+  Y1926 = numeric (), Y1925 = numeric (), Y1924 = numeric (), Y1923 = numeric (), 
+  Y1922 = numeric (), Y1921 = numeric (), Y1920 = numeric (), Y1919 = numeric (), 
+  Y1918 = numeric (), Y1917 = numeric (), Y1916 = numeric (), Y1915 = numeric (), 
+  Y1914 = numeric (), Y1913 = numeric (), Y1912 = numeric (), Y1911 = numeric (), 
+  Y1910 = numeric (), Y1909 = numeric (), Y1908 = numeric (), Y1907 = numeric (), 
+  Y1906 = numeric (), Y1905 = numeric (), Y1904 = numeric (), Y1903 = numeric (), 
+  Y1902 = numeric (), Y1901 = numeric (), Y1900 = numeric ())
+
 k <- 0
 # Loop over json files and read them
 #----------------------------------------------------------------------------------------
@@ -58,7 +82,7 @@ for (j in 1: length (jsonFiles))
   if (temp$sampleYearGrowth %notin% c ('none','some','all')) {
     stop ('Error: Sample year growth is not "some" or "all"!')  
   }
-  if (temp$sampleDPI !=  57596)        stop ('Error: DPI is not 57596!')  
+  if (temp$sampleDPI !=  3200)         stop ('Error: DPI is not 57596!')  
   if (!temp$barkFirst [[1]])           stop ('Error: Bark was not first!')  
   if (temp$siteLocID != 'BigChill')    stop ('Error: Site location ID was not "BigChill"!')
   if (temp$plotID %notin% c (1,4,5))   stop ('Error: Plot ID is not correct.')
@@ -71,29 +95,17 @@ for (j in 1: length (jsonFiles))
   
   # Check that the growing season measurements are correct
   #--------------------------------------------------------------------------------------
-  if ((sampleDate == '2019-10-24' | sampleDate == '2018-11-15') & growingSeason != 'all') {
+  if (sampleDate == '2020-08-04' & growingSeason != 'some') {
     stop (paste0 ('Error with growing season',treeID,growingSeason))
-  } else if (sampleDate == '2018-05-01' & growingSeason != 'none') {
-    stop (paste0 ('Error with growing season ',treeID,growingSeason))
-  } else if ((sampleDate == '2018-06-14' | sampleDate == '2018-06-19' | 
-              sampleDate == '2018-07-05' | sampleDate == '2018-07-19' | 
-              sampleDate == '2018-08-02' | sampleDate == '2018-08-16' | 
-              sampleDate == '2018-08-30' | sampleDate == '2018-09-06' | 
-              sampleDate == '2018-09-27') & growingSeason != 'some') {
-    stop (paste0 ('Error with growing season ',treeID,growingSeason))
   }
-  #if (t == 4) next
   k <- k + 1
   #print (c (len, treeID, sampleHeight, format (sampleDate, '%Y-%m-%d'), t))
   
   # Check that sample Height were entered correctly
   #--------------------------------------------------------------------------------------
-  sampleH2 <- substr (temp [['sampleID']], 4, 6)
-  if ((sampleH2 == 'I'   & sampleHeight != 0.5) |
-      (sampleH2 == 'II'  & sampleHeight != 1.5) | 
-      (sampleH2 == 'III' & sampleHeight != 2.5) | 
-      (sampleH2 == 'IV'  & sampleHeight != 4.0)) {
-    stop (paste0 ('Error with sample height ',treeID,sampleH2)) 
+  profileID <- substr (temp [['sampleID']], 4, 6)
+  if (profileID %notin% 1:4) {
+    stop (paste0 ('Error with profile ID ',treeID,profileID)) 
   }
   
   # Extract growth measurement, associated years and types of markers
@@ -115,40 +127,84 @@ for (j in 1: length (jsonFiles))
   
   # Wrangle data
   #--------------------------------------------------------------------------------------
-  growth <- as.numeric (growth [types %in% c ('Normal','Missing') &
-                                years <= 2019 & !is.na (years)])
-  years  <- as.numeric (years  [types %in% c ('Normal','Missing') &
-                                years <= 2019 & !is.na (years)])
-  if (years [1] == 2019) {
-    growth <- c (growth, rep (NA, 31-length (growth)))
-    years  <- c (years,  seq (years [length (years)]-1, 1988))
-  } else if (years [1] == 2018) {
-    growth <- c (NA, growth, rep (NA, 30-length (growth)))
-    years  <- c (2019, years,  seq (years [length (years)]-1, 1988))
-  } else if (years [1] == 2017) {
-    growth <- c (NA, NA, growth, rep (NA, 29-length (growth)))
-    years  <- c (2019, 2018, years,  seq (years [length (years)]-1, 1988))
-  }
+  growth <- as.numeric (growth [types %in% c ('Normal','Missing') & !is.na (years)])
+  years  <- as.numeric (years  [types %in% c ('Normal','Missing') & !is.na (years)])
+  if (years [1] == 2020) {
+    growth <- c (growth, rep (NA, 119-length (growth)))
+    years  <- c (years,  seq (years [length (years)]-1, 1900))
+  }# else if (years [1] == 2017) {
+  #  growth <- c (NA, growth, rep (NA, 118-length (growth)))
+  #  years  <- c (2018, years,  seq (years [length (years)]-1, 1900))
+  #}
   #print (growth)
   #print (years)
   
   # add to tibble with all growth for all years years
   #--------------------------------------------------------------------------------------
-  ringWidths <- ringWidths %>% add_row (treeId = treeID,
-                                        treatment = t,
-                                        sampleHeight = sampleHeight,
-                                        sampleDate = sampleDate,
-                                        Y2019 = growth [years == 2019],
-                                        Y2018 = growth [years == 2018],
-                                        Y2017 = growth [years == 2017],
-                                        Y2016 = growth [years == 2016],
-                                        Y2015 = growth [years == 2015],
-                                        Y2014 = growth [years == 2014],
-                                        Y2013 = growth [years == 2013],
-                                        Y2012 = growth [years == 2012],
-                                        Y2011 = growth [years == 2011],
-                                        Y2010 = growth [years == 2010])
-
+  incrementRingWidths <- incrementRingWidths %>% 
+    add_row (treeId = treeID, treatment = t, sampleHeight = sampleHeight,
+             sampleDate = sampleDate,
+             Y2018 = growth [years == 2018], Y2017 = growth [years == 2017],
+             Y2016 = growth [years == 2016], Y2015 = growth [years == 2015],
+             Y2014 = growth [years == 2014], Y2013 = growth [years == 2013],
+             Y2012 = growth [years == 2012], Y2011 = growth [years == 2011],
+             Y2010 = growth [years == 2010], Y2009 = growth [years == 2009],
+             Y2008 = growth [years == 2008], Y2007 = growth [years == 2007],
+             Y2006 = growth [years == 2006], Y2005 = growth [years == 2005],
+             Y2004 = growth [years == 2004], Y2003 = growth [years == 2003],
+             Y2002 = growth [years == 2002], Y2001 = growth [years == 2001],
+             Y2000 = growth [years == 2000], Y1999 = growth [years == 1999],
+             Y1998 = growth [years == 1998], Y1997 = growth [years == 1997],
+             Y1996 = growth [years == 1996], Y1995 = growth [years == 1995],
+             Y1994 = growth [years == 1994], Y1993 = growth [years == 1993],
+             Y1992 = growth [years == 1992], Y1991 = growth [years == 1991],
+             Y1990 = growth [years == 1990], Y1989 = growth [years == 1989],
+             Y1988 = growth [years == 1988], Y1987 = growth [years == 1987],
+             Y1986 = growth [years == 1986], Y1985 = growth [years == 1985],
+             Y1984 = growth [years == 1984], Y1983 = growth [years == 1983],
+             Y1982 = growth [years == 1982], Y1981 = growth [years == 1981],
+             Y1980 = growth [years == 1980], Y1979 = growth [years == 1979],
+             Y1978 = growth [years == 1978], Y1977 = growth [years == 1977],
+             Y1976 = growth [years == 1976], Y1975 = growth [years == 1975],
+             Y1974 = growth [years == 1974], Y1973 = growth [years == 1973],
+             Y1972 = growth [years == 1972], Y1971 = growth [years == 1971],
+             Y1970 = growth [years == 1970], Y1969 = growth [years == 1969],
+             Y1968 = growth [years == 1968], Y1967 = growth [years == 1967],
+             Y1966 = growth [years == 1966], Y1965 = growth [years == 1965],
+             Y1964 = growth [years == 1964], Y1963 = growth [years == 1963],
+             Y1962 = growth [years == 1962], Y1961 = growth [years == 1961],
+             Y1960 = growth [years == 1960], Y1959 = growth [years == 1959],
+             Y1958 = growth [years == 1958], Y1957 = growth [years == 1957],
+             Y1956 = growth [years == 1956], Y1955 = growth [years == 1955],
+             Y1954 = growth [years == 1954], Y1953 = growth [years == 1953],
+             Y1952 = growth [years == 1952], Y1951 = growth [years == 1951],
+             Y1950 = growth [years == 1950], Y1949 = growth [years == 1949],
+             Y1948 = growth [years == 1948], Y1947 = growth [years == 1947],
+             Y1946 = growth [years == 1946], Y1945 = growth [years == 1945],
+             Y1944 = growth [years == 1944], Y1943 = growth [years == 1943],
+             Y1942 = growth [years == 1942], Y1941 = growth [years == 1941],
+             Y1940 = growth [years == 1940], Y1939 = growth [years == 1939],
+             Y1938 = growth [years == 1938], Y1937 = growth [years == 1937],
+             Y1936 = growth [years == 1936], Y1935 = growth [years == 1935],
+             Y1934 = growth [years == 1934], Y1933 = growth [years == 1933],
+             Y1932 = growth [years == 1932], Y1931 = growth [years == 1931],
+             Y1930 = growth [years == 1930], Y1929 = growth [years == 1929],
+             Y1928 = growth [years == 1928], Y1927 = growth [years == 1927],
+             Y1926 = growth [years == 1926], Y1925 = growth [years == 1925],
+             Y1924 = growth [years == 1924], Y1923 = growth [years == 1923],
+             Y1922 = growth [years == 1922], Y1921 = growth [years == 1921],
+             Y1920 = growth [years == 1920], Y1919 = growth [years == 1919],
+             Y1918 = growth [years == 1918], Y1917 = growth [years == 1917],
+             Y1916 = growth [years == 1916], Y1915 = growth [years == 1915],
+             Y1914 = growth [years == 1914], Y1913 = growth [years == 1913],
+             Y1912 = growth [years == 1912], Y1911 = growth [years == 1911],
+             Y1910 = growth [years == 1910], Y1909 = growth [years == 1909],
+             Y1908 = growth [years == 1908], Y1907 = growth [years == 1907],
+             Y1906 = growth [years == 1906], Y1905 = growth [years == 1905],
+             Y1904 = growth [years == 1904], Y1903 = growth [years == 1903],
+             Y1902 = growth [years == 1902], Y1901 = growth [years == 1901],
+             Y1900 = growth [years == 1900])
+  
 }  # end json file loop
 
 # Add lines for no growth in the beginning of May for all slides that I only visually 
@@ -157,28 +213,28 @@ for (j in 1: length (jsonFiles))
 for (i in 1:15) {
   for (h in c (0.5, 1.5, 2.5, 4.0)) {
     # Condition to extract relevant data
-    con <- ringWidths [['treeId']] == i & 
-      ringWidths [['sampleHeight']] == h 
+    con <- incrementRingWidths [['treeId']] == i & 
+      incrementRingWidths [['sampleHeight']] == h 
     
     # Extract treatment
-    t <- unique (ringWidths [['treatment']] [con])
+    t <- unique (incrementRingWidths [['treatment']] [con])
     
     # Check that there is not an actual measurement for beginning of may
-    if (dim (filter (ringWidths, con, sampleDate == as_date ('2018-05-01'))) [1] < 1) {
-      ringWidths <- ringWidths %>% add_row (treeId = i, treatment = t, 
+    if (dim (filter (incrementRingWidths, con, sampleDate == as_date ('2018-05-01'))) [1] < 1) {
+      incrementRingWidths <- incrementRingWidths %>% add_row (treeId = i, treatment = t, 
                                             sampleDate = as_date ('2018-05-01'),
                                             sampleHeight = h, Y2019 = NA, Y2018 = 0, 
                                             Y2017 = 1, Y2016 = 1, Y2015 = 1, Y2014 = 1, 
                                             Y2013 = 1, Y2012 = 1, Y2011 = 1)
     } else {
-      ringWidths [['Y2018']] [con & ringWidths [['sampleDate']] == as_date ('2018-05-01')] <- 0 # For the measured image I indicated that the growing season did not start yet, WIAD does not create a ring, but it should be 0 
+      incrementRingWidths [['Y2018']] [con & incrementRingWidths [['sampleDate']] == as_date ('2018-05-01')] <- 0 # For the measured image I indicated that the growing season did not start yet, WIAD does not create a ring, but it should be 0 
     }
   }
 }
 
 # Arrange in advancing order by date, tree, sampling height
 #----------------------------------------------------------------------------------------
-ringWidths <- ringWidths %>% arrange (sampleDate, treeId, sampleHeight)
+incrementRingWidths <- incrementRingWidths %>% arrange (sampleDate, treeId, sampleHeight)
 
 # Reset working directory
 #----------------------------------------------------------------------------------------
@@ -186,7 +242,7 @@ setwd ('~/projects/PlantGrowth/Exp2018Analysis/')
 
 # Standardise ring width using the 2015 ring
 #----------------------------------------------------------------------------------------
-ringWidths <- ringWidths %>% mutate (RWI2019 = Y2019 / Y2017,
+incrementRingWidths <- incrementRingWidths %>% mutate (RWI2019 = Y2019 / Y2017,
                                      RWI2018 = Y2018 / Y2017,
                                      RWI2019_16 = Y2019 / Y2016,
                                      RWI2018_16 = Y2018 / Y2016,
@@ -202,7 +258,7 @@ ringWidths <- ringWidths %>% mutate (RWI2019 = Y2019 / Y2017,
 #       15 I   for 2018-08-16 because only the 2019 ring is complete in the sample
 #       15 I   for 2019-10-24 because only the 2018 and 2019 rings are complete in the sample
 #----------------------------------------------------------------------------------------
-#ringWidths <- ringWidths %>% 
+#incrementRingWidths <- incrementRingWidths %>% 
 #  filter (!(treeId == 4  & sampleHeight == 2.5 & sampleDate == as_date ('2018-11-15'))) %>% 
 #  filter (!(treeId == 9  & sampleHeight == 0.5 & sampleDate == as_date ('2019-10-24'))) %>% 
 #  filter (!(treeId == 15 & sampleHeight == 0.5 & sampleDate == as_date ('2018-08-16'))) %>% 
@@ -210,7 +266,7 @@ ringWidths <- ringWidths %>% mutate (RWI2019 = Y2019 / Y2017,
 
 # Summarise growth
 #----------------------------------------------------------------------------------------
-summaryData <- ringWidths %>% group_by (treatment, sampleDate, sampleHeight) %>% 
+summaryData <- incrementRingWidths %>% group_by (treatment, sampleDate, sampleHeight) %>% 
   summarise (meanY19 = mean (Y2019, na.rm = TRUE),
              seY19   = se   (Y2019),
              meanY18 = mean (Y2018, na.rm = TRUE),
@@ -246,13 +302,13 @@ PLOT <- 'FALSE'
 if (PLOT) {
   layout (matrix (1:15, nrow = 3, byrow = TRUE), widths = c (1.2, 1, 1, 1, 1), 
           heights = c (1, 1, 1.3))
-    for (i in 1:15) {
+  for (i in 1:15) {
     
     # Condition to extract relevant data
-    con <- ringWidths [['treeId']] == i & ringWidths [['sampleHeight']] == 0.5
+    con <- incrementRingWidths [['treeId']] == i & incrementRingWidths [['sampleHeight']] == 0.5
     
     # Extract treatment
-    t <- unique (ringWidths [['treatment']] [con]) 
+    t <- unique (incrementRingWidths [['treatment']] [con]) 
     
     # Plot data for 0.5 m
     if (i %% 5 == 1 & i <= 10) {
@@ -264,8 +320,8 @@ if (PLOT) {
     } else if (i > 10) {
       par (mar = c (5, 1, 1, 1))
     }
-    plot (x = ringWidths [['sampleDate']] [con],
-          y = ringWidths [['RWI2018']] [con],
+    plot (x = incrementRingWidths [['sampleDate']] [con],
+          y = incrementRingWidths [['RWI2018']] [con],
           xlab = '', ylab = '', las = 1, typ = 'p', pch = 25,
           col = tColours [['colour']] [tColours [['treatment']] == ifelse (t == 1, 'control',ifelse (t == 4, 'double compressed', 'chilled'))],
           xlim = as_date (c ('2018-02-01','2019-02-01')), ylim = c (0, 2.7), axes = FALSE)
@@ -282,30 +338,30 @@ if (PLOT) {
           labels = i, cex = 1.4)
     
     # Add data for 1.5m
-    con <- ringWidths [['treeId']] == i & ringWidths [['sampleHeight']] == 1.5
-    points (x = ringWidths [['sampleDate']] [con],
-            y = ringWidths [['RWI2018']] [con], pch = 23,
+    con <- incrementRingWidths [['treeId']] == i & incrementRingWidths [['sampleHeight']] == 1.5
+    points (x = incrementRingWidths [['sampleDate']] [con],
+            y = incrementRingWidths [['RWI2018']] [con], pch = 23,
             col = tColours [['colour']] [tColours [['treatment']] == ifelse (t == 1, 'control',ifelse (t == 4, 'double compressed', 'chilled'))])
     
     # Add data for 2.5m
-    con <- ringWidths [['treeId']] == i & ringWidths [['sampleHeight']] == 2.5
-    points (x = ringWidths [['sampleDate']] [con],
-            y = ringWidths [['RWI2018']] [con], pch = 24,
+    con <- incrementRingWidths [['treeId']] == i & incrementRingWidths [['sampleHeight']] == 2.5
+    points (x = incrementRingWidths [['sampleDate']] [con],
+            y = incrementRingWidths [['RWI2018']] [con], pch = 24,
             col = tColours [['colour']] [tColours [['treatment']] == ifelse (t == 1, 'control',ifelse (t == 4, 'double compressed', 'chilled'))])
     
     # Add data for 4.0m
-    con <- ringWidths [['treeId']] == i & ringWidths [['sampleHeight']] == 4.0
-    points (x = ringWidths [['sampleDate']] [con],
-            y = ringWidths [['RWI2018']] [con], pch = 21,
+    con <- incrementRingWidths [['treeId']] == i & incrementRingWidths [['sampleHeight']] == 4.0
+    points (x = incrementRingWidths [['sampleDate']] [con],
+            y = incrementRingWidths [['RWI2018']] [con], pch = 21,
             col = tColours [['colour']] [tColours [['treatment']] == ifelse (t == 1, 'control',ifelse (t == 4, 'double compressed', 'chilled'))])
-   
+    
     # Add the 2018 growth increment index for the from the 2019 sample
-    con <- ringWidths [['treeId']] == i & ringWidths [['sampleDate']] == as_date ('2019-10-24')
+    con <- incrementRingWidths [['treeId']] == i & incrementRingWidths [['sampleDate']] == as_date ('2019-10-24')
     points (x = rep (as_date ('2019-01-15'), 4),
-            y = ringWidths [['RWI2018']] [con], pch = c (25, 23, 24, 21),
+            y = incrementRingWidths [['RWI2018']] [con], pch = c (25, 23, 24, 21),
             col = tColours [['colour']] [tColours [['treatment']] == ifelse (t == 1, 'control',ifelse (t == 4, 'double compressed', 'chilled'))])
   }
-
+  
   # Add a legend 
   #--------------------------------------------------------------------------------------
   legend (x = as_date ('2018-02-01'),

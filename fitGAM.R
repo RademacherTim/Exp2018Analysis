@@ -42,8 +42,8 @@ for (h in c (4.0, 2.5, 1.5, 0.5))
     # Assume that the ring measured in 2019 is the end of the year growth
     if (sum (tempData [['sampleDate']] == as_date ('2019-10-24'), na.rm = TRUE) > 0) 
     {
-      tempData [['sampleDate']] [tempData [['sampleDate']] == as_date ('2019-10-24')] <- as_date ('2018-12-31')
-      tempData [['doy']] [tempData [['sampleDate']] == as_date ('2018-12-31')] <- yday ('2018-12-31')
+      tempData [['sampleDate']] [tempData [['sampleDate']] == as_date ('2019-10-24')] <- as_date ('2018-11-30')
+      tempData [['doy']] [tempData [['sampleDate']] == as_date ('2018-11-30')] <- yday ('2018-11-30')
     }
     
     # Fit general additive model to growth data

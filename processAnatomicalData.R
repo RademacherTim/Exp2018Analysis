@@ -7,6 +7,7 @@
 #----------------------------------------------------------------------------------------
 library ('tidyverse')
 library ('lubridate')
+library ('scam')
 
 # Get original working directory
 #----------------------------------------------------------------------------------------
@@ -114,7 +115,7 @@ for (r in 1:dim (anatomicalData) [1]) {
 
 # Clean unnecessary variables from loop
 #----------------------------------------------------------------------------------------
-rm (r, h, t, treeID, iDoy, tempData, direction, error, maxRWI, PLOT)
+rm (r, h, t, treeID, iDoy, tempData, direction, error, maxRWI, PLOT, fit.gam)
 
 # Add cell width column to data
 #----------------------------------------------------------------------------------------

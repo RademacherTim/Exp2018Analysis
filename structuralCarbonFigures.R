@@ -10,18 +10,18 @@ source ('processAnatomicalData.R')
 #----------------------------------------------------------------------------------------
 par (mfrow = c (1, 1), mar = c (5, 5, 1, 1)) 
 plot (x = ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
-        select (Y2018) %>% filter (!is.na (Y2018)) %>% unlist (),
+        select (Y2018) %>% filter (!is.na (Y2018)) %>% unlist () / 1.51170603675,
       y = anatomicalData %>% group_by (TREE, sampleHeight, YEAR) %>% 
         filter (YEAR == 2018) %>% summarise (maxRW = max (MRW)) %>% ungroup %>% 
         select (maxRW) %>% unlist (),
       xlab = 'ROXAS', ylab = 'WIAD', col = '#8dd3c799', pch = 19)
 points (x =  ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
-          select (Y2019) %>% filter (!is.na (Y2019)) %>% unlist (),
+          select (Y2019) %>% filter (!is.na (Y2019)) %>% unlist () / 1.51170603675,
         y = anatomicalData %>% group_by (TREE, sampleHeight, YEAR) %>% 
           filter (YEAR == 2019) %>% summarise (maxRW = max (MRW)) %>% ungroup %>% 
           select (maxRW) %>% unlist (), col = '#bebada99', pch = 19)
 points (x =  ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
-          select (Y2017) %>% filter (!is.na (Y2017)) %>% unlist (),
+          select (Y2017) %>% filter (!is.na (Y2017)) %>% unlist () / 1.51170603675,
         y = anatomicalData %>% group_by (TREE, sampleHeight, YEAR) %>% 
           filter (YEAR == 2017) %>% summarise (maxRW = max (MRW)) %>% ungroup %>% 
           select (maxRW) %>% unlist (), col = '#ffffb399', pch = 19)
