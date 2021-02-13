@@ -26,4 +26,5 @@ ALL$PLOT [which (ALL$TREE >= 1 & ALL$TREE <=  5)] <- 5
 ALL$POS <- substr (ALL$WOODID, 4, nchar (as.character (ALL$WOODID)))
 
 # Write single output file
-write.table (ALL, "20muband_ALL.txt",  row.names = FALSE)
+date <- '2018.11.15'
+write.table (ALL, paste0 ("../20muband_ALL_",date,".txt"),  row.names = FALSE)

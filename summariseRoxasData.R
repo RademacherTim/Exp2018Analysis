@@ -18,7 +18,7 @@ rm (list = ls ()) # clean desk
 
 
 ### 2. Define top directory containing all the data in whatever hierarchical structure ####
-topfolder <- '/media/tim/dataDisk/PlantGrowth/data/microcores/woodAnatomy/Exp2018/ROXAS/rotatedImages'
+topfolder <- '/media/tim/dataDisk/PlantGrowth/data/microcores/woodAnatomy/Exp2018/ROXAS/2018.11.15'
 
 setwd ('/media/tim/dataDisk/PlantGrowth/data/microcores/woodAnatomy/Exp2018/ROXAS/')
 
@@ -192,7 +192,3 @@ for (i in c (1:length (levels (metadata$treecode)))) {
 }  
 
 Sys.time() - t
-
-
-
-

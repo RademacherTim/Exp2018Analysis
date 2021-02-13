@@ -82,7 +82,7 @@ for (j in 1: length (jsonFiles))
   if (temp$sampleYearGrowth %notin% c ('none','some','all')) {
     stop ('Error: Sample year growth is not "some" or "all"!')  
   }
-  if (temp$sampleDPI !=  3200)         stop ('Error: DPI is not 57596!')  
+  if (temp$sampleDPI %notin%  c (2400, 3200)) stop ('Error: DPI is not 2400 or 3200!')  
   if (!temp$barkFirst [[1]])           stop ('Error: Bark was not first!')  
   if (temp$siteLocID != 'BigChill')    stop ('Error: Site location ID was not "BigChill"!')
   if (temp$plotID %notin% c (1,4,5))   stop ('Error: Plot ID is not correct.')
@@ -103,10 +103,16 @@ for (j in 1: length (jsonFiles))
   
   # Check that sample Height were entered correctly
   #--------------------------------------------------------------------------------------
-  profileID <- substr (temp [['sampleID']], 4, 6)
+  profileID <- as.numeric (substr (temp [['sampleID']], 4, 6))
   if (profileID %notin% 1:4) {
     stop (paste0 ('Error with profile ID ',treeID,profileID)) 
   }
+  
+  # Sort out the ones that have not been checked yet for now
+  #--------------------------------------------------------------------------------------
+  if ((treeID %in% c (9, 13, 15)) | 
+      (treeID %in% c (5, 10, 12, 14) & profileID == 1) | 
+      (treeID %in% c (8, 12)         & profileID == 2)) next
   
   # Extract growth measurement, associated years and types of markers
   #--------------------------------------------------------------------------------------
@@ -125,13 +131,38 @@ for (j in 1: length (jsonFiles))
   }
   #print (years)
   
+  # Divide into two profiles if there is a pith marker
+  #--------------------------------------------------------------------------------------
+  nProfiles <- 1
+  if ('Pith' %in% types) {
+    nProfiles <- 2
+    oldestRingIndex <- which (types == 'Pith')
+    growth2 <- growth [(oldestRingIndex + 1):len]
+    years2  <- years [(oldestRingIndex + 1):len]
+    types2  <- types [(oldestRingIndex + 1):len]
+    growth <- growth [1:oldestRingIndex]
+    years  <- years [1:oldestRingIndex]
+    types  <- types [1:oldestRingIndex]
+  }
+  
   # Wrangle data
   #--------------------------------------------------------------------------------------
-  growth <- as.numeric (growth [types %in% c ('Normal','Missing') & !is.na (years)])
-  years  <- as.numeric (years  [types %in% c ('Normal','Missing') & !is.na (years)])
+  growth <- as.numeric (growth [types %in% c ('Normal','Missing','Pith') & !is.na (years)])
+  years  <- as.numeric (years  [types %in% c ('Normal','Missing','Pith') & !is.na (years)])
+  if (nProfiles == 2) {
+    growth2 <- as.numeric (growth2 [types2 %in% c ('Normal','Missing') & !is.na (years2)])
+    years2  <- as.numeric (years2  [types2 %in% c ('Normal','Missing') & !is.na (years2)])
+  }
   if (years [1] == 2020) {
     growth <- c (growth, rep (NA, 119-length (growth)))
     years  <- c (years,  seq (years [length (years)]-1, 1900))
+    if (nProfiles == 2) {
+      # Determine the most recent year in second profile
+      mostRecentYear <- max (years2)
+      oldestYear <- min (years2)
+      growth2 <- c (rep (NA, 2020-mostRecentYear+1), rev (growth2), rep (NA, 119-length (growth2)))
+      years2  <- c (seq (2020, mostRecentYear+1), rev (years2),  seq (oldestYear-1, 1900))
+    }
   }# else if (years [1] == 2017) {
   #  growth <- c (NA, growth, rep (NA, 118-length (growth)))
   #  years  <- c (2018, years,  seq (years [length (years)]-1, 1900))
@@ -205,32 +236,75 @@ for (j in 1: length (jsonFiles))
              Y1902 = growth [years == 1902], Y1901 = growth [years == 1901],
              Y1900 = growth [years == 1900])
   
+  # Add secon profile if it exists
+  #--------------------------------------------------------------------------------------
+  if (nProfiles == 2) {
+    incrementRingWidths <- incrementRingWidths %>% 
+      add_row (treeId = treeID, treatment = t, sampleHeight = sampleHeight,
+               sampleDate = sampleDate,
+               Y2018 = growth2 [years2 == 2018], Y2017 = growth2 [years2 == 2017],
+               Y2016 = growth2 [years2 == 2016], Y2015 = growth2 [years2 == 2015],
+               Y2014 = growth2 [years2 == 2014], Y2013 = growth2 [years2 == 2013],
+               Y2012 = growth2 [years2 == 2012], Y2011 = growth2 [years2 == 2011],
+               Y2010 = growth2 [years2 == 2010], Y2009 = growth2 [years2 == 2009],
+               Y2008 = growth2 [years2 == 2008], Y2007 = growth2 [years2 == 2007],
+               Y2006 = growth2 [years2 == 2006], Y2005 = growth2 [years2 == 2005],
+               Y2004 = growth2 [years2 == 2004], Y2003 = growth2 [years2 == 2003],
+               Y2002 = growth2 [years2 == 2002], Y2001 = growth2 [years2 == 2001],
+               Y2000 = growth2 [years2 == 2000], Y1999 = growth2 [years2 == 1999],
+               Y1998 = growth2 [years2 == 1998], Y1997 = growth2 [years2 == 1997],
+               Y1996 = growth2 [years2 == 1996], Y1995 = growth2 [years2 == 1995],
+               Y1994 = growth2 [years2 == 1994], Y1993 = growth2 [years2 == 1993],
+               Y1992 = growth2 [years2 == 1992], Y1991 = growth2 [years2 == 1991],
+               Y1990 = growth2 [years2 == 1990], Y1989 = growth2 [years2 == 1989],
+               Y1988 = growth2 [years2 == 1988], Y1987 = growth2 [years2 == 1987],
+               Y1986 = growth2 [years2 == 1986], Y1985 = growth2 [years2 == 1985],
+               Y1984 = growth2 [years2 == 1984], Y1983 = growth2 [years2 == 1983],
+               Y1982 = growth2 [years2 == 1982], Y1981 = growth2 [years2 == 1981],
+               Y1980 = growth2 [years2 == 1980], Y1979 = growth2 [years2 == 1979],
+               Y1978 = growth2 [years2 == 1978], Y1977 = growth2 [years2 == 1977],
+               Y1976 = growth2 [years2 == 1976], Y1975 = growth2 [years2 == 1975],
+               Y1974 = growth2 [years2 == 1974], Y1973 = growth2 [years2 == 1973],
+               Y1972 = growth2 [years2 == 1972], Y1971 = growth2 [years2 == 1971],
+               Y1970 = growth2 [years2 == 1970], Y1969 = growth2 [years2 == 1969],
+               Y1968 = growth2 [years2 == 1968], Y1967 = growth2 [years2 == 1967],
+               Y1966 = growth2 [years2 == 1966], Y1965 = growth2 [years2 == 1965],
+               Y1964 = growth2 [years2 == 1964], Y1963 = growth2 [years2 == 1963],
+               Y1962 = growth2 [years2 == 1962], Y1961 = growth2 [years2 == 1961],
+               Y1960 = growth2 [years2 == 1960], Y1959 = growth2 [years2 == 1959],
+               Y1958 = growth2 [years2 == 1958], Y1957 = growth2 [years2 == 1957],
+               Y1956 = growth2 [years2 == 1956], Y1955 = growth2 [years2 == 1955],
+               Y1954 = growth2 [years2 == 1954], Y1953 = growth2 [years2 == 1953],
+               Y1952 = growth2 [years2 == 1952], Y1951 = growth2 [years2 == 1951],
+               Y1950 = growth2 [years2 == 1950], Y1949 = growth2 [years2 == 1949],
+               Y1948 = growth2 [years2 == 1948], Y1947 = growth2 [years2 == 1947],
+               Y1946 = growth2 [years2 == 1946], Y1945 = growth2 [years2 == 1945],
+               Y1944 = growth2 [years2 == 1944], Y1943 = growth2 [years2 == 1943],
+               Y1942 = growth2 [years2 == 1942], Y1941 = growth2 [years2 == 1941],
+               Y1940 = growth2 [years2 == 1940], Y1939 = growth2 [years2 == 1939],
+               Y1938 = growth2 [years2 == 1938], Y1937 = growth2 [years2 == 1937],
+               Y1936 = growth2 [years2 == 1936], Y1935 = growth2 [years2 == 1935],
+               Y1934 = growth2 [years2 == 1934], Y1933 = growth2 [years2 == 1933],
+               Y1932 = growth2 [years2 == 1932], Y1931 = growth2 [years2 == 1931],
+               Y1930 = growth2 [years2 == 1930], Y1929 = growth2 [years2 == 1929],
+               Y1928 = growth2 [years2 == 1928], Y1927 = growth2 [years2 == 1927],
+               Y1926 = growth2 [years2 == 1926], Y1925 = growth2 [years2 == 1925],
+               Y1924 = growth2 [years2 == 1924], Y1923 = growth2 [years2 == 1923],
+               Y1922 = growth2 [years2 == 1922], Y1921 = growth2 [years2 == 1921],
+               Y1920 = growth2 [years2 == 1920], Y1919 = growth2 [years2 == 1919],
+               Y1918 = growth2 [years2 == 1918], Y1917 = growth2 [years2 == 1917],
+               Y1916 = growth2 [years2 == 1916], Y1915 = growth2 [years2 == 1915],
+               Y1914 = growth2 [years2 == 1914], Y1913 = growth2 [years2 == 1913],
+               Y1912 = growth2 [years2 == 1912], Y1911 = growth2 [years2 == 1911],
+               Y1910 = growth2 [years2 == 1910], Y1909 = growth2 [years2 == 1909],
+               Y1908 = growth2 [years2 == 1908], Y1907 = growth2 [years2 == 1907],
+               Y1906 = growth2 [years2 == 1906], Y1905 = growth2 [years2 == 1905],
+               Y1904 = growth2 [years2 == 1904], Y1903 = growth2 [years2 == 1903],
+               Y1902 = growth2 [years2 == 1902], Y1901 = growth2 [years2 == 1901],
+               Y1900 = growth2 [years2 == 1900])
+    
+  } 
 }  # end json file loop
-
-# Add lines for no growth in the beginning of May for all slides that I only visually 
-# inspected and did not measure
-#----------------------------------------------------------------------------------------
-for (i in 1:15) {
-  for (h in c (0.5, 1.5, 2.5, 4.0)) {
-    # Condition to extract relevant data
-    con <- incrementRingWidths [['treeId']] == i & 
-      incrementRingWidths [['sampleHeight']] == h 
-    
-    # Extract treatment
-    t <- unique (incrementRingWidths [['treatment']] [con])
-    
-    # Check that there is not an actual measurement for beginning of may
-    if (dim (filter (incrementRingWidths, con, sampleDate == as_date ('2018-05-01'))) [1] < 1) {
-      incrementRingWidths <- incrementRingWidths %>% add_row (treeId = i, treatment = t, 
-                                            sampleDate = as_date ('2018-05-01'),
-                                            sampleHeight = h, Y2019 = NA, Y2018 = 0, 
-                                            Y2017 = 1, Y2016 = 1, Y2015 = 1, Y2014 = 1, 
-                                            Y2013 = 1, Y2012 = 1, Y2011 = 1)
-    } else {
-      incrementRingWidths [['Y2018']] [con & incrementRingWidths [['sampleDate']] == as_date ('2018-05-01')] <- 0 # For the measured image I indicated that the growing season did not start yet, WIAD does not create a ring, but it should be 0 
-    }
-  }
-}
 
 # Arrange in advancing order by date, tree, sampling height
 #----------------------------------------------------------------------------------------

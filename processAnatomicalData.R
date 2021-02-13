@@ -17,15 +17,32 @@ originalDir <- getwd ()
 #----------------------------------------------------------------------------------------
 setwd ('/media/tim/dataDisk/PlantGrowth/data/microcores/woodAnatomy/Exp2018/')
 
-# Read the data per 20 micron tangential slices
+# Read the data per 20 micron tangential slices for the samples collected on the 2018-11-15
 #----------------------------------------------------------------------------------------
-anatomicalData <- read.table (file = '20muband_ALL.txt', header = TRUE)
+anatomicalData <- read.table (file = '20muband_ALL_2018.11.15.txt', header = TRUE)
 
-# Change sample height to the actual height in meters above ground
+# Change sample height to the actual height in meters above ground and a sample date
 #----------------------------------------------------------------------------------------
 anatomicalData <- anatomicalData %>% 
-  mutate (sampleHeight = case_when ((POS == 'I')   ~ 0.5, (POS == 'II') ~ 1.5,
-                                    (POS == 'III') ~ 2.5, (POS == 'IV') ~ 4.0,))
+  mutate (sampleHeight = case_when ((POS == 'I')   ~ 0.5, (POS == 'II.5')  ~ 1.0,
+                                    (POS == 'II')  ~ 1.5, (POS == 'III.5') ~ 2.0,
+                                    (POS == 'III') ~ 2.5, (POS == 'IV')    ~ 4.0)) %>%
+  add_column (sampleDate = as_date ('2018-11-15'))
+
+# Add the data for 20 micrometer tangential slices for samples collected on 2019-10-24
+#----------------------------------------------------------------------------------------
+temp <- read.table (file = '20muband_ALL_2019.10.24.txt', header = TRUE)
+
+# Change sample height to the actual height in meters above ground and a sample date
+#----------------------------------------------------------------------------------------
+temp <- temp %>% 
+  mutate (sampleHeight = case_when ((POS == 'I')   ~ 0.5, (POS == 'II.5')  ~ 1.0,
+                                    (POS == 'II')  ~ 1.5, (POS == 'III.5') ~ 2.0,
+                                    (POS == 'III') ~ 2.5, (POS == 'IV')    ~ 4.0)) %>%
+  add_column (sampleDate = as_date ('2019-10-24'))
+
+# Join dates for anatomical data
+anatomicalData <- rbind (anatomicalData, temp)
 
 # Read ring width data
 #----------------------------------------------------------------------------------------
@@ -43,6 +60,7 @@ for (r in 1:dim (anatomicalData) [1]) {
   # If not 2018, skip. Only have temporal resolution to for 2018 with multiple samples
   #--------------------------------------------------------------------------------------
   if (anatomicalData [['YEAR']] [r] != 2018) next
+  if (anatomicalData [['sampleHeight']] [r] %in% 1:2) next
   
   # Get tree ID, treatment and sample height of the sample
   #--------------------------------------------------------------------------------------
