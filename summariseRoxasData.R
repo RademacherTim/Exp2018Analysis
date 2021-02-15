@@ -192,3 +192,4 @@ for (i in c (1:length (levels (metadata$treecode)))) {
 }  
 
 Sys.time() - t
+

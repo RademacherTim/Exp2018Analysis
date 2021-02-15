@@ -42,6 +42,7 @@ temp <- temp %>%
   add_column (sampleDate = as_date ('2019-10-24'))
 
 # Join dates for anatomical data
+#----------------------------------------------------------------------------------------
 anatomicalData <- rbind (anatomicalData, temp)
 
 # Read ring width data
@@ -152,8 +153,16 @@ anatomicalData <- add_column (anatomicalData, nCells = 20.0 /
 
 # Provide column with cumulative cell-wall area
 #----------------------------------------------------------------------------------------
-anatomicalData <- anatomicalData %>% group_by (TREE, sampleHeight, YEAR) %>% 
-  mutate (cumCWA = cumsum (CWA)) 
+#anatomicalData <- anatomicalData %>% 
+#  group_by (TREE, sampleHeight, YEAR, sampleDate) %>% 
+#  mutate (cumCWA    = cumsum (CWA),
+#          cumNCells = cumsum (nCells)) 
+
+# Add cumulative number of cells column
+#----------------------------------------------------------------------------------------
+#anatomicalData <- anatomicalData %>% 
+#  group_by (TREE, sampleHeight, YEAR, sampleDate) %>% 
+#  mutate (cumNCells = cumsum (nCells))
 
 # Switch back to original working directory
 #----------------------------------------------------------------------------------------
