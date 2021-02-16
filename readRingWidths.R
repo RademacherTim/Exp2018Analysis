@@ -148,6 +148,11 @@ for (j in 1: length (jsonFiles)) {
                                         Y2011 = growth [years == 2011],
                                         Y2010 = growth [years == 2010])
 
+  #if (treeID == 5 & sampleHeight == 2.5) {
+  #  print (paste (jsonFiles [j], treeID, sampleHeight, sampleDate, 
+  #                growth [years == 2017], growth [years == 2018], 
+  #                growth [years == 2018] / growth [years == 2017]))
+  #}
 }  # end json file loop
 
 # Add lines for no growth in the beginning of May for all slides that I only visually 
@@ -183,6 +188,17 @@ ringWidths <- ringWidths %>% arrange (sampleDate, treeId, sampleHeight)
 #----------------------------------------------------------------------------------------
 setwd ('~/projects/PlantGrowth/Exp2018Analysis/')
 
+# Remove images (or leave them as NA, if comented out):
+#        05 II 2018-07-05
+#----------------------------------------------------------------------------------------
+ringWidths [ringWidths [['treeId']] == 5 & 
+            ringWidths [['sampleHeight']] == 1.5 & 
+            ringWidths [['sampleDate']] %in% as_date (c ('2018-07-19','2018-08-02','2018-08-16')), 'Y2018'] <- NA
+ringWidths [ringWidths [['treeId']] == 5 & 
+            ringWidths [['sampleHeight']] == 2.5 & 
+            ringWidths [['sampleDate']] %in% as_date (c ('2018-08-30')), 'Y2018'] <- NA
+
+
 # Standardise ring width using the 2015 ring
 #----------------------------------------------------------------------------------------
 ringWidths <- ringWidths %>% mutate (RWI2019 = Y2019 / Y2017,
@@ -194,18 +210,6 @@ ringWidths <- ringWidths %>% mutate (RWI2019 = Y2019 / Y2017,
                                      RWI2018_15 = Y2018 / Y2015,
                                      RWI2017_15 = Y2017 / Y2015,
                                      RWI2016_15 = Y2016 / Y2015)
-
-# Remove images (or leave them as NA, if comented out):
-#       04 III for 2018-11-15 because only the 2018 ring is completee in the sample
-#       09 I   for 2019-10-24 because only the 2019 ring is complete in the sample
-#       15 I   for 2018-08-16 because only the 2019 ring is complete in the sample
-#       15 I   for 2019-10-24 because only the 2018 and 2019 rings are complete in the sample
-#----------------------------------------------------------------------------------------
-#ringWidths <- ringWidths %>% 
-#  filter (!(treeId == 4  & sampleHeight == 2.5 & sampleDate == as_date ('2018-11-15'))) %>% 
-#  filter (!(treeId == 9  & sampleHeight == 0.5 & sampleDate == as_date ('2019-10-24'))) %>% 
-#  filter (!(treeId == 15 & sampleHeight == 0.5 & sampleDate == as_date ('2018-08-16'))) %>% 
-#  filter (!(treeId == 15 & sampleHeight == 0.5 & sampleDate == as_date ('2019-10-24')))
 
 # Summarise growth
 #----------------------------------------------------------------------------------------

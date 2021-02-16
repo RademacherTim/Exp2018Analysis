@@ -13,8 +13,7 @@ library ('scam')
 layout (matrix (1:20, nrow = 4, byrow = TRUE), widths = c (1.2, 1, 1, 1, 1, 1), 
         heights = c (1, 1, 1, 1.3))
 # Loop over heights
-for (h in c (4.0, 2.5, 1.5, 0.5)) 
-{
+for (h in c (4.0, 2.5, 1.5, 0.5)) {
   # Loop over trees
   for (i in 1:5) 
   {
@@ -194,3 +193,4 @@ for (h in c (4.0, 2.5, 1.5, 0.5))
     abline (v = ifelse (t != 1, c (sDoy, eDoy), sDoy), col = '#99999999', lty = 2) 
   }
 }
+  
