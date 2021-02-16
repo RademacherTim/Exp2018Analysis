@@ -38,8 +38,7 @@ ringWidths <- tibble (treeId = numeric (), treatment = numeric (), sampleDate = 
 k <- 0
 # Loop over json files and read them
 #----------------------------------------------------------------------------------------
-for (j in 1: length (jsonFiles)) 
-{
+for (j in 1: length (jsonFiles)) {
   
   # Read in TRIAD outputs
   #--------------------------------------------------------------------------------------

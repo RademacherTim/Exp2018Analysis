@@ -153,16 +153,31 @@ anatomicalData <- add_column (anatomicalData, nCells = 20.0 /
 
 # Provide column with cumulative cell-wall area
 #----------------------------------------------------------------------------------------
-#anatomicalData <- anatomicalData %>% 
-#  group_by (TREE, sampleHeight, YEAR, sampleDate) %>% 
-#  mutate (cumCWA    = cumsum (CWA),
-#          cumNCells = cumsum (nCells)) 
-
-# Add cumulative number of cells column
-#----------------------------------------------------------------------------------------
-#anatomicalData <- anatomicalData %>% 
-#  group_by (TREE, sampleHeight, YEAR, sampleDate) %>% 
-#  mutate (cumNCells = cumsum (nCells))
+anatomicalData <- anatomicalData %>% add_column (cumNCells = NA, cumCWA = NA)
+for (r in 1:dim (anatomicalData) [1]) {
+  if (r == 1) { 
+    anatomicalData [['cumNCells']] [r] <- anatomicalData [['nCells']] [r] 
+    anatomicalData [['cumCWA']]    [r] <- anatomicalData [['CWA']]    [r] 
+  } else {
+    
+    # Is this a different profile from the previous row?
+    differentProfile <- 
+      anatomicalData [['YEAR']]         [r] != anatomicalData [['YEAR']]         [r-1] |
+      anatomicalData [['TREE']]         [r] != anatomicalData [['TREE']]         [r-1] |
+      anatomicalData [['sampleHeight']] [r] != anatomicalData [['sampleHeight']] [r-1] |
+      anatomicalData [['sampleDate']]   [r] != anatomicalData [['sampleDate']]   [r-1]
+    if (differentProfile) {
+      anatomicalData [['cumNCells']] [r] <- anatomicalData [['nCells']] [r] 
+      anatomicalData [['cumCWA']]    [r] <- anatomicalData [['nCells']] [r] * 
+        anatomicalData [['CWA']] [r]
+    } else {
+      anatomicalData [['cumNCells']] [r] <- anatomicalData [['nCells']] [r] + 
+        anatomicalData [['cumNCells']] [r-1] 
+      anatomicalData [['cumCWA']] [r] <- anatomicalData [['nCells']] [r] * 
+        anatomicalData [['CWA']] [r] + anatomicalData [['cumCWA']] [r-1]
+    }
+  }
+}
 
 # Switch back to original working directory
 #----------------------------------------------------------------------------------------

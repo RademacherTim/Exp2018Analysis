@@ -10,23 +10,49 @@ source ('processAnatomicalData.R')
 #----------------------------------------------------------------------------------------
 par (mfrow = c (1, 1), mar = c (5, 5, 1, 1)) 
 plot (x = ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
-        select (Y2018) %>% filter (!is.na (Y2018)) %>% unlist () / 1.51170603675,
-      y = anatomicalData %>% group_by (TREE, sampleHeight, YEAR) %>% 
-        filter (YEAR == 2018) %>% summarise (maxRW = max (MRW)) %>% ungroup %>% 
-        select (maxRW) %>% unlist (),
-      xlab = 'ROXAS', ylab = 'WIAD', col = '#8dd3c799', pch = 19)
-points (x =  ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
-          select (Y2019) %>% filter (!is.na (Y2019)) %>% unlist () / 1.51170603675,
-        y = anatomicalData %>% group_by (TREE, sampleHeight, YEAR) %>% 
-          filter (YEAR == 2019) %>% summarise (maxRW = max (MRW)) %>% ungroup %>% 
-          select (maxRW) %>% unlist (), col = '#bebada99', pch = 19)
-points (x =  ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
-          select (Y2017) %>% filter (!is.na (Y2017)) %>% unlist () / 1.51170603675,
-        y = anatomicalData %>% group_by (TREE, sampleHeight, YEAR) %>% 
-          filter (YEAR == 2017) %>% summarise (maxRW = max (MRW)) %>% ungroup %>% 
+        select (Y2018) %>% filter (!is.na (Y2018)) %>% unlist (),
+      y = anatomicalData %>% group_by (TREE, sampleHeight, YEAR, sampleDate) %>% 
+        filter (YEAR == 2018 & sampleDate == as_date ('2019-10-24')) %>% 
+        summarise (maxRW = max (MRW)) %>% ungroup %>% select (maxRW) %>% unlist (),
+      xlab = expression (paste ('WIAD ring width (',mu,m,')',sep = '')), 
+      ylab = expression (paste ('ROXAS ring width (',mu,m,')',sep = '')), 
+      col = '#8dd3c799', pch = 19, las = 1)
+points (x = ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
+          select (Y2019) %>% filter (!is.na (Y2019)) %>% unlist (),
+        y = anatomicalData %>% group_by (TREE, sampleHeight, YEAR, sampleDate) %>% 
+          filter (YEAR == 2019 & sampleDate == as_date ('2019-10-24')) %>% 
+          summarise (maxRW = max (MRW)) %>% ungroup %>% select (maxRW) %>% unlist (), 
+        col = '#bebada99', pch = 19)
+points (x = ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
+          select (Y2017) %>% filter (!is.na (Y2017)) %>% unlist (),
+        y = anatomicalData %>% group_by (TREE, sampleHeight, YEAR, sampleDate) %>% 
+          filter (YEAR == 2017 & sampleDate == as_date ('2019-10-24')) %>% 
+          summarise (maxRW = max (MRW)) %>% ungroup %>% 
           select (maxRW) %>% unlist (), col = '#ffffb399', pch = 19)
+points (x = ringWidths %>% filter (sampleDate == as_date ('2018-11-15') & 
+                                   treeId %in% c (1:5, 11:15)) %>% 
+          select (Y2017) %>% filter (!is.na (Y2017)) %>% unlist (),
+        y = anatomicalData %>% group_by (TREE, sampleHeight, YEAR, sampleDate) %>% 
+          filter (YEAR == 2017 & sampleDate == as_date ('2018-11-15') & 
+                  sampleHeight %in% c (0.5, 1.5, 2.5, 4) & TREE != 6) %>% 
+          summarise (maxRW = max (MRW)) %>% ungroup %>%  
+#          add_row (.before = 15, TREE = 4, sampleHeight = 2.5, YEAR = 2017, 
+#                   sampleDate = as_date ('2018-11-15'), maxRW = NA) %>% # Got value manually from ROXAS outputs for 4 III, which only has the 2018 ring
+          select (maxRW) %>% unlist (), col = '#fb807299', pch = 19)
+points (x = ringWidths %>% filter (sampleDate == as_date ('2018-11-15') & 
+                                     treeId %in% c (1:5, 11:15)) %>% 
+          select (Y2018) %>% filter (!is.na (Y2018)) %>% unlist (),
+        y = anatomicalData %>% group_by (TREE, sampleHeight, YEAR, sampleDate) %>% 
+          filter (YEAR == 2018 & sampleDate == as_date ('2018-11-15') & 
+                    sampleHeight %in% c (0.5, 1.5, 2.5, 4) & TREE != 6) %>% 
+          summarise (maxRW = max (MRW)) %>% ungroup %>%  
+          select (maxRW) %>% unlist (), col = '#80b1d399', pch = 19)
 abline (a = 0, b = 1, col = '#99999999')
-legend (x = 0, y = 2500, box.lty = 0, pch = 19, col = c ('#ffffb399','#8dd3c799','#bebada99'),
+legend (x = 100, y = 2600, box.lty = 0, pch = 19, title = '2018-11-15',
+        col = c ('#fb807299','#80b1d399'),
+        legend = c ('2017','2018'))
+legend (x = 100, y = 2000, box.lty = 0, pch = 19, title = '2019-10-24',
+        col = c ('#ffffb399','#8dd3c799','#bebada99'),
         legend = c ('2017','2018', '2019'))
 
 # Plot cell-wall thickness by period of formation
