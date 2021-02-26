@@ -155,8 +155,8 @@ for (j in 1: length (jsonFiles)) {
   #}
 }  # end json file loop
 
-# Add lines for no growth in the beginning of May for all slides that I only visually 
-# inspected and did not measure
+# Add lines for no growth in the beginning of January and May for all slides. All slides 
+# were only visually inspected but showed not growth in the first samples from 2018-05-01
 #----------------------------------------------------------------------------------------
 for (i in 1:15) {
   for (h in c (0.5, 1.5, 2.5, 4.0)) {
@@ -177,6 +177,13 @@ for (i in 1:15) {
     } else {
       ringWidths [['Y2018']] [con & ringWidths [['sampleDate']] == as_date ('2018-05-01')] <- 0 # For the measured image I indicated that the growing season did not start yet, WIAD does not create a ring, but it should be 0 
     }
+    
+    # add measurement for 2018-01-01
+    ringWidths <- ringWidths %>% add_row (treeId = i, treatment = t, 
+                                          sampleDate = as_date ('2018-01-01'), 
+                                          sampleHeight = h, Y2019 = NA, Y2018 = 0, 
+                                          Y2017 = 1, Y2016 = 1, Y2015 = 1, Y2014 = 1, 
+                                          Y2013 = 1, Y2012 = 1, Y2011 = 1)
   }
 }
 
@@ -214,7 +221,7 @@ ringWidths <- ringWidths %>% mutate (RWI2019 = Y2019 / Y2017,
 # Summarise growth
 #----------------------------------------------------------------------------------------
 summaryData <- ringWidths %>% group_by (treatment, sampleDate, sampleHeight) %>% 
-  summarise (meanY19 = mean (Y2019, na.rm = TRUE),
+  dplyr::summarise (meanY19 = mean (Y2019, na.rm = TRUE),
              seY19   = se   (Y2019),
              meanY18 = mean (Y2018, na.rm = TRUE),
              seY18   = se   (Y2018),
@@ -271,7 +278,7 @@ if (PLOT) {
           y = ringWidths [['RWI2018']] [con],
           xlab = '', ylab = '', las = 1, typ = 'p', pch = 25,
           col = tColours [['colour']] [tColours [['treatment']] == ifelse (t == 1, 'control',ifelse (t == 4, 'double compressed', 'chilled'))],
-          xlim = as_date (c ('2018-02-01','2019-02-01')), ylim = c (0, 2.7), axes = FALSE)
+          xlim = as_date (c ('2018-01-01','2019-02-01')), ylim = c (0, 2.7), axes = FALSE)
     axis (side = 1, at = as_date (c ('2018-02-01','2018-03-01','2018-04-01','2018-05-01','2018-06-01','2018-07-01','2018-08-01','2018-09-01','2018-10-01','2018-11-01','2018-12-01')), 
           labels = c ('F','M','A','M','J','J','A','S','O','N','D'))
     axis (side = 2, las = 1)

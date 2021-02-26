@@ -9,7 +9,20 @@ library ('easynls')
 source ('readRingWidths.R')
 library ('scam')
 
+# create tibble for start and end of growing season dates
+#----------------------------------------------------------------------------------------
+growingSeasonDates <- tibble (treeId = rep (1:15, each = 4), 
+                              treatment = rep (c (1, 4, 5), each = 20),
+                              sampleHeight = rep (c (0.5, 1.5, 2.5, 4.0), 15),
+                              startOfGrowth = NA,
+                              endOfGrowth = NA)
+# set growing season threshold
+#----------------------------------------------------------------------------------------
+threshold <- 0.05
+
 # plot growth over time for chilled trees
+#----------------------------------------------------------------------------------------
+png (file = './fig/woodGrowthOverTimeChilledTrees.png', width = 1255, height = 622)
 layout (matrix (1:20, nrow = 4, byrow = TRUE), widths = c (1.2, 1, 1, 1, 1, 1), 
         heights = c (1, 1, 1, 1.3))
 # Loop over heights
@@ -67,15 +80,80 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     sDoy <- lubridate::yday (criticalDates (group = t, startOnly = TRUE))
     eDoy <- lubridate::yday (criticalDates (group = t, endOnly = TRUE))
     abline (v = c (sDoy, eDoy), col = '#99999999') 
+    
+    # get the maximal value of the GAM for the year (to correct the predicted values to 
+    # growth fractions) 
+    #------------------------------------------------------------------------------------
+    maxRWI <- max (exp (predict (fit.gam, newdata = data.frame (doy = c (1:365)))))
+    
+    # determine date when 5% of growth had occured 
+    # within a 0.1% error on the fraction growth
+    #------------------------------------------------------------------------------------
+    error <- 10000 # set error to a large number to start with
+    iDoy <- 150 # start halfway through the year
+    while (error < -0.001 | error > 0.001) {
+      growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWI
+      if (growthFraction > threshold) {
+        if (iDoy != 150) {
+          if (direction == 'later') break
+        }
+        iDoy <- iDoy - 1
+        direction <- 'earlier'
+      } else {
+        if (iDoy != 150) {
+          if (direction == 'earlier') break
+        }
+        iDoy <- iDoy + 1
+        direction <- 'later'
+      }
+      error <- growthFraction - threshold
+    }
+   
+    # Save start of growth
+    growingSeasonDates [['startOfGrowth']] [growingSeasonDates [['treeId']] == i & growingSeasonDates [['sampleHeight']] == h] <- iDoy
+    
+    # plot 5% of volume growth had occured
+    points (x = iDoy, y = 2.25, pch = 5)
+    
+    # determine date when 95% of growth had occured 
+    # within a 0.1% error on the fraction growth
+    #------------------------------------------------------------------------------------
+    error <- 10000 # set error to a large number to start with
+    iDoy <- 180 # start halfway through the year
+    while (error < -0.001 | error > 0.001) {
+      growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWI
+      if (growthFraction > (1.0 - threshold)) {
+        if (iDoy != 180) {
+          if (direction == 'later') break
+        }
+        iDoy <- iDoy - 1
+        direction <- 'earlier'
+      } else {
+        if (iDoy != 180) {
+          if (direction == 'earlier') break
+        }
+        iDoy <- iDoy + 1
+        direction <- 'later'
+      }
+      error <- growthFraction - (1.0 - threshold)
+    }
+    
+    # Save start of growth
+    growingSeasonDates [['endOfGrowth']] [growingSeasonDates [['treeId']] == i & growingSeasonDates [['sampleHeight']] == h] <- iDoy
+    
+    # plot 5% of volume growth had occured
+    points (x = iDoy, y = 2.25, pch = 5)
   }
 }
+dev.off ()
 
 # plot growth over time for compressed trees
+#----------------------------------------------------------------------------------------
+png (file = './fig/woodGrowthOverTimeCompressedTrees.png', width = 1255, height = 622)
 layout (matrix (1:20, nrow = 4, byrow = TRUE), widths = c (1.2, 1, 1, 1, 1, 1), 
         heights = c (1, 1, 1, 1.3))
 # Loop over heights
-for (h in c (4.0, 2.5, 1.5, 0.5)) 
-{
+for (h in c (4.0, 2.5, 1.5, 0.5)) {
   # Loop over trees
   for (i in 6:10) 
   {
@@ -103,8 +181,8 @@ for (h in c (4.0, 2.5, 1.5, 0.5))
     # Assume that the ring measured in 2019 is the end of the year growth
     if (sum (tempData [['sampleDate']] == as_date ('2019-10-24'), na.rm = TRUE) > 0) 
     {
-      tempData [['sampleDate']] [tempData [['sampleDate']] == as_date ('2019-10-24')] <- as_date ('2018-12-31')
-      tempData [['doy']] [tempData [['sampleDate']] == as_date ('2018-12-31')] <- yday ('2018-12-31')
+      tempData [['sampleDate']] [tempData [['sampleDate']] == as_date ('2019-10-24')] <- as_date ('2018-11-30')
+      tempData [['doy']] [tempData [['sampleDate']] == as_date ('2018-11-30')] <- yday ('2018-11-30')
     }
     
     # Fit general additive model to growth data
@@ -129,15 +207,80 @@ for (h in c (4.0, 2.5, 1.5, 0.5))
     sDoy <- lubridate::yday (criticalDates (group = t, startOnly = TRUE))
     eDoy <- lubridate::yday (criticalDates (group = t, endOnly = TRUE))
     abline (v = c (sDoy, eDoy), col = '#99999999') 
+    
+    # get the maximal value of the GAM for the year (to correct the predicted values to 
+    # growth fractions) 
+    #------------------------------------------------------------------------------------
+    maxRWI <- max (exp (predict (fit.gam, newdata = data.frame (doy = c (1:365)))))
+    
+    # determine date when 5% of growth had occured 
+    # within a 0.1% error on the fraction growth
+    #------------------------------------------------------------------------------------
+    error <- 10000 # set error to a large number to start with
+    iDoy <- 150 # start halfway through the year
+    while (error < -0.001 | error > 0.001) {
+      growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWI
+      if (growthFraction > threshold) {
+        if (iDoy != 150) {
+          if (direction == 'later') break
+        }
+        iDoy <- iDoy - 1
+        direction <- 'earlier'
+      } else {
+        if (iDoy != 150) {
+          if (direction == 'earlier') break
+        }
+        iDoy <- iDoy + 1
+        direction <- 'later'
+      }
+      error <- growthFraction - threshold
+    }
+    
+    # Save start of growth
+    growingSeasonDates [['startOfGrowth']] [growingSeasonDates [['treeId']] == i & growingSeasonDates [['sampleHeight']] == h] <- iDoy
+    
+    # plot 5% of volume growth had occured
+    points (x = iDoy, y = 2.25, pch = 5)
+    
+    # determine date when 95% of growth had occured 
+    # within a 0.1% error on the fraction growth
+    #------------------------------------------------------------------------------------
+    error <- 10000 # set error to a large number to start with
+    iDoy <- 180 # start halfway through the year
+    while (error < -0.001 | error > 0.001) {
+      growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWI
+      if (growthFraction > (1.0 - threshold)) {
+        if (iDoy != 180) {
+          if (direction == 'later') break
+        }
+        iDoy <- iDoy - 1
+        direction <- 'earlier'
+      } else {
+        if (iDoy != 180) {
+          if (direction == 'earlier') break
+        }
+        iDoy <- iDoy + 1
+        direction <- 'later'
+      }
+      error <- growthFraction - (1.0 - threshold)
+    }
+    
+    # Save start of growth
+    growingSeasonDates [['endOfGrowth']] [growingSeasonDates [['treeId']] == i & growingSeasonDates [['sampleHeight']] == h] <- iDoy
+    
+    # plot 5% of volume growth had occured
+    points (x = iDoy, y = 2.25, pch = 5)
   }
 }
+dev.off ()
 
-# plot growth over time for compressed trees
+# plot growth over time for control trees
+#----------------------------------------------------------------------------------------
+png (file = './fig/woodGrowthOverTimeControlTrees.png', width = 1255, height = 622)
 layout (matrix (1:20, nrow = 4, byrow = TRUE), widths = c (1.2, 1, 1, 1, 1, 1), 
         heights = c (1, 1, 1, 1.3))
 # Loop over heights
-for (h in c (4.0, 2.5, 1.5, 0.5)) 
-{
+for (h in c (4.0, 2.5, 1.5, 0.5)) {
   # Loop over trees
   for (i in 11:15) 
   {
@@ -165,8 +308,8 @@ for (h in c (4.0, 2.5, 1.5, 0.5))
     # Assume that the ring measured in 2019 is the end of the year growth
     if (sum (tempData [['sampleDate']] == as_date ('2019-10-24'), na.rm = TRUE) > 0) 
     {
-      tempData [['sampleDate']] [tempData [['sampleDate']] == as_date ('2019-10-24')] <- as_date ('2018-12-31')
-      tempData [['doy']] [tempData [['sampleDate']] == as_date ('2018-12-31')] <- yday ('2018-12-31')
+      tempData [['sampleDate']] [tempData [['sampleDate']] == as_date ('2019-10-24')] <- as_date ('2018-11-30')
+      tempData [['doy']] [tempData [['sampleDate']] == as_date ('2018-11-30')] <- yday ('2018-11-30')
     }
     
     # Fit general additive model to growth data
@@ -189,8 +332,72 @@ for (h in c (4.0, 2.5, 1.5, 0.5))
     
     # plot treatment period
     sDoy <- lubridate::yday (criticalDates (group = t, startOnly = TRUE))
-    if (t != 1) eDoy <- lubridate::yday (criticalDates (group = t, endOnly = TRUE))
-    abline (v = ifelse (t != 1, c (sDoy, eDoy), sDoy), col = '#99999999', lty = 2) 
+    abline (v = sDoy, col = '#99999999') 
+    
+    # get the maximal value of the GAM for the year (to correct the predicted values to 
+    # growth fractions) 
+    #------------------------------------------------------------------------------------
+    maxRWI <- max (exp (predict (fit.gam, newdata = data.frame (doy = c (1:365)))))
+    
+    # determine date when 5% of growth had occured 
+    # within a 0.1% error on the fraction growth
+    #------------------------------------------------------------------------------------
+    error <- 10000 # set error to a large number to start with
+    iDoy <- 150 # start halfway through the year
+    while (error < -0.001 | error > 0.001) {
+      growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWI
+      if (growthFraction > threshold) {
+        if (iDoy != 150) {
+          if (direction == 'later') break
+        }
+        iDoy <- iDoy - 1
+        direction <- 'earlier'
+      } else {
+        if (iDoy != 150) {
+          if (direction == 'earlier') break
+        }
+        iDoy <- iDoy + 1
+        direction <- 'later'
+      }
+      error <- growthFraction - threshold
+    }
+    
+    # Save start of growth
+    growingSeasonDates [['startOfGrowth']] [growingSeasonDates [['treeId']] == i & growingSeasonDates [['sampleHeight']] == h] <- iDoy
+    
+    # plot 5% of volume growth had occured
+    points (x = iDoy, y = 2.25, pch = 5)
+    
+    # determine date when 95% of growth had occured 
+    # within a 0.1% error on the fraction growth
+    #------------------------------------------------------------------------------------
+    error <- 10000 # set error to a large number to start with
+    iDoy <- 180 # start halfway through the year
+    while (error < -0.001 | error > 0.001) {
+      growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWI
+      if (growthFraction > (1.0 - threshold)) {
+        if (iDoy != 180) {
+          if (direction == 'later') break
+        }
+        iDoy <- iDoy - 1
+        direction <- 'earlier'
+      } else {
+        if (iDoy != 180) {
+          if (direction == 'earlier') break
+        }
+        iDoy <- iDoy + 1
+        direction <- 'later'
+      }
+      error <- growthFraction - (1.0 - threshold)
+    }
+    
+    # Save start of growth
+    growingSeasonDates [['endOfGrowth']] [growingSeasonDates [['treeId']] == i & growingSeasonDates [['sampleHeight']] == h] <- iDoy
+    
+    # plot 5% of volume growth had occured
+    points (x = iDoy, y = 2.25, pch = 5)
   }
 }
+dev.off ()
+
   
