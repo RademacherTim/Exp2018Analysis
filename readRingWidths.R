@@ -18,7 +18,7 @@ source ('plotingFunctions.R')
 
 # Set working directory to read json files for the follow-up microcores
 #----------------------------------------------------------------------------------------
-setwd ('/media/tim/dataDisk/PlantGrowth/data/microcores/woodAnatomy/Exp2018/ringWidthTRIAD/new/')
+setwd ('/media/tim/dataDisk/PlantGrowth/data/microcores/woodAnatomy/Exp2018/ringWidthsWIAD/new/')
 
 # List all json output file from TRIAD
 #----------------------------------------------------------------------------------------

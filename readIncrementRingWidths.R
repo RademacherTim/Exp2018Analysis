@@ -1,4 +1,4 @@
-# Script to read in the TRIAD rin width measurements
+# Script to read in the WIAD ring width measurements
 #----------------------------------------------------------------------------------------
 
 # Start from clean slate
@@ -328,7 +328,7 @@ incrementRingWidths <- incrementRingWidths %>% mutate (RWI2019 = Y2019 / Y2017,
                                      RWI2017_15 = Y2017 / Y2015,
                                      RWI2016_15 = Y2016 / Y2015)
 
-# Summarise growth
+# Summarise growth # TR - NB Should not be done here!!!
 #----------------------------------------------------------------------------------------
 summaryData <- incrementRingWidths %>% group_by (treatment, sampleDate, sampleHeight) %>% 
   summarise (meanY19 = mean (Y2019, na.rm = TRUE),
@@ -360,7 +360,7 @@ summaryData <- incrementRingWidths %>% group_by (treatment, sampleDate, sampleHe
              meanRWI2016_15 = mean (RWI2016_15, na.rm = TRUE),
              seRWI2016_15   = se (RWI2016_15)) 
 
-# Plot all ring width series 
+# Plot all ring width series # TR - NB Should not be done in the read file!
 #----------------------------------------------------------------------------------------
 par (mfrow = c (1, 1))
 par (mar = c (5, 5, 1, 1))
