@@ -1,7 +1,7 @@
 # script to fit general additive model to ring width data from the 2018 experiment
 
 # start from clean slate
-rm (list = ls ())
+#rm (list = ls ())
 
 # load dependencies
 #if (!existsFunction ('')) library ('mgcv')
@@ -16,13 +16,14 @@ growingSeasonDates <- tibble (treeId = rep (1:15, each = 4),
                               sampleHeight = rep (c (0.5, 1.5, 2.5, 4.0), 15),
                               startOfGrowth = NA,
                               endOfGrowth = NA)
+
 # set growing season threshold
 #----------------------------------------------------------------------------------------
 threshold <- 0.05
 
-# plot growth over time for chilled trees
+# determine growing season dates and plot growth over time for chilled trees
 #----------------------------------------------------------------------------------------
-PLOT <- FALSE 
+PLOT <- TRUE 
 if (PLOT) {
   png (file = './fig/woodGrowthOverTimeChilledTrees.png', width = 1255, height = 622)
   layout (matrix (1:20, nrow = 4, byrow = TRUE), widths = c (1.2, 1, 1, 1, 1, 1), 
@@ -154,11 +155,13 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
 }
 if (PLOT) dev.off ()
 
-# plot growth over time for compressed trees
+# determine growing season dates and plot growth over time for compressed trees
 #----------------------------------------------------------------------------------------
-png (file = './fig/woodGrowthOverTimeCompressedTrees.png', width = 1255, height = 622)
-layout (matrix (1:20, nrow = 4, byrow = TRUE), widths = c (1.2, 1, 1, 1, 1, 1), 
-        heights = c (1, 1, 1, 1.3))
+if (PLOT) {
+  png (file = './fig/woodGrowthOverTimeCompressedTrees.png', width = 1255, height = 622)
+  layout (matrix (1:20, nrow = 4, byrow = TRUE), widths = c (1.2, 1, 1, 1, 1, 1), 
+          heights = c (1, 1, 1, 1.3))
+}
 # Loop over heights
 for (h in c (4.0, 2.5, 1.5, 0.5)) {
   # Loop over trees
@@ -166,14 +169,16 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
   {
     
     # Determine plot margins
-    if (i == 6 & h != 0.5) {
-      par (mar = c (2, 5, 1, 1))
-    } else if (i == 6 & h == 0.5) {
-      par (mar = c (5, 5, 1, 1))
-    } else if (i != 6 & h != 0.5) {
-      par (mar = c (2, 1, 1, 1))
-    } else if (i != 6 & h == 0.5) {
-      par (mar = c (5, 1, 1, 1))
+    if (PLOT) {
+      if (i == 6 & h != 0.5) {
+        par (mar = c (2, 5, 1, 1))
+      } else if (i == 6 & h == 0.5) {
+        par (mar = c (5, 5, 1, 1))
+      } else if (i != 6 & h != 0.5) {
+        par (mar = c (2, 1, 1, 1))
+      } else if (i != 6 & h == 0.5) {
+        par (mar = c (5, 1, 1, 1))
+      }
     }
     
     # Select only relevant data and add day of year column
@@ -193,27 +198,29 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     }
     
     # Fit general additive model to growth data
-    fit.gam <- scam (RWI2018 ~ s (doy, k = 8, bs = 'mpi'), 
-                     data = tempData, 
-                     family = quasipoisson)
+    fit.gam <- scam::scam (RWI2018 ~ s (doy, k = 8, bs = 'mpi'), 
+                           data   = tempData, 
+                           family = quasipoisson)
     
     # Plot the growth index measurement and the fitted growth curve
-    plot (x = tempData [['doy']],
-          y = tempData [['RWI2018']],
-          xlim = c (0, 365), las = 1, 
-          xlab = ifelse (h == 0.5, 'day of year',''), 
-          ylab = ifelse (i == 6, 'radial growth index', ''), 
-          yaxt = ifelse (i == 6, 't','n'),
-          pch = 19, col = tColours [['colour']] [t], ylim = c (0, 2.3)#,
-    )#main = paste ('Tree',i,' height',h))
-    
-    lines (x = 1:365, y = exp (predict (fit.gam, newdata = data.frame (doy = c (1:365)))),
-           col = tColours [['colour']] [t])
-    
-    # plot treatment period
-    sDoy <- lubridate::yday (criticalDates (group = t, startOnly = TRUE))
-    eDoy <- lubridate::yday (criticalDates (group = t, endOnly = TRUE))
-    abline (v = c (sDoy, eDoy), col = '#99999999') 
+    if (PLOT) { 
+      plot (x = tempData [['doy']],
+            y = tempData [['RWI2018']],
+            xlim = c (0, 365), las = 1, 
+            xlab = ifelse (h == 0.5, 'day of year',''), 
+            ylab = ifelse (i == 6, 'radial growth index', ''), 
+            yaxt = ifelse (i == 6, 't','n'),
+            pch = 19, col = tColours [['colour']] [t], ylim = c (0, 2.3)#,
+      )#main = paste ('Tree',i,' height',h))
+      
+      lines (x = 1:365, y = exp (predict (fit.gam, newdata = data.frame (doy = c (1:365)))),
+             col = tColours [['colour']] [t])
+      
+      # plot treatment period
+      sDoy <- lubridate::yday (criticalDates (group = t, startOnly = TRUE))
+      eDoy <- lubridate::yday (criticalDates (group = t, endOnly = TRUE))
+      abline (v = c (sDoy, eDoy), col = '#99999999') 
+    }
     
     # get the maximal value of the GAM for the year (to correct the predicted values to 
     # growth fractions) 
@@ -247,7 +254,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     growingSeasonDates [['startOfGrowth']] [growingSeasonDates [['treeId']] == i & growingSeasonDates [['sampleHeight']] == h] <- iDoy
     
     # plot 5% of volume growth had occured
-    points (x = iDoy, y = 2.25, pch = 5)
+    if (PLOT) points (x = iDoy, y = 2.25, pch = 5)
     
     # determine date when 95% of growth had occured 
     # within a 0.1% error on the fraction growth
@@ -276,16 +283,18 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     growingSeasonDates [['endOfGrowth']] [growingSeasonDates [['treeId']] == i & growingSeasonDates [['sampleHeight']] == h] <- iDoy
     
     # plot 5% of volume growth had occured
-    points (x = iDoy, y = 2.25, pch = 5)
+    if (PLOT) points (x = iDoy, y = 2.25, pch = 5)
   }
 }
-dev.off ()
+if (PLOT) dev.off ()
 
-# plot growth over time for control trees
+# determine growing season dates and plot growth over time for control trees
 #----------------------------------------------------------------------------------------
-png (file = './fig/woodGrowthOverTimeControlTrees.png', width = 1255, height = 622)
-layout (matrix (1:20, nrow = 4, byrow = TRUE), widths = c (1.2, 1, 1, 1, 1, 1), 
-        heights = c (1, 1, 1, 1.3))
+if (PLOT) {
+  png (file = './fig/woodGrowthOverTimeControlTrees.png', width = 1255, height = 622)
+  layout (matrix (1:20, nrow = 4, byrow = TRUE), widths = c (1.2, 1, 1, 1, 1, 1), 
+          heights = c (1, 1, 1, 1.3))
+}
 # Loop over heights
 for (h in c (4.0, 2.5, 1.5, 0.5)) {
   # Loop over trees
@@ -293,14 +302,16 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
   {
     
     # Determine plot margins
-    if (i == 11 & h != 0.5) {
-      par (mar = c (2, 5, 1, 1))
-    } else if (i == 11 & h == 0.5) {
-      par (mar = c (5, 5, 1, 1))
-    } else if (i != 11 & h != 0.5) {
-      par (mar = c (2, 1, 1, 1))
-    } else if (i != 11 & h == 0.5) {
-      par (mar = c (5, 1, 1, 1))
+    if (PLOT) {
+      if (i == 11 & h != 0.5) {
+        par (mar = c (2, 5, 1, 1))
+      } else if (i == 11 & h == 0.5) {
+        par (mar = c (5, 5, 1, 1))
+      } else if (i != 11 & h != 0.5) {
+        par (mar = c (2, 1, 1, 1))
+      } else if (i != 11 & h == 0.5) {
+        par (mar = c (5, 1, 1, 1))
+      }
     }
     
     # Select only relevant data and add day of year column
@@ -320,26 +331,28 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     }
     
     # Fit general additive model to growth data
-    fit.gam <- scam (RWI2018 ~ s (doy, k = 8, bs = 'mpi'), 
-                     data = tempData, 
-                     family = quasipoisson)
+    fit.gam <- scam::scam (RWI2018 ~ s (doy, k = 8, bs = 'mpi'), 
+                           data   = tempData, 
+                           family = quasipoisson)
     
     # Plot the growth index measurement and the fitted growth curve
-    plot (x = tempData [['doy']],
-          y = tempData [['RWI2018']],
-          xlim = c (0, 365), las = 1, 
-          xlab = ifelse (h == 0.5, 'day of year',''), 
-          ylab = ifelse (i == 11, 'radial growth index', ''), 
-          yaxt = ifelse (i == 11, 't','n'),
-          pch = 19, col = tColours [['colour']] [t], ylim = c (0, 2.3)#,
-    )#main = paste ('Tree',i,' height',h))
-    
-    lines (x = 1:365, y = exp (predict (fit.gam, newdata = data.frame (doy = c (1:365)))),
-           col = tColours [['colour']] [t])
-    
-    # plot treatment period
-    sDoy <- lubridate::yday (criticalDates (group = t, startOnly = TRUE))
-    abline (v = sDoy, col = '#99999999') 
+    if (PLOT) { 
+      plot (x = tempData [['doy']],
+            y = tempData [['RWI2018']],
+            xlim = c (0, 365), las = 1, 
+            xlab = ifelse (h == 0.5, 'day of year',''), 
+            ylab = ifelse (i == 11, 'radial growth index', ''), 
+            yaxt = ifelse (i == 11, 't','n'),
+            pch = 19, col = tColours [['colour']] [t], ylim = c (0, 2.3)#,
+      )#main = paste ('Tree',i,' height',h))
+      
+      lines (x = 1:365, y = exp (predict (fit.gam, newdata = data.frame (doy = c (1:365)))),
+             col = tColours [['colour']] [t])
+      
+      # plot treatment period
+      sDoy <- lubridate::yday (criticalDates (group = t, startOnly = TRUE))
+      abline (v = sDoy, col = '#99999999') 
+    }
     
     # get the maximal value of the GAM for the year (to correct the predicted values to 
     # growth fractions) 
@@ -350,7 +363,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     # within a 0.1% error on the fraction growth
     #------------------------------------------------------------------------------------
     error <- 10000 # set error to a large number to start with
-    iDoy <- 150 # start at day 150
+    iDoy <- 150 # start halfway through the year
     while (error < -0.001 | error > 0.001) {
       growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWI
       if (growthFraction > threshold) {
@@ -373,7 +386,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     growingSeasonDates [['startOfGrowth']] [growingSeasonDates [['treeId']] == i & growingSeasonDates [['sampleHeight']] == h] <- iDoy
     
     # plot 5% of volume growth had occured
-    points (x = iDoy, y = 2.25, pch = 5)
+    if (PLOT) points (x = iDoy, y = 2.25, pch = 5)
     
     # determine date when 95% of growth had occured 
     # within a 0.1% error on the fraction growth
@@ -402,9 +415,13 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     growingSeasonDates [['endOfGrowth']] [growingSeasonDates [['treeId']] == i & growingSeasonDates [['sampleHeight']] == h] <- iDoy
     
     # plot 5% of volume growth had occured
-    points (x = iDoy, y = 2.25, pch = 5)
+    if (PLOT) points (x = iDoy, y = 2.25, pch = 5)
   }
 }
-dev.off ()
-
+if (PLOT) dev.off ()
   
+# clean up
+#----------------------------------------------------------------------------------------
+rm (PLOT, fit.gam, ringWidths, tempData, direction, eDoy, error, growthFraction, h, i, 
+    iDoy, maxRWI, sDoy, t, threshold)
+#========================================================================================
