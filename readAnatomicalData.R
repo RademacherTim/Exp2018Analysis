@@ -14,8 +14,8 @@
 
 # Load dependencies
 #----------------------------------------------------------------------------------------
-library ('tidyverse')
-library ('lubridate')
+if (!existsFunction ('')) library ('tidyverse')
+if (!existsFunction ('as_date')) library ('lubridate')
 
 # Get original working directory
 #----------------------------------------------------------------------------------------

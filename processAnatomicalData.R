@@ -12,7 +12,7 @@
 
 # Load dependencies
 #----------------------------------------------------------------------------------------
-library ('scam')
+if (!existsFunction ('scam')) library ('scam')
 
 # Get original working directory
 #----------------------------------------------------------------------------------------
@@ -27,6 +27,10 @@ source ('readRingWidths.R')
 # Add new column to data (all rings started growing after the sample on the 5th of May 2018)
 #----------------------------------------------------------------------------------------
 anatomicalData <- add_column (anatomicalData, period = NA)
+
+# set growing season threshold
+#----------------------------------------------------------------------------------------
+threshold <- 0.05
 
 # Loop over for each row in the anatomical data to associate it with a growth period
 #----------------------------------------------------------------------------------------
@@ -99,6 +103,7 @@ for (r in 1:dim (anatomicalData) [1]) {
     
     # Associate the estimated date of growth with the tangential band
     anatomicalData [['period']] [r] <- as_date (iDoy, origin = '2018-01-01')
+    
   }
   
   print (paste ('Tree',treeID,' height',h,' line',i, 

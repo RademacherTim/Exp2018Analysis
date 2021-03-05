@@ -6,14 +6,29 @@
 # load dependencies
 #----------------------------------------------------------------------------------------
 library ('lme4')
+library ('caret')
 library ('tidyverse')
 library ('lubridate')
 source ('plotingFunctions.R')
 
-# Are there clear differences in growth before treatment onset based on ring widths of the 
-# previous eight years (i.e., 2010 to 2017)
+# load ring width data from thin-sections measured with WIAD
 #----------------------------------------------------------------------------------------
+source ('readRingWidths.R')
+ 
+# load ring width from increment cores
+#----------------------------------------------------------------------------------------
+source ('readIncrementRingWidths.R')
+
+# load anatomical data from thin-sections
+#----------------------------------------------------------------------------------------
+source ('processAnatomicalData.R')
+
+# Compare differences in ring widths from all samples attributing its variability to tree, 
+# sampling height and year of formation
+#----------------------------------------------------------------------------------------
+# TR - NB: This currently includes the compressed trees
 tempData <- ringWidths %>% filter (sampleDate != as_date ('2018-05-01')) %>% 
+  filter (treatment %in% c (1, 4, 5)) %>%
   select (c (1:4, 7:14)) %>% 
   pivot_longer (cols = 5:12, names_prefix = 'Y', names_to = 'year', values_to = 'RW') %>%
   mutate (treeId       = factor (treeId),
@@ -21,12 +36,27 @@ tempData <- ringWidths %>% filter (sampleDate != as_date ('2018-05-01')) %>%
           sampleDate   = factor (sampleDate),
           sampleHeight = factor (sampleHeight),
           year         = factor (year))
-M1 <- lmer (formula = RW ~ (treeId | sampleHeight) + year + treatment, 
+
+# Backward stepwise regression to compare multiple linear regression models 
+full.model <- lm (RW ~ year + treeId + sampleHeight + sampleDate, data = tempData)
+BIC (full.model)
+best.model <- lm (RW ~ year + treeId, data = tempData)
+BIC (best.model)
+mini.model <- lm (RW ~ year, data = tempData)
+BIC (mini.model)
+mini.model <- lm (RW ~ treeId, data = tempData)
+BIC (mini.model)
+
+# Are there clear differences in growth before treatment onset based on ring widths of the 
+# previous eight years (i.e., 2010 to 2017)
+#----------------------------------------------------------------------------------------
+M2 <- lmer (formula = RW ~ (treeId | sampleHeight) + year + treatment, 
             data = tempData,
             REML = TRUE)
 # The chilled trees grew a little bit (0.3 mm) less than the control while the compressed 
 # trees grew 0.1mm more than the control trees on average over the previous eight years.
 
+tempData
 
 # TR Still need to adapt all of the below
 

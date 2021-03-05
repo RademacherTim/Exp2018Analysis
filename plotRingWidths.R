@@ -102,36 +102,36 @@ legend (x = 100, y = 2000, box.lty = 0, pch = 19, title = '2019-10-24',
 par (mfrow = c (1, 1), mar = c (5, 5, 1, 1)) 
 
 # plot 2018 rings
-plot (x = ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
+plot (x = ringWidths %>% filter (sampleDate == as_date ('2018-11-15')) %>% 
         select (Y2018) %>% unlist (),
-      y = ringWidths %>% filter (sampleDate == as_date ('2018-11-15')) %>% 
+      y = ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
         select (Y2018) %>% unlist (), pch = 19, col = '#8dd3c799',
-      xlab = expression (paste ('2019-10-24 sample ring widths (',mu,m,')',sep = '')), 
-      ylab = expression (paste ('2018-11-15 sample ring widths (',mu,m,')',sep = '')),
+      xlab = expression (paste ('2018-11-15 sample ring widths (',mu,m,')',sep = '')), 
+      ylab = expression (paste ('2019-10-24 sample ring widths (',mu,m,')',sep = '')),
       las = 1, xlim = c (0, 2500), ylim = c (0, 2500))
 
 # add 2017 rings
-points (x = ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
+points (x = ringWidths %>% filter (sampleDate == as_date ('2018-11-15')) %>% 
           select (Y2017) %>% unlist (),
-        y = ringWidths %>% filter (sampleDate == as_date ('2018-11-15')) %>% 
+        y = ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
           select (Y2017) %>% unlist (), pch = 19, col = '#bebada99')
 
 # add 2016 rings
-points (x = ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
+points (x = ringWidths %>% filter (sampleDate == as_date ('2018-11-15')) %>% 
           select (Y2016) %>% unlist (),
-        y = ringWidths %>% filter (sampleDate == as_date ('2018-11-15')) %>% 
+        y = ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
           select (Y2016) %>% unlist (), pch = 19, col = '#fb807299')
 
 # add 2015 rings
-points (x = ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
+points (x = ringWidths %>% filter (sampleDate == as_date ('2018-11-15')) %>% 
           select (Y2015) %>% unlist (),
-        y = ringWidths %>% filter (sampleDate == as_date ('2018-11-15')) %>% 
+        y = ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
           select (Y2015) %>% unlist (), pch = 19, col = '#80b1d399')
 
 # add 2014 rings
-points (x = ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
+points (x = ringWidths %>% filter (sampleDate == as_date ('2018-11-15')) %>% 
           select (Y2014) %>% unlist (),
-        y = ringWidths %>% filter (sampleDate == as_date ('2018-11-15')) %>% 
+        y = ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
           select (Y2014) %>% unlist (), pch = 19, col = '#ffffb399')
 
 # add 1:1 line on which they should fall
@@ -142,8 +142,34 @@ legend (x = 100, y = 2500, box.lty = 0, pch = 19, title = 'Year',
         col = c ('#8dd3c799','#bebada99','#fb807299','#80b1d399','#ffffb399'),
         legend = 2018:2014)
 
-# Plot ring width for various sampling height from 2018-11-15 samples (WIAD measurements)
+
+mod0 <- lm (ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
+      select (Y2014, Y2015, Y2016, Y2017, Y2018) %>% unlist () ~ 
+      0 + ringWidths %>% filter (sampleDate == as_date ('2018-11-15')) %>% 
+      select (Y2014, Y2015, Y2016, Y2017, Y2018) %>% unlist ())
+
+summary (mod0)
+
+# Plot ring width from 2019-10-24 versus 2018-11-15 samples (WIAD measurements)
 #----------------------------------------------------------------------------------------
 par (mfrow = c (1, 1), mar = c (5, 5, 1, 1)) 
 
 # plot line for each indiviual tree and sampling height
+plot (x = ringWidths %>% filter (sampleDate == as_date ('2018-11-15')) %>% 
+        select (RWI2018) %>% unlist (),
+      y = ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
+        select (RWI2018) %>% unlist (), pch = 19, col = '#8dd3c799',
+      xlab = expression (paste ('2019-10-24 sample ring widths (',mu,m,')',sep = '')), 
+      ylab = expression (paste ('2018-11-15 sample ring widths (',mu,m,')',sep = '')),
+      las = 1, xlim = c (0, 2.5), ylim = c (0, 2.5))
+
+# add 1:1 line on which they should fall
+abline (a = 0, b = 1, col = '#99999999')
+
+# add legend of the colours used
+legend (x = 100, y = 2500, box.lty = 0, pch = 19, col = '#8dd3c799',
+        legend = 'radial growth index 2018')
+
+mod1 <- lm (ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% select (RWI2018) %>% unlist () ~
+            0 + ringWidths %>% filter (sampleDate == as_date ('2018-11-15')) %>% select (RWI2018) %>% unlist ())
+summary (mod1)

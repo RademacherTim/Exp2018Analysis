@@ -1,3 +1,4 @@
+#========================================================================================
 # Script to read in the TRIAD rin width measurements
 #----------------------------------------------------------------------------------------
 
@@ -7,14 +8,14 @@
 
 # Load dependencies
 #----------------------------------------------------------------------------------------
-library ('tidyverse')
-library ('lubridate')
-library ('rjson')
-source ('plotingFunctions.R')
+if (!exists ('tibble'))   library ('tidyverse')
+if (!exists ('as_date'))  library ('lubridate')
+if (!exists ('fromJSON')) library ('rjson')
+if (!exists ('tColours')) source ('plotingFunctions.R')
 
-# create %notin% funtion
+# get orginal working directory
 #----------------------------------------------------------------------------------------
-`%notin%` <- Negate (`%in%`)
+originalDir <- getwd ()
 
 # Set working directory to read json files for the follow-up microcores
 #----------------------------------------------------------------------------------------
@@ -148,11 +149,11 @@ for (j in 1: length (jsonFiles)) {
                                         Y2011 = growth [years == 2011],
                                         Y2010 = growth [years == 2010])
 
-  #if (treeID == 5 & sampleHeight == 2.5) {
-  #  print (paste (jsonFiles [j], treeID, sampleHeight, sampleDate, 
-  #                growth [years == 2017], growth [years == 2018], 
-  #                growth [years == 2018] / growth [years == 2017]))
-  #}
+  if (treeID == 13 & sampleHeight == 1.5) {
+    print (paste (jsonFiles [j], treeID, sampleHeight, sampleDate, 
+                  growth [years == 2017], growth [years == 2018], 
+                  growth [years == 2018] / growth [years == 2017]))
+  }
 }  # end json file loop
 
 # Add lines for no growth in the beginning of January and May for all slides. All slides 
@@ -190,10 +191,6 @@ for (i in 1:15) {
 # Arrange in advancing order by date, tree, sampling height
 #----------------------------------------------------------------------------------------
 ringWidths <- ringWidths %>% arrange (sampleDate, treeId, sampleHeight)
-
-# Reset working directory
-#----------------------------------------------------------------------------------------
-setwd ('~/projects/PlantGrowth/Exp2018Analysis/')
 
 # Remove images (or leave them as NA, if comented out):
 #        05 II 2018-07-05
@@ -323,8 +320,12 @@ if (PLOT) {
           legend = c ('4.0m','2.5m','1.5m','0.5m'))
 }
 
+# reset original working directory
+#----------------------------------------------------------------------------------------
+setwd (originalDir)
+
 # Clean unnecessary variables from loop
 #----------------------------------------------------------------------------------------
-rm (temp, treeID, t, i, j, k, jsonFiles, sampleDate, sampleHeight, growth, types, years, 
-    con, len, summaryData, growingSeason, sampleH2, yPositions, h)
-
+rm (PLOT, temp, treeID, t, i, j, k, jsonFiles, sampleDate, sampleHeight, growth, types, 
+    years, con, len, summaryData, growingSeason, sampleH2, yPositions, h, originalDir)
+#========================================================================================

@@ -7,10 +7,10 @@
 
 # Load dependencies
 #----------------------------------------------------------------------------------------
-library ('tidyverse')
-library ('lubridate')
-library ('rjson')
-source ('plotingFunctions.R')
+if (!existsFunction ('%>%'))      library ('tidyverse')
+if (!existsFunction ('as_date'))  library ('lubridate')
+if (!existsFunction ('fromJSON')) library ('rjson')
+if (!exists ('tColours')) source ('plotingFunctions.R')
 
 # create %notin% funtion
 #----------------------------------------------------------------------------------------
@@ -362,22 +362,25 @@ summaryData <- incrementRingWidths %>% group_by (treatment, sampleDate, sampleHe
 
 # Plot all ring width series # TR - NB Should not be done in the read file!
 #----------------------------------------------------------------------------------------
-par (mfrow = c (1, 1))
-par (mar = c (5, 5, 1, 1))
-plot (x = 1900:2020,
-      y = incrementRingWidths [1, 125:5] / 1000,
-      typ = 'l', xlab = 'year', ylab = expression (paste ('ring width (',mm,')', sep = '')),
-      ylim = c (0, 12), las = 1, col = 'white')
-# Add average ring width
-lines (x = 1900:2020,
-       y = colMeans (incrementRingWidths [, 125:5], na.rm = TRUE) / 1000, 
-       lwd = 3, col = 'darkred')
-for (i in 1:36) {
-  lines (x = 1900:2020, y = incrementRingWidths [i, 125:5] / 1000, lwd = 0.5)
+PLOT <- FALSE
+if (PLOT) {
+  par (mfrow = c (1, 1))
+  par (mar = c (5, 5, 1, 1))
+  plot (x = 1900:2020,
+        y = incrementRingWidths [1, 125:5] / 1000,
+        typ = 'l', xlab = 'year', ylab = expression (paste ('ring width (',mm,')', sep = '')),
+        ylim = c (0, 12), las = 1, col = 'white')
+  # Add average ring width
+  lines (x = 1900:2020,
+         y = colMeans (incrementRingWidths [, 125:5], na.rm = TRUE) / 1000, 
+         lwd = 3, col = 'darkred')
+  for (i in 1:36) {
+    lines (x = 1900:2020, y = incrementRingWidths [i, 125:5] / 1000, lwd = 0.5)
+  }
 }
 
 # Clean unnecessary variables from loop
 #----------------------------------------------------------------------------------------
 rm (temp, treeID, t, i, j, k, jsonFiles, sampleDate, sampleHeight, growth, types, years, 
-    con, len, summaryData, growingSeason, sampleH2, yPositions, h)
+    con, len, summaryData, growingSeason, sampleH2, yPositions, h, PLOT)
 
