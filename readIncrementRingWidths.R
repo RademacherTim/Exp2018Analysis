@@ -1,9 +1,13 @@
-# Script to read in the WIAD ring width measurements
+#========================================================================================
+# Script to read in the ring width measurements performed with WIAD on scans of increment 
+# cores of White pines collected on the 2020-08-02, which were part of the chilling and 
+# compression experiment. All data is publicly available on the Harvard Forest Data 
+# Archive.
+#
+# Data repository url:
+# Code repository url:
+#
 #----------------------------------------------------------------------------------------
-
-# Start from clean slate
-#----------------------------------------------------------------------------------------
-#rm (list = ls ())
 
 # Load dependencies
 #----------------------------------------------------------------------------------------
@@ -11,10 +15,6 @@ if (!existsFunction ('%>%'))      library ('tidyverse')
 if (!existsFunction ('as_date'))  library ('lubridate')
 if (!existsFunction ('fromJSON')) library ('rjson')
 if (!exists ('tColours')) source ('plotingFunctions.R')
-
-# create %notin% funtion
-#----------------------------------------------------------------------------------------
-`%notin%` <- Negate (`%in%`)
 
 # Set working directory to read json files for the follow-up microcores
 #----------------------------------------------------------------------------------------
@@ -328,38 +328,6 @@ incrementRingWidths <- incrementRingWidths %>% mutate (RWI2019 = Y2019 / Y2017,
                                      RWI2017_15 = Y2017 / Y2015,
                                      RWI2016_15 = Y2016 / Y2015)
 
-# Summarise growth # TR - NB Should not be done here!!!
-#----------------------------------------------------------------------------------------
-summaryData <- incrementRingWidths %>% group_by (treatment, sampleDate, sampleHeight) %>% 
-  summarise (meanY19 = mean (Y2019, na.rm = TRUE),
-             seY19   = se   (Y2019),
-             meanY18 = mean (Y2018, na.rm = TRUE),
-             seY18   = se   (Y2018),
-             meanY17 = mean (Y2017, na.rm = TRUE),
-             seY17   = se   (Y2017),
-             meanY16 = mean (Y2016, na.rm = TRUE),
-             seY16   = se   (Y2016),
-             meanY15 = mean (Y2015, na.rm = TRUE),
-             seY15   = se   (Y2015),
-             meanRWI2019 = mean (RWI2019, na.rm = TRUE),
-             seRWI2019   = se (RWI2019),
-             meanRWI2018 = mean (RWI2018, na.rm = TRUE),
-             seRWI2018   = se (RWI2018),
-             meanRWI2019_16 = mean (RWI2019_16, na.rm = TRUE),
-             seRWI2019_16   = se (RWI2019_16),
-             meanRWI2018_16 = mean (RWI2018_16, na.rm = TRUE),
-             seRWI2018_16   = se (RWI2018_16),
-             meanRWI2017_16 = mean (RWI2017_16, na.rm = TRUE),
-             seRWI2017_16   = se (RWI2017_16),
-             meanRWI2019_15 = mean (RWI2019_15, na.rm = TRUE),
-             seRWI2019_15   = se (RWI2019_15),
-             meanRWI2018_15 = mean (RWI2018_15, na.rm = TRUE),
-             seRWI2018_15   = se (RWI2018_15),
-             meanRWI2017_15 = mean (RWI2017_15, na.rm = TRUE),
-             seRWI2017_15   = se (RWI2017_15),
-             meanRWI2016_15 = mean (RWI2016_15, na.rm = TRUE),
-             seRWI2016_15   = se (RWI2016_15)) 
-
 # Plot all ring width series # TR - NB Should not be done in the read file!
 #----------------------------------------------------------------------------------------
 PLOT <- FALSE
@@ -381,6 +349,8 @@ if (PLOT) {
 
 # Clean unnecessary variables from loop
 #----------------------------------------------------------------------------------------
-rm (temp, treeID, t, i, j, k, jsonFiles, sampleDate, sampleHeight, growth, types, years, 
-    con, len, summaryData, growingSeason, sampleH2, yPositions, h, PLOT)
+rm (temp, treeID, t, i, j, k, jsonFiles, sampleDate, sampleHeight, growth, growth2, 
+    types, types2, years, years2, len, growingSeason, yPositions, PLOT, sColours, 
+    tColours, mostRecentYear, nProfiles, oldestRingIndex, oldestYear, profileID, se, 
+    '%notin%', criticalDates, addOpacity)
 

@@ -14,7 +14,7 @@
 
 # Load dependencies
 #----------------------------------------------------------------------------------------
-if (!existsFunction ('')) library ('tidyverse')
+if (!existsFunction ('tibble')) library ('tidyverse')
 if (!existsFunction ('as_date')) library ('lubridate')
 
 # Get original working directory
@@ -56,3 +56,8 @@ anatomicalData <- rbind (anatomicalData, temp)
 # Reset original working directory
 #----------------------------------------------------------------------------------------
 setwd (originalDir)
+
+# Clean up
+#----------------------------------------------------------------------------------------
+rm (originalDir, temp)
+#========================================================================================

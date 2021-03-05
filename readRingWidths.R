@@ -1,10 +1,13 @@
 #========================================================================================
-# Script to read in the TRIAD rin width measurements
+# Script to read in the ring width measurements performed with WIAD on the thin-sections
+# of microcores of White pines at Harvard Forest from throughout the 2018 growing seaons,
+# as part of the chilling and compression experiment. All data is publicly available on 
+# the Harvard Forest Data Archive.
+#
+# Data repository url:
+# Code repository url:
+#
 #----------------------------------------------------------------------------------------
-
-# Start from clean slate
-#----------------------------------------------------------------------------------------
-#rm (list = ls ())
 
 # Load dependencies
 #----------------------------------------------------------------------------------------
@@ -37,6 +40,7 @@ ringWidths <- tibble (treeId = numeric (), treatment = numeric (), sampleDate = 
                       # Y2003 = numeric (), Y2002 = numeric (), Y2001 = numeric (), 
                       # Y2000 = numeric (), Y1999 = numeric (), Y1998 = numeric ())
 k <- 0
+VERBOSE <- FALSE
 # Loop over json files and read them
 #----------------------------------------------------------------------------------------
 for (j in 1: length (jsonFiles)) {
@@ -149,10 +153,12 @@ for (j in 1: length (jsonFiles)) {
                                         Y2011 = growth [years == 2011],
                                         Y2010 = growth [years == 2010])
 
-  if (treeID == 13 & sampleHeight == 1.5) {
+  if (VERBOSE) {
+    if (treeID == 13 & sampleHeight == 1.5) {
     print (paste (jsonFiles [j], treeID, sampleHeight, sampleDate, 
                   growth [years == 2017], growth [years == 2018], 
                   growth [years == 2018] / growth [years == 2017]))
+    }
   }
 }  # end json file loop
 
@@ -327,5 +333,6 @@ setwd (originalDir)
 # Clean unnecessary variables from loop
 #----------------------------------------------------------------------------------------
 rm (PLOT, temp, treeID, t, i, j, k, jsonFiles, sampleDate, sampleHeight, growth, types, 
-    years, con, len, summaryData, growingSeason, sampleH2, yPositions, h, originalDir)
+    years, con, len, summaryData, growingSeason, sampleH2, yPositions, h, originalDir, 
+    VERBOSE)
 #========================================================================================

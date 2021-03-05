@@ -14,17 +14,17 @@
 
 # load dependencies
 #----------------------------------------------------------------------------------------
-library ('tidyverse')
-library ('lubridate')
-source ('plotingFunctions.R')
+if (!existsFunction ('tibble'))  library ('tidyverse')
+if (!existsFunction ('as_date')) library ('lubridate')
+if (!exists ('tColours')) source ('plotingFunctions.R')
 
 # load ring width data from thin-sections measured with WIAD
 #----------------------------------------------------------------------------------------
-source ('readRingWidths.R')
+if (!exists ('ringWidths')) source ('readRingWidths.R')
 
 # load ring width from increment cores
 #----------------------------------------------------------------------------------------
-source ('readIncrementRingWidths.R')
+if (!exists ('increm')) source ('readIncrementRingWidths.R')
 
 # load anatomical data from thin-sections
 #----------------------------------------------------------------------------------------
@@ -36,6 +36,8 @@ source ('readAnatomicalData.R')
 # samples collected on the 2019-10-24 and 2018-11-15.
 # N.B. This also includes compressed trees for now.
 #----------------------------------------------------------------------------------------
+png (filename = './fig/ROXAS_vs_WIAD_ring_width_measurements_comparison.png', width = 700,
+     height = 600)
 par (mfrow = c (1, 1), mar = c (5, 5, 1, 1)) 
 
 # plot 2018 ring widths from the samples collected in 2019-10-24
@@ -95,10 +97,12 @@ legend (x = 100, y = 2500, box.lty = 0, pch = 19, title = '2018-11-15',
 legend (x = 100, y = 2000, box.lty = 0, pch = 19, title = '2019-10-24',
         col = c ('#ffffb399','#8dd3c799','#bebada99'),
         legend = c ('2017','2018', '2019'))
+dev.off ()
 
 # Plot ring width from 2019-10-24 samples versus from 2018-11-15 samples for WIAD
 #----------------------------------------------------------------------------------------
 # TR - NB: I could add addtional sample dates in various panels (9 sampling dates are measured) 
+png (filename = './fig/ring_width_between-sample_variability.png', width = 700, height = 600)
 par (mfrow = c (1, 1), mar = c (5, 5, 1, 1)) 
 
 # plot 2018 rings
@@ -143,15 +147,31 @@ legend (x = 100, y = 2500, box.lty = 0, pch = 19, title = 'Year',
         legend = 2018:2014)
 
 
+# Get correlation of ring widths from one sample as a function from another
+#----------------------------------------------------------------------------------------
 mod0 <- lm (ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
       select (Y2014, Y2015, Y2016, Y2017, Y2018) %>% unlist () ~ 
       0 + ringWidths %>% filter (sampleDate == as_date ('2018-11-15')) %>% 
       select (Y2014, Y2015, Y2016, Y2017, Y2018) %>% unlist ())
-
-summary (mod0)
+mod1 <- lm (ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
+              select (Y2018) %>% unlist () ~ 
+              0 + ringWidths %>% filter (sampleDate == as_date ('2018-11-15')) %>% 
+              select (Y2018) %>% unlist ())
+#summary (mod0)
+abline (mod0, col = '#666666', lwd = 2)
+abline (mod1, col = '#8dd3c7', lwd = 2)
+r2 <- summary (mod0)$adj.r.squared
+mylabel = bquote (italic (R)^2 == .(format (r2, digits = 3)))
+text (x = 2100, y = 500, labels = mylabel, col = '#666666')
+r2 <- summary (mod1)$adj.r.squared
+mylabel = bquote (italic (R)^2 == .(format (r2, digits = 3)))
+text (x = 2100, y = 600, labels = mylabel, col = '#8dd3c7')
+dev.off ()
+rm (mod0, mod1, r2, mylabel)
 
 # Plot ring width from 2019-10-24 versus 2018-11-15 samples (WIAD measurements)
 #----------------------------------------------------------------------------------------
+png (filename = './fig/ring_growth_index_between-sample_variability.png')
 par (mfrow = c (1, 1), mar = c (5, 5, 1, 1)) 
 
 # plot line for each indiviual tree and sampling height
@@ -168,8 +188,19 @@ abline (a = 0, b = 1, col = '#99999999')
 
 # add legend of the colours used
 legend (x = 100, y = 2500, box.lty = 0, pch = 19, col = '#8dd3c799',
-        legend = 'radial growth index 2018')
+        legend = 'Radial growth index 2018')
 
 mod1 <- lm (ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% select (RWI2018) %>% unlist () ~
             0 + ringWidths %>% filter (sampleDate == as_date ('2018-11-15')) %>% select (RWI2018) %>% unlist ())
-summary (mod1)
+#summary (mod1)
+abline (mod1, col = '#8dd3c7', lwd = 2)
+r2 <- summary (mod1)$adj.r.squared
+mylabel = bquote (italic (R)^2 == .(format (r2, digits = 3)))
+text (x = 0.2, y = 2.2, labels = mylabel, col = '#8dd3c7')
+dev.off ()
+rm (mod1, r2, mylabel)
+
+# Plot 2019 ring widths      
+#----------------------------------------------------------------------------------------
+
+#========================================================================================

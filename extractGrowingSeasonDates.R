@@ -422,6 +422,6 @@ if (PLOT) dev.off ()
   
 # clean up
 #----------------------------------------------------------------------------------------
-rm (PLOT, fit.gam, ringWidths, tempData, direction, eDoy, error, growthFraction, h, i, 
-    iDoy, maxRWI, sDoy, t, threshold)
+rm (PLOT, fit.gam, ringWidths, tempData, tColours, sColours, direction, eDoy, error, 
+    growthFraction, h, i, iDoy, maxRWI, sDoy, t, threshold)
 #========================================================================================
