@@ -1,3 +1,4 @@
+#========================================================================================
 # Script to explore anatomical data for the 2018 chilling and compression experiment at 
 # Harvard Forest
 
@@ -15,7 +16,8 @@ for (h in c (4.0, 2.5, 1.5, 0.5))
   {
     
     # Condition to extract relevant data
-    con <- anatomicalData [['TREE']] == i & anatomicalData [['sampleHeight']] == h & 
+    con <- anatomicalData [['TREE']] == i & 
+      anatomicalData [['sampleHeight']] == h & 
       anatomicalData [['YEAR']] %in% 2017:2019
     
     # Extract treatment
@@ -861,3 +863,4 @@ for (h in c (4.0, 2.5, 1.5, 0.5))
   }
 }
 
+#========================================================================================

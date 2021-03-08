@@ -188,45 +188,68 @@ summary (mod8); rm (tempData)
 
 # How do the increment ring widths compare to microcore ring widths?
 #----------------------------------------------------------------------------------------
-# TR - NB: This and the following is still not working!!!
 par (mar = c (5, 5, 1, 1))
 plot (x = 500,
       y = 500,
       col = 'white',
       axes = FALSE,
-      xlim = c (0, 2500),
-      ylim = c (0, 2500),
-      xlab = expression (paste ('Ring width (',mu,'m)', sep = '')),
-      ylab =expression (paste ('Ring width (',mu,'m)', sep = '')))
+      xlim = c (0, 3000),
+      ylim = c (0, 3000),
+      xlab = expression (paste ('Thin-section ring width (',mu,'m)', sep = '')),
+      ylab =expression (paste ('Increment core ring width (',mu,'m)', sep = '')))
 axis (side = 1)
 axis (side = 2, las = 1)
+# Draw a 1:1 line
+#----------------------------------------------------------------------------------------
+abline (a = 0, b = 1, col = '#66666699') 
+# Draw mean measurements and their standard error 
+#----------------------------------------------------------------------------------------
 for (t in 1:15) {
   for (y in 2010: 2017) {
     Year <- paste ('Y', y, sep = '')
     tmpX <- ringWidths %>% 
       filter (treeId == t, 
-              sampleHeight %in% c (0.5, 1.5, 2.5, 4.0), 
+              sampleHeight == 1.5,#%in% c (0.5, 1.5, 2.5, 4.0), 
               sampleDate != as_date ('2018-01-01')) %>% 
-      select (Year) %>% unlist ()
-    tmpX <- tibble (mean = mean (tmpX, na.rm = TRUE),
-                    sd = sd (tmpX, na.rm = TRUE),
-                    se = se (tmpX)) 
+      select (Year) %>% unlist () 
+    tmpX <- tibble (mean = mean (tmpX [which (tmpX != 1)], na.rm = TRUE),# * 1.5413335,
+                    sd = sd (tmpX [which (tmpX != 1)], na.rm = TRUE),
+                    se = se (tmpX [which (tmpX != 1)])) 
     tmpY <- incrementRingWidths %>%  
-      filter (treeId == t) %>% select (Y2017) %>% unlist ()
-    tmpY <- tibble (mean = mean (tmpY, na.rm = TRUE),
-                    sd = sd (tmpY, na.rm = TRUE),
-                    se = se (tmpY))
-    arrows (x0 = tmpX [['mean']] - tmpX [['sd']], x1 = tmpX [['mean']] + tmpX [['sd']], 
+      filter (treeId == t) %>% select (Year) %>% unlist ()
+    tmpY <- tibble (mean = mean (tmpY [which (tmpY != 1)], na.rm = TRUE),
+                    sd = sd (tmpY [which (tmpY != 1)], na.rm = TRUE),
+                    se = se (tmpY [which (tmpY != 1)]))
+    arrows (x0 = tmpX [['mean']] - tmpX [['se']], x1 = tmpX [['mean']] + tmpX [['se']], 
             y0 = tmpY [['mean']], length = 0.1, angle = 90, code = 3, col = '#66666666')
-    arrows (y0 = tmpY [['mean']] - tmpY [['sd']], y1 = tmpY [['mean']] + tmpY [['sd']], 
+    arrows (y0 = tmpY [['mean']] - tmpY [['se']], y1 = tmpY [['mean']] + tmpY [['se']], 
             x0 = tmpX [['mean']], length = 0.1, angle = 90, code = 3, col = '#66666666')
     points (x = tmpX [['mean']], y = tmpY [['mean']], pch = 21, bg = 'white', lwd = 2,
             col = '#66666666')  
   }
-}
-# Draw a 1:1 line
+} 
+
+# Did groups grow differently in previous years?
 #----------------------------------------------------------------------------------------
-abline (a = 0, b = 1, col = '#66666699')  
+tempData <- ringWidths %>%
+  filter (sampleDate %notin% c (as_date ('2018-01-01'), as_date ('2018-05-01'))) %>%
+  mutate (treeId       = factor (treeId),
+          treatment    = factor (treatment, levels = c (1,4,5)),
+          sampleHeight = factor (sampleHeight, levels = c (4.0,2.5,1.5,0.5))) %>% 
+  select (1:4,7:14) %>% 
+  pivot_longer (cols = 5:12, names_to = 'year', names_prefix = 'Y', values_to = 'RW') %>%
+  mutate (year = factor (year))
+g <- ggplot (tempData) +
+  geom_boxplot (aes (x = sampleHeight, y = RW, fill = treatment),
+                alpha = 0.7, colour = rep (tColours [['colour']] [c (1,4,5)], 4)) + 
+  coord_flip () +
+  labs (x = 'Sample Height (m)', y = expression (paste ('Ring widths (',mu,'m)', sep = ''))) +
+  scale_fill_manual (values = tColours [['colour']] [c (1,4,5)], labels = c ('Control','Compressed','Chilled'))
+g
+# Were there differences in the 2010 to 2017 ring width (previous years) among treatments?
+mod9 <- lmer (formula = RW ~ (1 | treeId) + year + treatment + sampleHeight,
+              data = tempData, REML = TRUE)
+summary (mod9); rm (tempData)
 
 # Did groups grow differently in 2019?
 #----------------------------------------------------------------------------------------
@@ -243,10 +266,9 @@ g <- ggplot (tempData) +
   scale_fill_manual (values = tColours [['colour']] [c (1,4,5)], labels = c ('Control','Compressed','Chilled'))
 g
 # Were there differences in the 2019 ring width (following year) among treatments?
-mod9 <- lmer (formula = Y2019 ~ (1 | treeId) + treatment:sampleHeight,
+mod10 <- lmer (formula = Y2019 ~ (1 | treeId) + treatment:sampleHeight,
               data = tempData, REML = TRUE)
-summary (mod9); rm (tempData)
-
+summary (mod10); rm (tempData)
 
 # clean up 
 #----------------------------------------------------------------------------------------

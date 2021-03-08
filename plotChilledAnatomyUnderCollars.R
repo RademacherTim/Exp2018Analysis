@@ -4,7 +4,8 @@
 #----------------------------------------------------------------------------------------
 
 # Get the anatomical and ring width data
-source ('processAnatomicalData.R')
+if (!exists ('anatomicalData')) source ('processAnatomicalData.R')
+if (!exists ('tColours')) source ('plotingFunctions.R')
 
 # plot lumen area over ring profile in 2017, 2018, and 2019
 layout (matrix (1:30, nrow = 6, byrow = TRUE), widths = c (1.2, 1, 1, 1, 1, 1), 

@@ -146,7 +146,6 @@ legend (x = 100, y = 2500, box.lty = 0, pch = 19, title = 'Year',
         col = c ('#8dd3c799','#bebada99','#fb807299','#80b1d399','#ffffb399'),
         legend = 2018:2014)
 
-
 # Get correlation of ring widths from one sample as a function from another
 #----------------------------------------------------------------------------------------
 mod0 <- lm (ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
@@ -199,8 +198,5 @@ mylabel = bquote (italic (R)^2 == .(format (r2, digits = 3)))
 text (x = 0.2, y = 2.2, labels = mylabel, col = '#8dd3c7')
 dev.off ()
 rm (mod1, r2, mylabel)
-
-# Plot 2019 ring widths      
-#----------------------------------------------------------------------------------------
 
 #========================================================================================

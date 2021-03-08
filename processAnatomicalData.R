@@ -28,9 +28,13 @@ source ('readRingWidths.R')
 #----------------------------------------------------------------------------------------
 anatomicalData <- add_column (anatomicalData, period = NA)
 
-# set growing season threshold
+# set growing season threshold as 5 and 95% percent of annual growth having occured 
 #----------------------------------------------------------------------------------------
 threshold <- 0.05
+
+# Set whether processing happens verbose or not
+#----------------------------------------------------------------------------------------
+VERBOSE <- FALSE
 
 # Loop over for each row in the anatomical data to associate it with a growth period
 #----------------------------------------------------------------------------------------
@@ -106,14 +110,12 @@ for (r in 1:dim (anatomicalData) [1]) {
     
   }
   
-  print (paste ('Tree',treeID,' height',h,' line',i, 
-                anatomicalData [['period']] [r], iDoy, 
-                growthFraction* 100, anatomicalData [['RRADDISTR']] [r]))
+  if (VERBOSE) {
+    print (paste ('Tree',treeID,' height',h,' line',r, 
+                  anatomicalData [['period']] [r], iDoy, 
+                  growthFraction* 100, anatomicalData [['RRADDISTR']] [r]))
+  }
 }
-
-# Clean unnecessary variables from loop
-#----------------------------------------------------------------------------------------
-rm (r, h, t, treeID, iDoy, tempData, direction, error, maxRWI, PLOT, fit.gam)
 
 # Add cell width column to data
 #----------------------------------------------------------------------------------------
@@ -161,4 +163,9 @@ for (r in 1:dim (anatomicalData) [1]) {
 # Switch back to original working directory
 #----------------------------------------------------------------------------------------
 setwd (originalDir); rm (originalDir)
+
+# Clean unnecessary variables from loop
+#----------------------------------------------------------------------------------------
+rm (r, h, t, sColours, tColours, differentProfile, growthFraction, treeID, iDoy, 
+    tempData, threshold, direction, error, maxRWI, fit.gam, VERBOSE)
 #========================================================================================
