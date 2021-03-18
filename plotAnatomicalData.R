@@ -1,8 +1,14 @@
 #========================================================================================
 # Script to explore anatomical data for the 2018 chilling and compression experiment at 
-# Harvard Forest
+# Harvard Forest. All data is publicly available on the Harvard Forest Data Archive.
+#
+# Data repository url:
+# Code repository url:
+#
+#----------------------------------------------------------------------------------------
 
 # Get the anatomical and ring width data
+#----------------------------------------------------------------------------------------
 source ('processAnatomicalData.R')
 
 # plot lumen area over ring profile in 2017, 2018, and 2019

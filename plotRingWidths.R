@@ -48,7 +48,7 @@ plot (x = ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>%
         dplyr::summarise (maxRW = max (MRW)) %>% ungroup %>% select (maxRW) %>% unlist (),
       xlab = expression (paste ('WIAD ring width (',mu,m,')',sep = '')), 
       ylab = expression (paste ('ROXAS ring width (',mu,m,')',sep = '')), 
-      xlim = c (0, 2500), ylim = c (0, 2500),
+      xlim = c (0, 4500), ylim = c (0, 4500),
       col = '#ffffb399', pch = 19, las = 1)
 
 # add 2019 ring widths from the samples collected in 2019-10-24 

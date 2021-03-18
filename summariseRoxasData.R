@@ -9,12 +9,19 @@
 # 
 # (c) Georg von Arx
 # 
-# modified by Tim Rademacher 5 January 2021
+# last modified by Tim Rademacher 18th of March 2021
 #%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#%#
 
 
 ### 1. Clean up ####
 rm (list = ls ()) # clean desk 
+
+### 1.1 Correction factor for resolution error
+# BELOW LINE NEEDS TO BE COMMENTED OUT FOR NORMAL OPERATIONS OR SET TO 1.0  
+correctionFactor <- 2.26 / 1.47 
+# original resolution was 2.26(757407188416) pixels per micrometer
+# compressed resolution of the actual images was 1.49 pixels per micrometer according to Patrick
+# compressed resolution of the actual image was 1.47 pixels per micrometer in 2017
 
 
 ### 2. Define top directory containing all the data in whatever hierarchical structure ####
@@ -24,18 +31,35 @@ setwd ('/media/tim/dataDisk/PlantGrowth/data/microcores/woodAnatomy/Exp2018/ROXA
 
 ### 3. Get file names of cell and ring output files and write them into a metadata table ####
 ### cells
-cf <- list.files(path=topfolder, pattern="Output_Cells.txt", full.names=TRUE, recursive=TRUE, ignore.case=TRUE, include.dirs=TRUE, no.. = FALSE)
-len <- length(cf)
-metadata <- data.frame(tree=rep(NA,len), slide=rep(NA,len), image=rep(NA,len), imagecode=rep(NA,len), cell.file=rep(NA,len), ring.file=rep(NA,len))
-metadata$cell.file <- as.matrix(cf)
+cf <- list.files (path = topfolder, 
+                  pattern = "Output_Cells.txt", 
+                  full.names = TRUE, 
+                  recursive = TRUE, 
+                  ignore.case = TRUE, 
+                  include.dirs = TRUE, 
+                  no.. = FALSE)
+len <- length (cf)
+metadata <- data.frame (tree  = rep (NA, len), 
+                        slide = rep (NA, len), 
+                        image = rep (NA, len), 
+                        imagecode = rep (NA, len), 
+                        cell.file = rep (NA, len), 
+                        ring.file = rep (NA, len))
+metadata$cell.file <- as.matrix (cf)
 
 ### rings
-rf <- list.files(path=topfolder, pattern="Output_Rings.txt", full.names=TRUE, recursive=TRUE, ignore.case=TRUE, include.dirs=TRUE, no.. = FALSE)
+rf <- list.files (path = topfolder, 
+                  pattern = "Output_Rings.txt", 
+                  full.names = TRUE, 
+                  recursive = TRUE, 
+                  ignore.case = TRUE, 
+                  include.dirs = TRUE, 
+                  no.. = FALSE)
 metadata$ring.file <- as.matrix(rf)
 
 
 ### 4. Check consistency of cell and ring files within each row ####
-for (i in c(1:len)) {
+for (i in c (1:len)) {
   ### Extract full image code of cell file (without path and any other text)
   ipos <- lapply(strsplit(cf[i], ''), function(x) which(x=='/'))   #get position of all "/"
   ipos <- unlist(ipos)[(length(unlist(ipos)))]   #get position of last "/"
@@ -50,7 +74,7 @@ for (i in c(1:len)) {
   
   if (cf.code!=rf.code)
   {
-    stop(paste("cell and ring files are not consistent at line ", i, "!", sep=""))
+    stop (paste ("cell and ring files are not consistent at line ", i, "!", sep=""))
   }  
 }  
 
@@ -86,12 +110,13 @@ for (i in c (nrow (metadata):1)) {
 
 
 ### 7. Summarize the data ####
-
-t <- Sys.time()
+t <- Sys.time ()
 
 for (i in c (1:length (levels (metadata$treecode)))) {
   # print(levels(metadata$treecode)[i])   #loop control
-  print(paste("(", i, "/", length(levels(metadata$treecode)), ") - ", "Processing wood piece: ", unique(metadata$treecode)[i], sep=""))
+  print (paste ("(", i, "/", length (levels (metadata$treecode)), ") - ", 
+                "Processing wood piece: ", unique (metadata$treecode) [i], 
+                sep = ""))
   
   ### 7.1 Get subset data for target wedge
   mdf <- metadata [i == as.numeric (metadata$treecode), ]
@@ -100,10 +125,9 @@ for (i in c (1:length (levels (metadata$treecode)))) {
   numfiles <- nrow (mdf)
   
   ### 7.3 Loop through each output file and extract information
-  # for (f in (1:numfiles))
   for (f in (1:numfiles)) {  
-    # print(mdf$cell.file[f])
-    print(paste("   (", make.unique(rep(LETTERS, length.out=100), sep='')[f], ") ", mdf$cell.file[f], ": ", sep=""))  
+    print(paste("   (", make.unique (rep (LETTERS, length.out = 100), sep = '') [f], ") ", 
+                mdf$cell.file[f], ": ", sep = ""))  
     if (f == 1) {  # on first run, initialize cells and rings dataframes
       cells <- NULL
       cells <- read.table(mdf$cell.file[f], header=TRUE, sep="\t", na.strings=c("NA",""))   #cell data
@@ -150,7 +174,26 @@ for (i in c (1:length (levels (metadata$treecode)))) {
     }   
   }    
   
-  ### 7.4 Correct for occasionally wrong CWA measurements (cells at edge, with large lateral wall integration)
+  ### 7.4 Correct for wrong image resolution if necessary
+  if (exists ('correctionFactor')) {
+    rings$MRW <- round (rings$MRW * correctionFactor)
+    cells$RADDIST  <- round (cells$RADDIST * correctionFactor, 1)
+    cells$RADDISTR <- round (cells$RADDISTR * correctionFactor)
+    cells$LA       <- round (cells$LA * correctionFactor**2, 2)
+    cells$KH       <- cells$KH * correctionFactor**4
+    cells$CWTPI    <- round (cells$CWTPI * correctionFactor, 2)
+    cells$CWTBA    <- round (cells$CWTBA * correctionFactor, 2)
+    cells$CWTLE    <- round (cells$CWTLE * correctionFactor, 2)
+    cells$CWTRI    <- round (cells$CWTRI * correctionFactor, 2)
+    cells$CWTTAN   <- round (cells$CWTTAN * correctionFactor, 2)
+    cells$CWTRAD   <- round (cells$CWTRAD * correctionFactor, 2)
+    cells$CWTALL   <- round (cells$CWTALL * correctionFactor, 2)
+    cells$DRAD     <- round (cells$DRAD   * correctionFactor, 2)
+    cells$DTAN     <- round (cells$DTAN   * correctionFactor, 2)
+    cells$CWA      <- round (cells$CWA    * correctionFactor**2, 2)
+  } 
+  
+  ### 7.5 Correct for occasionally wrong CWA measurements (cells at edge, with large lateral wall integration)
   cells$MAX.CWT <- ifelse(!is.na(cells$CWTPI), cells$CWTPI, 0)
   cells$MAX.CWT <- ifelse(!is.na(cells$CWTBA), ifelse(cells$CWTBA > cells$MAX.CWT, cells$CWTBA, cells$MAX.CWT), cells$MAX.CWT)
   cells$MAX.CWT <- ifelse(!is.na(cells$CWTLE), ifelse(cells$CWTLE > cells$MAX.CWT, cells$CWTLE, cells$MAX.CWT), cells$MAX.CWT)
@@ -166,24 +209,24 @@ for (i in c (1:length (levels (metadata$treecode)))) {
   cells$LR <- NULL
   cells$MAX.CWA <- NULL
   
-  ### 7.5 Add cell area 
+  ### 7.6 Add cell area 
   cells$TCA <- ifelse(cells$CWA>0, cells$LA + cells$CWA, ifelse(is.na(cells$CWA), NA, -(cells$LA-cells$CWA)))
   
-  ### 7.6 Add hydraulic diameter of each cell
+  ### 7.7 Add hydraulic diameter of each cell
   cells$a <- 2*sqrt(cells$ASP*cells$LA/pi)
   cells$b <- cells$a/cells$ASP
   cells$DH <- sqrt((2*cells$a^2*cells$b^2)/(cells$a^2+cells$b^2))
   cells$a <- NULL
   cells$b <- NULL
   
-  ### 7.7 Add special anatomical cell density
+  ### 7.8 Add special anatomical cell density
   cells$RWD2 <- cells$CWTRAD/cells$DRAD
   
-  ### 7.8 Order data by ascending year
+  ### 7.9 Order data by ascending year
   cells <- cells[order(cells$YEAR, cells$RRADDISTR),]
   rings <- rings[order(rings$YEAR),]
   
-  ### 7.9 Write data to files
+  ### 7.10 Write data to files
   output <- paste(mdf$tree[1], "_Output_Cells.txt", sep="")
   write.table(cells, file=output, row.names = FALSE)
   

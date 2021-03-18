@@ -5,7 +5,7 @@
 # This scripts creates intra-annual profiles of anatomical parameters based on 
 # summary files (one per radial wood piece) of ROXAS text file output for rings  
 # and cells. No data is shared across ring borders, but restricted to the 
-# respective target ring.Profile data is plotted and saved to file. In addition, 
+# respective target ring. Profile data is plotted and saved to file. In addition, 
 # files for means (overall, earlywood, latewood), minimum and maximum values per 
 # ring are created.
 #
@@ -3084,7 +3084,3 @@ for (i in c(1:length(cell.files))) {
 } 
 
 Sys.time() - t
-
-
-### 5. clean up ####
-# rm(list=ls(all=TRUE))

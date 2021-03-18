@@ -22,7 +22,7 @@ originalDir <- getwd ()
 
 # Set working directory to read json files for the follow-up microcores
 #----------------------------------------------------------------------------------------
-setwd ('/media/tim/dataDisk/PlantGrowth/data/microcores/woodAnatomy/Exp2018/ringWidthsWIAD/new/')
+setwd ('/media/tim/dataDisk/PlantGrowth/data/microcores/woodAnatomy/Exp2018/ringWidthsWIAD/corrected/')
 
 # List all json output file from TRIAD
 #----------------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ for (j in 1: length (jsonFiles)) {
   if (temp$sampleYearGrowth %notin% c ('none','some','all')) {
     stop ('Error: Sample year growth is not "some" or "all"!')  
   }
-  if (temp$sampleDPI !=  57596)        stop ('Error: DPI is not 57596!')  
+  if (temp$sampleDPI !=  38100)        stop ('Error: DPI is not 57596!')  
   if (!temp$barkFirst [[1]])           stop ('Error: Bark was not first!')  
   if (temp$siteLocID != 'BigChill')    stop ('Error: Site location ID was not "BigChill"!')
   if (temp$plotID %notin% c (1,4,5))   stop ('Error: Plot ID is not correct.')

@@ -14,7 +14,7 @@
 
 # Load dependencies
 #----------------------------------------------------------------------------------------
-if (!existsFunction ('tibble')) library ('tidyverse')
+if (!existsFunction ('add_column')) library ('tidyverse')
 if (!existsFunction ('as_date')) library ('lubridate')
 
 # Get original working directory

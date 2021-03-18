@@ -1,7 +1,7 @@
 # change resolution of the of WIAD output files and change old versions from TRIAD to WIAD
 library ('jsonlite')
-inputFolder <- '/media/tim/dataDisk/PlantGrowth/data/microcores/woodAnatomy/Exp2018/ringWidthTRIAD/'
-outputFolder <- '/media/tim/dataDisk/PlantGrowth/data/microcores/woodAnatomy/Exp2018/ringWidthTRIAD/new/'
+inputFolder <- '/media/tim/dataDisk/PlantGrowth/data/microcores/woodAnatomy/Exp2018/ringWidthsWIAD/new/'
+outputFolder <- '/media/tim/dataDisk/PlantGrowth/data/microcores/woodAnatomy/Exp2018/ringWidthsWIAD/corrected/'
 jsonFiles <- list.files (inputFolder, pattern = '.json')
 
 # Loop over files
@@ -14,9 +14,9 @@ for (j in 1:length (jsonFiles)) {
   labels <- read_json (paste0 (inputFolder, jsonFiles [j]))
   
   # check if resolution has already been changed
-  if (labels$sampleDPI == 38100) {
-    labels$sampleDPI [[1]] <- 57596 
-  } else if (labels$sampleDPI != 57596) {
+  if (labels$sampleDPI == 57596) {
+    labels$sampleDPI [[1]] <- 38100 
+  } else if (labels$sampleDPI != 38100) {
     print (paste (j, jsonFiles [j], labels$sampleDPI))
     stop ('Error: Resolution is wrong!')
   }
