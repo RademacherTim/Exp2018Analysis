@@ -36,7 +36,7 @@ summary (mod); rm (tempData)
 # Did one treatment cause an increases or reduction in mean radial cell size?
 #----------------------------------------------------------------------------------------
 tempData <- anatomicalData %>% 
-  filter (YEAR == 2018, PLOT %in% c (1, 5)) %>%
+  filter (YEAR == 2018, RRADDISTR <= 10, PLOT %in% c (1, 5)) %>%
   group_by (PLOT, TREE, sampleHeight, sampleDate) %>% 
   summarise (meanCellSize = mean (cellRadWidth)) %>%
   mutate (treatment = factor (PLOT, levels = c (5, 1)),
@@ -76,18 +76,32 @@ mod <- lmer (maxCumCWA ~ (1|treeId) + (1|sampleDate) + treatment:sampleHeight,
 summary (mod)
 
 
-# Did one treatment cause an increases or reduction in mean cell-wall thickness?
+# Did one treatment cause an increases or reduction in mean cell-wall area?
 #----------------------------------------------------------------------------------------
 tempData <- anatomicalData %>% 
   filter (YEAR == 2018, PLOT %in% c (1, 5)) %>%
   group_by (PLOT, TREE, sampleHeight, sampleDate) %>% 
-  summarise (meanCWT = mean (cumCWA)) %>%
+  summarise (meanCWA = mean (CWA)) %>%
   mutate (treatment = factor (PLOT, levels = c (5, 1)),
           treeId = factor (TREE),
           sampleHeight = factor (sampleHeight),
           sampleDate = factor (sampleDate))
-mod <- lmer (maxCumCWA ~ (1|treeId) + (1|sampleDate) + treatment:sampleHeight, 
+mod <- lmer (meanCWA ~ (1|treeId) + (1|sampleDate) + treatment:sampleHeight, 
              data = tempData, REML = TRUE)
 summary (mod)
 
+
+# was this reduction in cell-wall area pronounced in cells that formed after treatment onset?
+#----------------------------------------------------------------------------------------
+tempData <- anatomicalData %>% 
+  filter (YEAR == 2018, PLOT %in% c (1, 5), period > as_date ('2018-09-03')) %>%
+  group_by (PLOT, TREE, sampleHeight, sampleDate) %>% 
+  summarise (meanCWA = mean (CWA, na.rm = TRUE)) %>%
+  mutate (treatment = factor (PLOT, levels = c (5, 1)),
+          treeId = factor (TREE),
+          sampleHeight = factor (sampleHeight),
+          sampleDate = factor (sampleDate))
+mod <- lmer (meanCWA ~ (1|treeId) + (1|sampleDate) + treatment:sampleHeight, 
+             data = tempData, REML = TRUE)
+summary (mod)
 #========================================================================================
