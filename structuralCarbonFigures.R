@@ -1,5 +1,5 @@
 #========================================================================================
-# This script plots anatomical vairables to deduce any treatment effects
+# This script plots anatomical variables to deduce any treatment effects
 #----------------------------------------------------------------------------------------
 
 # Source anatomical data

@@ -91,10 +91,10 @@ points (x = ringWidths %>% filter (sampleDate == as_date ('2018-11-15') &
 abline (a = 0, b = 1, col = '#99999999')
 
 # add legend of the colours used
-legend (x = 100, y = 2500, box.lty = 0, pch = 19, title = '2018-11-15',
+legend (x = 100, y = 4500, box.lty = 0, pch = 19, title = '2018-11-15',
         col = c ('#fb807299','#80b1d399'),
         legend = c ('2017','2018'))
-legend (x = 100, y = 2000, box.lty = 0, pch = 19, title = '2019-10-24',
+legend (x = 100, y = 4000, box.lty = 0, pch = 19, title = '2019-10-24',
         col = c ('#ffffb399','#8dd3c799','#bebada99'),
         legend = c ('2017','2018', '2019'))
 dev.off ()
@@ -112,7 +112,7 @@ plot (x = ringWidths %>% filter (sampleDate == as_date ('2018-11-15')) %>%
         select (Y2018) %>% unlist (), pch = 19, col = '#8dd3c799',
       xlab = expression (paste ('2018-11-15 sample ring widths (',mu,m,')',sep = '')), 
       ylab = expression (paste ('2019-10-24 sample ring widths (',mu,m,')',sep = '')),
-      las = 1, xlim = c (0, 2500), ylim = c (0, 2500))
+      las = 1, xlim = c (0, 4500), ylim = c (0, 4500))
 
 # add 2017 rings
 points (x = ringWidths %>% filter (sampleDate == as_date ('2018-11-15')) %>% 
@@ -142,7 +142,7 @@ points (x = ringWidths %>% filter (sampleDate == as_date ('2018-11-15')) %>%
 abline (a = 0, b = 1, col = '#99999999')
 
 # add legend of the colours used
-legend (x = 100, y = 2500, box.lty = 0, pch = 19, title = 'Year',
+legend (x = 100, y = 4500, box.lty = 0, pch = 19, title = 'Year',
         col = c ('#8dd3c799','#bebada99','#fb807299','#80b1d399','#ffffb399'),
         legend = 2018:2014)
 
@@ -161,10 +161,10 @@ abline (mod0, col = '#666666', lwd = 2)
 abline (mod1, col = '#8dd3c7', lwd = 2)
 r2 <- summary (mod0)$adj.r.squared
 mylabel = bquote (italic (R)^2 == .(format (r2, digits = 3)))
-text (x = 2100, y = 500, labels = mylabel, col = '#666666')
+text (x = 4100, y = 500, labels = mylabel, col = '#666666')
 r2 <- summary (mod1)$adj.r.squared
 mylabel = bquote (italic (R)^2 == .(format (r2, digits = 3)))
-text (x = 2100, y = 600, labels = mylabel, col = '#8dd3c7')
+text (x = 4100, y = 800, labels = mylabel, col = '#8dd3c7')
 dev.off ()
 rm (mod0, mod1, r2, mylabel)
 
@@ -178,15 +178,15 @@ plot (x = ringWidths %>% filter (sampleDate == as_date ('2018-11-15')) %>%
         select (RWI2018) %>% unlist (),
       y = ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% 
         select (RWI2018) %>% unlist (), pch = 19, col = '#8dd3c799',
-      xlab = expression (paste ('2019-10-24 sample ring widths (',mu,m,')',sep = '')), 
-      ylab = expression (paste ('2018-11-15 sample ring widths (',mu,m,')',sep = '')),
+      xlab = expression (paste ('2019-10-24 sample ring width index (',mu,m,')',sep = '')), 
+      ylab = expression (paste ('2018-11-15 sample ring width index (',mu,m,')',sep = '')),
       las = 1, xlim = c (0, 2.5), ylim = c (0, 2.5))
 
 # add 1:1 line on which they should fall
 abline (a = 0, b = 1, col = '#99999999')
 
 # add legend of the colours used
-legend (x = 100, y = 2500, box.lty = 0, pch = 19, col = '#8dd3c799',
+legend (x = 0, y = 2.5, box.lty = 0, pch = 19, col = '#8dd3c799',
         legend = 'Radial growth index 2018')
 
 mod1 <- lm (ringWidths %>% filter (sampleDate == as_date ('2019-10-24')) %>% select (RWI2018) %>% unlist () ~

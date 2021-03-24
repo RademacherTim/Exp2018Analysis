@@ -18,7 +18,7 @@
 #----------------------------------------------------------------------------------------
 if (!existsFunction ('%>%'))     library ('tidyverse')
 if (!existsFunction ('as_date')) library ('lubridate')
-if (!existsFunction ('vioplot')) library ('ggplot2')
+if (!existsFunction ('ggplot')) library ('ggplot2')
 if (!exists ('tColours')) source ('plotingFunctions.R')
 if (!existsFunction ('lmer')) library ('lme4')
 if (!existsFunction ('vioplot')) library ('vioplot')
@@ -33,13 +33,34 @@ if (!exists ('incrementRingWidths')) source ('readIncrementRingWidths.R')
 # make box plot of onset and cessation of growth for each treatment
 #----------------------------------------------------------------------------------------
 g <- ggplot (growingSeasonDates) +
-  geom_boxplot (aes (x = factor (sampleHeight), y = startOfGrowth, fill =factor (treatment)),
-               alpha = 0.1, 
-               colour = rep (tColours [['colour']] [c (1,4,5)], 4),
-               position = c ()) +
-  geom_boxplot (aes (x = factor (sampleHeight), y = endOfGrowth, fill = factor (treatment)),
-               alpha = 0.7, colour = rep (tColours [['colour']] [c (1,4,5)], 4)) +
-  scale_fill_manual (values = tColours [['colour']] [c (1,4,5)], labels = c ('Control','Compressed','Chilled')) +
+  geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 0.5),
+                aes (x = sampleHeight, y = startOfGrowth, fill = factor (treatment)),
+                alpha = 0.1, 
+                colour = tColours [['colour']] [c (1,4,5)],
+                position = position_dodge2 ()) +
+  geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 0.5),
+                aes (x = sampleHeight, y = endOfGrowth, fill = factor (treatment)),
+               alpha = 0.7, colour = tColours [['colour']] [c (1,4,5)]) +
+  geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 1.5),
+                aes (x = sampleHeight, y = startOfGrowth, fill = factor (treatment)),
+                alpha = 0.1, colour = tColours [['colour']] [c (1,4,5)]) +
+  geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 1.5),
+                aes (x = sampleHeight, y = endOfGrowth, fill = factor (treatment)),
+                alpha = 0.7, colour = tColours [['colour']] [c (1,4,5)]) +
+  geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 2.5),
+                aes (x = sampleHeight, y = startOfGrowth, fill = factor (treatment)),
+                alpha = 0.1, colour = tColours [['colour']] [c (1,4,5)]) +
+  geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 2.5),
+                aes (x = sampleHeight, y = endOfGrowth, fill = factor (treatment)),
+                alpha = 0.7, colour = tColours [['colour']] [c (1,4,5)]) +
+  geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 4.0),
+                aes (x = sampleHeight, y = startOfGrowth, fill = factor (treatment)),
+                alpha = 0.1, colour = tColours [['colour']] [c (1,4,5)]) +
+  geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 4.0),
+                aes (x = sampleHeight, y = endOfGrowth, fill = factor (treatment)),
+                alpha = 0.7, colour = tColours [['colour']] [c (1,4,5)]) +
+  scale_fill_manual (values = tColours [['colour']] [c (1,4,5)], 
+                     labels = c ('Control','Compressed','Chilled')) +
   labs (x = 'Sample height (m)', y = 'Day of year', fill = 'Treatment') +
   scale_x_discrete (limits = c (0.5, 1.5, 2.5, 4.0)) + 
   scale_y_continuous (breaks = seq (0, 360 , by = 60), limits = c (0, 365)) +
@@ -256,10 +277,10 @@ summary (mod9); rm (tempData)
 tempData <- ringWidths %>%
   filter (sampleDate == as_date ('2019-10-24')) %>%
   mutate (treeId       = factor (treeId),
-        treatment    = factor (treatment, levels = c (5,4,1)),
-        sampleHeight = factor (sampleHeight))
+          treatment    = factor (treatment, levels = c (5,4,1)),
+          sampleHeight = factor (sampleHeight))
 g <- ggplot (tempData) +
-  geom_boxplot (aes (x = sampleHeight, y = Y2019, fill = treatment),
+  geom_boxplot (aes (x = sampleHeight, y = RWI2019, fill = treatment),
                 alpha = 0.7, colour = rep (tColours [['colour']] [c (1,4,5)], 4)) + 
   coord_flip () +
   labs (x = 'Sample Height (m)', y = 'Radial growth index') +
@@ -272,5 +293,5 @@ summary (mod10); rm (tempData)
 
 # clean up 
 #----------------------------------------------------------------------------------------
-rm (mo1, mod2, tempData)
+rm (mod1, mod2, mod3, mod4, mod5, mod6, mod7, mod8, mod9, mod10)
 #========================================================================================
