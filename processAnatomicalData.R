@@ -24,6 +24,12 @@ setwd ('/home/tim/projects/PlantGrowth/Exp2018Analysis/')
 source ('readAnatomicalData.R')
 source ('readRingWidths.R')
 
+# Before any processing need to remove data from samples without full 2018 ring
+#----------------------------------------------------------------------------------------
+anatomicalData <- anatomicalData %>% 
+  dplyr::filter (!(TREE == 4 & sampleDate == as_date ('2018-11-15') & sampleHeight == 2.5)) %>%
+  dplyr::filter (PLOT != 4)
+
 # Add new column to data (all rings started growing after the sample on the 5th of May 2018)
 #----------------------------------------------------------------------------------------
 anatomicalData <- add_column (anatomicalData, period = NA)

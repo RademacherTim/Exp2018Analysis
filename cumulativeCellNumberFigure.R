@@ -1,5 +1,5 @@
 #========================================================================================
-# This script plot median cell size variations between treatments and heights
+# This script plot cumulative cell number across treatments and heights
 #----------------------------------------------------------------------------------------
 
 # Source anatomical data and dependencies
@@ -47,47 +47,47 @@ plotFractionFormed <- function (data) {
 plotRunningAverage <- function (data) {
   
   options (warn = -1)
-  binnedData <- data %>% mutate (bin = cut (RRADDISTR, seq (0, 100, 1)))
-  meanRadWidth <- binnedData %>% filter (PLOT == 1) %>% 
-    group_by (bin) %>% summarise (meanRadWidth = mean (cellRadWidth, na.rm = TRUE),
-                                  seRadWidth   = se (cellRadWidth))
-  polygon (x = c (seq (0.5, 99.5, 1), 
-                  seq (99.5, 0.5, -1)),
-           y = c (meanRadWidth [['meanRadWidth']] + meanRadWidth [['seRadWidth']], 
-                  rev (meanRadWidth [['meanRadWidth']] - meanRadWidth [['seRadWidth']])),
+  binnedData <- data %>% mutate (bin = cut (RRADDISTR, seq (0, 100, 5)))
+  meanNCells <- binnedData %>% filter (PLOT == 1) %>% 
+    group_by (bin) %>% summarise (meanNCells = mean (cumNCells, na.rm = TRUE),
+                                  seNCells   = se (cumNCells))
+  polygon (x = c (seq (0.5, 99.5, 5), 
+                  seq (99.5, 0.5, -5)),
+           y = c (meanNCells [['meanNCells']] + meanNCells [['seNCells']], 
+                  rev (meanNCells [['meanNCells']] - meanNCells [['seNCells']])),
            lty = 0, col = addOpacity (tColours [['colour']] [1], 0.5))
-  lines (x = seq (0.5, 99.5, 1), 
-         #y = rollmean (meanRadWidth [['meanRadWidth']], k = 10, na.pad = TRUE), 
-         y = meanRadWidth [['meanRadWidth']],
+  lines (x = seq (0.5, 99.5, 5), 
+         #y = rollmean (meanNCells [['meanNCells']], k = 5, na.pad = TRUE), 
+         y = meanNCells [['meanNCells']],
          col = tColours [['colour']] [1], lwd  = 2)
-  meanRadWidth <- binnedData %>% filter (PLOT == 5) %>% 
-    group_by (bin) %>% summarise (meanRadWidth = mean (cellRadWidth, na.rm = TRUE),
-                                  seRadWidth   = se (cellRadWidth))
-  meanRadWidth <- meanRadWidth [!is.na (meanRadWidth [['bin']]), ]
-  indices <- which (is.na (meanRadWidth [['seRadWidth']]))
-  meanRadWidth [['seRadWidth']] [indices] <- rowMeans (cbind (meanRadWidth [['seRadWidth']] [indices-1], 
-                                                    meanRadWidth [['seRadWidth']] [indices+1]))
-  polygon (x = c (seq (0.5, 99.5, 1), 
-                  seq (99.5, 0.5, -1)),
-           y = c (meanRadWidth [['meanRadWidth']] + meanRadWidth [['seRadWidth']], 
-                  rev (meanRadWidth [['meanRadWidth']] - meanRadWidth [['seRadWidth']])),
+  meanNCells <- binnedData %>% filter (PLOT == 5) %>% 
+    group_by (bin) %>% summarise (meanNCells = mean (cumNCells, na.rm = TRUE),
+                                  seNCells   = se (cumNCells))
+  meanNCells <- meanNCells [!is.na (meanNCells [['bin']]), ]
+  indices <- which (is.na (meanNCells [['seNCells']]))
+  meanNCells [['seNCells']] [indices] <- rowMeans (cbind (meanNCells [['seNCells']] [indices-1], 
+                                                              meanNCells [['seNCells']] [indices+1]))
+  polygon (x = c (seq (0.5, 99.5, 5), 
+                  seq (99.5, 0.5, -5)),
+           y = c (meanNCells [['meanNCells']] + meanNCells [['seNCells']], 
+                  rev (meanNCells [['meanNCells']] - meanNCells [['seNCells']])),
            lty = 0, col = addOpacity (tColours [['colour']] [5], 0.5))
-  lines (x = seq (0.5, 99.5, 1), 
-         #y = rollmean (meanRadWidth [['meanRadWidth']], k = 10, na.pad = TRUE), 
-         y = meanRadWidth [['meanRadWidth']],
+  lines (x = seq (0.5, 99.5, 5), 
+         #y = rollmean (meanNCells [['meanNCells']], k = 10, na.pad = TRUE), 
+         y = meanNCells [['meanNCells']],
          col = tColours [['colour']] [5], lwd = 2, lty = 2)
   options (warn = 0)
 }
 
 # Plot cell size over percentage ring width 
 #----------------------------------------------------------------------------------------
-png (filename = './fig/medianCellSizeOverPercentageRingWidth.png', width = 500, height = 600)
+#png (filename = './fig/cumulativeCellNumberOverPercentageRingWidth.png', width = 500, height = 600)
 layout (matrix (1:4), height = c (1,1,1,1.3))
 
 # loop over sampling heights
 #----------------------------------------------------------------------------------------
 for (h in c (4.0, 2.5, 1.5, 0.5)) {
-
+  
   # determine panel marigns
   if  (h != 0.5) {
     par (mar = c (1, 5, 1, 1))
@@ -100,21 +100,21 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
   
   # create plot area
   plot (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 5],
-        y = tempData [['cellRadWidth']] [tempData [['PLOT']] == 5],
+        y = tempData [['cumNCells']] [tempData [['PLOT']] == 5],
         col = 'white', xlab = ifelse (h == 0.5, 'Percentage ring width (%)',''), 
-        ylab = expression (paste ('Radial cell diameter (',mu, m,')', sep = '')),
-        xlim = c (0, 100), ylim = c (0, 75), axes = FALSE)
+        ylab = 'Cumulative cell number (n)',
+        xlim = c (0, 100), ylim = c (0, 65), axes = FALSE)
   
   # Add the average portion formed before, during and after the experiment
   plotFractionFormed (data = tempData) 
   
   # Add individual points
-  points (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 5],
-          y = tempData [['cellRadWidth']] [tempData [['PLOT']] == 5],
-          col = addOpacity (tColours [['colour']] [5], 0.2), pch = 5)
-  points (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 1],
-          y = tempData [['cellRadWidth']] [tempData [['PLOT']] == 1],
-          col = addOpacity (tColours [['colour']] [1], 0.2), pch = 19)  
+  lines (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 5],
+         y = tempData [['cumNCells']] [tempData [['PLOT']] == 5],
+         col = addOpacity (tColours [['colour']] [5], 0.5), lty = 2)
+  lines (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 1],
+         y = tempData [['cumNCells']] [tempData [['PLOT']] == 1],
+         col = addOpacity (tColours [['colour']] [1], 0.5))  
   axis (side = 1, at = seq (0, 100, 10), labels = rep ('', 11))
   axis (side = 2, at = seq (0, 60, 20), las = 1)
   
