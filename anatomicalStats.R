@@ -36,7 +36,7 @@ summary (mod); rm (tempData)
 # Did one treatment cause an increases or reduction in mean radial cell size?
 #----------------------------------------------------------------------------------------
 tempData <- anatomicalData %>% 
-  filter (YEAR == 2018, RRADDISTR <= 10, PLOT %in% c (1, 5)) %>%
+  filter (YEAR == 2018, RRADDISTR <= 10, PLOT %in% c (1, 5), period < as_date ('2018-06-25')) %>%
   group_by (PLOT, TREE, sampleHeight, sampleDate) %>% 
   summarise (meanCellSize = mean (cellRadWidth)) %>%
   mutate (treatment = factor (PLOT, levels = c (5, 1)),

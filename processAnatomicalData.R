@@ -24,7 +24,7 @@ setwd ('/home/tim/projects/PlantGrowth/Exp2018Analysis/')
 source ('readAnatomicalData.R')
 source ('readRingWidths.R')
 
-# Before any processing need to remove data from samples without full 2018 ring
+# Before any processing, we need to remove data from samples without full 2018 ring
 #----------------------------------------------------------------------------------------
 anatomicalData <- anatomicalData %>% 
   dplyr::filter (!(TREE == 4 & sampleDate == as_date ('2018-11-15') & sampleHeight == 2.5)) %>%
@@ -141,12 +141,19 @@ anatomicalData <- add_column (anatomicalData, nCells = 20.0 /
 # Provide column with cumulative cell-wall area
 #----------------------------------------------------------------------------------------
 anatomicalData <- anatomicalData %>% add_column (cumNCells = NA, cumCWA = NA)
+FIRSTCWA    <- TRUE
+FIRSTNCELLS <- TRUE
 for (r in 1:dim (anatomicalData) [1]) {
-  if (r == 1) { 
-    anatomicalData [['cumNCells']] [r] <- anatomicalData [['nCells']] [r] 
-    anatomicalData [['cumCWA']]    [r] <- anatomicalData [['CWA']]    [r] 
+  if (r == 1 | FIRSTCWA) { 
+    if (!is.na (anatomicalData [['CWA']] [r])) {
+      anatomicalData [['cumCWA']] [r] <- anatomicalData [['CWA']] [r]
+      
+      # Switch FIRST off to move on once a non-NA value was entered 
+      FIRSTCWA <- FALSE
+    } else {
+      FIRSTCWA <- TRUE
+    }
   } else {
-    
     # Is this a different profile from the previous row?
     differentProfile <- 
       anatomicalData [['YEAR']]         [r] != anatomicalData [['YEAR']]         [r-1] |
@@ -154,14 +161,49 @@ for (r in 1:dim (anatomicalData) [1]) {
       anatomicalData [['sampleHeight']] [r] != anatomicalData [['sampleHeight']] [r-1] |
       anatomicalData [['sampleDate']]   [r] != anatomicalData [['sampleDate']]   [r-1]
     if (differentProfile) {
-      anatomicalData [['cumNCells']] [r] <- anatomicalData [['nCells']] [r] 
-      anatomicalData [['cumCWA']]    [r] <- anatomicalData [['nCells']] [r] * 
-        anatomicalData [['CWA']] [r]
+      if (!is.na (anatomicalData [['CWA']] [r])) {
+        anatomicalData [['cumCWA']]    [r] <- anatomicalData [['CWA']] [r]
+      } else {
+        FIRSTCWA <- TRUE
+      }
     } else {
-      anatomicalData [['cumNCells']] [r] <- anatomicalData [['nCells']] [r] + 
-        anatomicalData [['cumNCells']] [r-1] 
-      anatomicalData [['cumCWA']] [r] <- anatomicalData [['nCells']] [r] * 
-        anatomicalData [['CWA']] [r] + anatomicalData [['cumCWA']] [r-1]
+      if (!is.na (anatomicalData [['CWA']] [r])) {
+        anatomicalData [['cumCWA']] [r] <- anatomicalData [['CWA']] [r] + 
+          anatomicalData [['cumCWA']] [r-1]
+      } else {
+        anatomicalData [['cumCWA']] [r] <- anatomicalData [['cumCWA']] [r-1]
+      }
+    }
+  }
+  if (r == 1 | FIRSTNCELLS) { 
+    if (!is.na (anatomicalData [['nCells']] [r])) {
+      anatomicalData [['cumNCells']] [r] <- anatomicalData [['nCells']] [r]
+      
+      # Switch FIRST off to move on once a non-NA value was entered 
+      FIRSTNCELLS <- FALSE
+    } else {
+      FIRSTNCELLS <- TRUE
+    }
+  } else {
+    # Is this a different profile from the previous row?
+    differentProfile <- 
+      anatomicalData [['YEAR']]         [r] != anatomicalData [['YEAR']]         [r-1] |
+      anatomicalData [['TREE']]         [r] != anatomicalData [['TREE']]         [r-1] |
+      anatomicalData [['sampleHeight']] [r] != anatomicalData [['sampleHeight']] [r-1] |
+      anatomicalData [['sampleDate']]   [r] != anatomicalData [['sampleDate']]   [r-1]
+    if (differentProfile) {
+      if (!is.na (anatomicalData [['nCells']] [r])) {
+        anatomicalData [['cumNCells']] [r] <- anatomicalData [['nCells']] [r] 
+      } else {
+        FIRSTCWA <- TRUE
+      }
+    } else {
+      if (!is.na (anatomicalData [['nCells']] [r])) {
+        anatomicalData [['cumNCells']] [r] <- anatomicalData [['nCells']] [r] + 
+          anatomicalData [['cumNCells']] [r-1]
+      } else {
+        anatomicalData [['cumNCells']] [r] <- anatomicalData [['cumNCells']] [r-1]
+      }
     }
   }
 }

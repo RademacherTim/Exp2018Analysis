@@ -45,16 +45,18 @@ plotFractionFormed <- function (data) {
 # Function to plot running mean and se for each 
 #----------------------------------------------------------------------------------------
 plotRunningAverage <- function (data) {
-  binnedData <- data %>% mutate (bin = cut (RRADDISTR, seq (0, 100, 1)))
-  meanCW <- binnedData %>% filter (PLOT == 1) %>% 
+  
+  reso <- 5
+  binnedData <- data %>% mutate (bin = cut (RRADDISTR, seq (0, 100, reso)))
+  meanCWA <- binnedData %>% filter (PLOT == 1) %>% 
     group_by (bin) %>% summarise (meanCWA = mean (CWA, na.rm = TRUE),
                                   seCWA   = se (CWA))
-  polygon (x = c (seq (0.5, 99.5, 1), 
-                  seq (99.5, 0.5, -1)),
+  polygon (x = c (seq (reso/2, 100 - (reso/2), reso), 
+                  seq (100 - (reso/2), reso/2, -reso)),
            y = c (meanCWA [['meanCWA']] + meanCWA [['seCWA']], 
                   rev (meanCWA [['meanCWA']] - meanCWA [['seCWA']])),
            lty = 0, col = addOpacity (tColours [['colour']] [1], 0.5))
-  lines (x = seq (0.5, 99.5, 1), 
+  lines (x = seq (reso/2, 100 - (reso/2), reso), 
          #y = rollmean (meanCWA [['meanCWA']], k = 10, na.pad = TRUE), 
          y = meanCWA [['meanCWA']],
          col = tColours [['colour']] [1], lwd  = 2)
@@ -65,12 +67,12 @@ plotRunningAverage <- function (data) {
   indices <- which (is.na (meanCWA [['seCWA']]))
   meanCWA [['seCWA']] [indices] <- rowMeans (cbind (meanCWA [['seCWA']] [indices-1], 
                                                     meanCWA [['seCWA']] [indices+1]))
-  polygon (x = c (seq (0.5, 99.5, 1), 
-                  seq (99.5, 0.5, -1)),
+  polygon (x = c (seq (reso/2, 100 - (reso/2), reso), 
+                  seq (100 - (reso/2), reso/2, -reso)),
            y = c (meanCWA [['meanCWA']] + meanCWA [['seCWA']], 
                   rev (meanCWA [['meanCWA']] - meanCWA [['seCWA']])),
            lty = 0, col = addOpacity (tColours [['colour']] [5], 0.5))
-  lines (x = seq (0.5, 99.5, 1), 
+  lines (x = seq (reso/2, 100 - (reso/2), reso), 
          #y = rollmean (meanCWA [['meanCWA']], k = 10, na.pad = TRUE), 
          y = meanCWA [['meanCWA']],
          col = tColours [['colour']] [5], lwd = 2, lty = 2)
@@ -78,103 +80,50 @@ plotRunningAverage <- function (data) {
 
 # Plot cell-wall area (CWA) bover percentage ring width 
 #----------------------------------------------------------------------------------------
-png (filename = './fig/medianCWAOverPercentageRingWidth.png', width = 500, height = 600)
-layout (matrix (1:4), height = c (1,1,1,1.3))
-par (mar = c (1, 5, 1, 1))
-tempData <- anatomicalData %>% filter (YEAR == 2018, PLOT  %in% c (5, 1), sampleHeight == 4.0)
-plot (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 5],
-      y = tempData [['CWA']] [tempData [['PLOT']] == 5],
-      col = 'white', xlab = '', 
-      ylab = expression (paste ('Cell-wall area (',mu, m^2,')', sep = '')),
-      xlim = c (0, 100), ylim = c (0, 1400), axes = FALSE)
+png (filename = './fig/meanCWAOverPercentageRingWidth.png', width = 500, height = 700)
+layout (matrix (1:6), height = c (1,1,1,1,1,1.3))
 
-# Add the average portion formed before, during and after the experiment
-plotFractionFormed (data = tempData) 
-
-# Add individual points
-points (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 5],
+# loop over sampling heights
+#----------------------------------------------------------------------------------------
+for (h in c (4.0, 2.5, 2.0, 1.5, 1.0, 0.5)) {
+  
+  # determine panel marigns
+  if  (h != 0.5) {
+    par (mar = c (1, 5, 1, 1))
+  } else {
+    par (mar = c (5, 5, 1, 1))
+  }
+  
+  # get relevant data 
+  tempData <- anatomicalData %>% filter (YEAR == 2018, PLOT  %in% c (5, 1), sampleHeight == h)
+  
+  # plot empty plot
+  plot (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 5],
         y = tempData [['CWA']] [tempData [['PLOT']] == 5],
-        col = addOpacity (tColours [['colour']] [5], 0.2), pch = 5)
-points (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 1],
-        y = tempData [['CWA']] [tempData [['PLOT']] == 1],
-        col = addOpacity (tColours [['colour']] [1], 0.2), pch = 19)  
-axis (side = 1, at = seq (0, 100, 10), labels = rep ('', 11))
-axis (side = 2, at = seq (0, 1400, 400), las = 1)
+        col = 'white', xlab = ifelse (h ==0.5, 'Percentage ring width (%)',''), 
+        ylab = expression (paste ('Cell-wall area (',mu, m^2,')', sep = '')),
+        xlim = c (0, 100), ylim = c (0, 1400), axes = FALSE)
 
-# Add smoothed mean signal
-plotRunningAverage (data = tempData)
-
-# Add panel for 2.5 m
-par (mar = c (1,5,1,1))
-tempData <- anatomicalData %>% filter (YEAR == 2018, PLOT  %in% c (5, 1), sampleHeight == 2.5)
-plot (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 5],
-      y = tempData [['CWA']] [tempData [['PLOT']] == 5],
-      col = 'white', xlab = '', 
-      ylab = expression (paste ('Cell-wall area (',mu, m^2,')', sep = '')),
-      xlim = c (0, 100), ylim = c (0, 1400), axes = FALSE)
-
-# Add the average portion formed before, during and after the experiment
-plotFractionFormed (data = tempData)
-
-points (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 5],
-        y = tempData [['CWA']] [tempData [['PLOT']] == 5],
-        col = addOpacity (tColours [['colour']] [5], 0.5), pch = 5)
-points (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 1],
-        y = tempData [['CWA']] [tempData [['PLOT']] == 1],
-        col = addOpacity (tColours [['colour']] [1], 0.3), pch = 19)  
-axis (side = 1, at = seq (0, 100, 10), labels = rep ('', 11))
-axis (side = 2, at = seq (0, 1400, 400), las = 1)
-
-# Add smoothed mean signal
-plotRunningAverage (data = tempData)
-
-# Add panel for 1.5 m
-par (mar = c (1, 5, 1, 1))
-tempData <- anatomicalData %>% filter (YEAR == 2018, PLOT  %in% c (5, 1), sampleHeight == 1.5)
-plot (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 5],
-      y = tempData [['CWA']] [tempData [['PLOT']] == 5],
-      col = 'white', xlab = '', 
-      ylab = expression (paste ('Cell-wall area (',mu, m^2,')', sep = '')),
-      xlim = c (0, 100), ylim = c (0, 1400), axes = FALSE)
-
-# Add the average portion formed before, during and after the experiment
-plotFractionFormed (data = tempData)
-
-points (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 5],
-        y = tempData [['CWA']] [tempData [['PLOT']] == 5],
-        col = addOpacity (tColours [['colour']] [5], 0.5), pch = 5)
-points (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 1],
-        y = tempData [['CWA']] [tempData [['PLOT']] == 1],
-        col = addOpacity (tColours [['colour']] [1], 0.3), pch = 19)  
-axis (side = 1, at = seq (0, 100, 10), labels = rep ('', 11))
-axis (side = 2, at = seq (0, 1400, 400), las = 1)
-
-# Add smoothed mean signal
-plotRunningAverage (data = tempData)
-
-# Add panel for 1.5 m
-par (mar = c (5, 5, 1, 1))
-tempData <- anatomicalData %>% filter (YEAR == 2018, PLOT  %in% c (5, 1), sampleHeight == 0.5)
-plot (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 5],
-      y = tempData [['CWA']] [tempData [['PLOT']]== 5],
-      col = 'white', xlab = 'Percentage ring width (%)', 
-      ylab = expression (paste ('Cell-wall area (',mu, m^2,')', sep = '')),
-      xlim = c (0, 100), ylim = c (0, 1400), axes = FALSE)
-
-# Add the average portion formed before, during and after the experiment
-plotFractionFormed (data = tempData)
-
-points (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 5],
-        y = tempData [['CWA']] [tempData [['PLOT']]== 5],
-        col = addOpacity (tColours [['colour']] [5], 0.5), pch = 5)
-points (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 1],
-        y = tempData [['CWA']] [tempData [['PLOT']] == 1],
-        col = addOpacity (tColours [['colour']] [1], 0.3), pch = 19)  
-axis (side = 1, at = seq (0, 100, 10))
-axis (side = 2, at = seq (0, 1400, 400), las = 1)
-
-# Add smoothed mean signal
-plotRunningAverage (data = tempData)
+  # add the average portion formed before, during and after the experiment
+  if (h %notin% 1:2) plotFractionFormed (data = tempData) 
+  
+  # add individual points
+  points (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 5],
+          y = tempData [['CWA']] [tempData [['PLOT']] == 5],
+          col = addOpacity (tColours [['colour']] [5], 0.2), pch = 5)
+  points (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 1],
+          y = tempData [['CWA']] [tempData [['PLOT']] == 1],
+          col = addOpacity (tColours [['colour']] [1], 0.2), pch = 19)  
+  if (h != 0.5) {
+    axis (side = 1, at = seq (0, 100, 10), labels = rep ('', 11))
+  } else {
+    axis (side = 1, at = seq (0, 100, 10))
+  }
+  axis (side = 2, at = seq (0, 1400, 400), las = 1)
+  
+  # Add smoothed mean signal
+  plotRunningAverage (data = tempData)
+}
 
 # Add column
 legend (x = 6, y = 1350, legend = c ('control','chilled'), pch = c (19,5), bg = 'transparent',

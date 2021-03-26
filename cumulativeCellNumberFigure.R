@@ -47,16 +47,17 @@ plotFractionFormed <- function (data) {
 plotRunningAverage <- function (data) {
   
   options (warn = -1)
-  binnedData <- data %>% mutate (bin = cut (RRADDISTR, seq (0, 100, 5)))
+  reso <- 5
+  binnedData <- data %>% mutate (bin = cut (RRADDISTR, seq (0, 100, reso)))
   meanNCells <- binnedData %>% filter (PLOT == 1) %>% 
     group_by (bin) %>% summarise (meanNCells = mean (cumNCells, na.rm = TRUE),
                                   seNCells   = se (cumNCells))
-  polygon (x = c (seq (0.5, 99.5, 5), 
-                  seq (99.5, 0.5, -5)),
+  polygon (x = c (seq (reso/2, 100 - (reso/2), reso),
+                  seq (100 - (reso/2), (reso/2), -reso)),
            y = c (meanNCells [['meanNCells']] + meanNCells [['seNCells']], 
                   rev (meanNCells [['meanNCells']] - meanNCells [['seNCells']])),
            lty = 0, col = addOpacity (tColours [['colour']] [1], 0.5))
-  lines (x = seq (0.5, 99.5, 5), 
+  lines (x = seq (reso/2, 100 - (reso/2), reso), 
          #y = rollmean (meanNCells [['meanNCells']], k = 5, na.pad = TRUE), 
          y = meanNCells [['meanNCells']],
          col = tColours [['colour']] [1], lwd  = 2)
@@ -67,12 +68,12 @@ plotRunningAverage <- function (data) {
   indices <- which (is.na (meanNCells [['seNCells']]))
   meanNCells [['seNCells']] [indices] <- rowMeans (cbind (meanNCells [['seNCells']] [indices-1], 
                                                               meanNCells [['seNCells']] [indices+1]))
-  polygon (x = c (seq (0.5, 99.5, 5), 
-                  seq (99.5, 0.5, -5)),
+  polygon (x = c (seq (reso/2, 100 - (reso/2), reso),
+                  seq (100 - (reso/2), reso/2, -reso)),
            y = c (meanNCells [['meanNCells']] + meanNCells [['seNCells']], 
                   rev (meanNCells [['meanNCells']] - meanNCells [['seNCells']])),
            lty = 0, col = addOpacity (tColours [['colour']] [5], 0.5))
-  lines (x = seq (0.5, 99.5, 5), 
+  lines (x = seq (reso/2, 100 - (reso/2), reso), 
          #y = rollmean (meanNCells [['meanNCells']], k = 10, na.pad = TRUE), 
          y = meanNCells [['meanNCells']],
          col = tColours [['colour']] [5], lwd = 2, lty = 2)
@@ -81,12 +82,12 @@ plotRunningAverage <- function (data) {
 
 # Plot cell size over percentage ring width 
 #----------------------------------------------------------------------------------------
-#png (filename = './fig/cumulativeCellNumberOverPercentageRingWidth.png', width = 500, height = 600)
-layout (matrix (1:4), height = c (1,1,1,1.3))
+png (filename = './fig/cumulativeCellNumberOverPercentageRingWidth.png', width = 500, height = 700)
+layout (matrix (1:6), height = c (1,1,1,1,1,1.3))
 
 # loop over sampling heights
 #----------------------------------------------------------------------------------------
-for (h in c (4.0, 2.5, 1.5, 0.5)) {
+for (h in c (4.0, 2.5, 2.0, 1.5, 1.0, 0.5)) {
   
   # determine panel marigns
   if  (h != 0.5) {
@@ -103,10 +104,10 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
         y = tempData [['cumNCells']] [tempData [['PLOT']] == 5],
         col = 'white', xlab = ifelse (h == 0.5, 'Percentage ring width (%)',''), 
         ylab = 'Cumulative cell number (n)',
-        xlim = c (0, 100), ylim = c (0, 65), axes = FALSE)
+        xlim = c (0, 100), ylim = c (0, 85), axes = FALSE)
   
   # Add the average portion formed before, during and after the experiment
-  plotFractionFormed (data = tempData) 
+  if (h %notin% 1:2) plotFractionFormed (data = tempData) 
   
   # Add individual points
   lines (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 5],
@@ -115,8 +116,12 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
   lines (x = tempData [['RRADDISTR']] [tempData [['PLOT']] == 1],
          y = tempData [['cumNCells']] [tempData [['PLOT']] == 1],
          col = addOpacity (tColours [['colour']] [1], 0.5))  
-  axis (side = 1, at = seq (0, 100, 10), labels = rep ('', 11))
-  axis (side = 2, at = seq (0, 60, 20), las = 1)
+  if (h != 0.5) {
+    axis (side = 1, at = seq (0, 100, 10), labels = rep ('', 11))
+  } else {
+    axis (side = 1, at = seq (0, 100, 10))
+  }
+  axis (side = 2, at = seq (0, 80, 20), las = 1)
   
   # Add smoothed mean signal
   plotRunningAverage (data = tempData)
@@ -124,9 +129,9 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
 }
 
 # Add column
-legend (x = 6, y = 35, legend = c ('control','chilled'), pch = c (19,5), bg = 'transparent',
+legend (x = 6, y = 75, legend = c ('control','chilled'), lwd = 1, lty = 1:2, bg = 'transparent',
         col = addOpacity (tColours [['colour']] [c (1, 5)], 0.5), box.lty = 0)
-legend (x = 0, y = 35, legend = rep ('', 2), lwd = 2, lty = 1:2,  bg = 'transparent',
+legend (x = 0, y = 75, legend = rep ('', 2), lwd = 2, lty = 1:2,  bg = 'transparent',
         col = tColours [['colour']] [c (1, 5)], box.lty = 0)
 dev.off ()
 #========================================================================================
