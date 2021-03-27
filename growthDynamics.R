@@ -30,41 +30,108 @@ if (!exists ('growingSeasonDates')) source ('extractGrowingSeasonDates.R')
 if (!exists ('ringWidths')) source ('readRingWidths.R')
 if (!exists ('incrementRingWidths')) source ('readIncrementRingWidths.R')
 
+# make two panel figure of growth over for control and compressed trees
+#----------------------------------------------------------------------------------------
+tempData <- ringWidths %>% filter (treatment %in% c (1, 5)) %>%
+  select (RWI2018, treeId, treatment, sampleHeight, sampleDate) %>%
+  group_by (sampleHeight, treeId) %>%
+  mutate (maxRWI =  max (RWI2018, na.rm = TRUE)) %>%
+  mutate (RGI = RWI2018 / maxRWI) %>%
+  ungroup ()
+layout (matrix (1:4, nrow = 4), widths = c (1,1,1,1.3))
+par (mar = c (5,5,1,1))
+plot (x = tempData %>% filter (treatment == 1, sampleHeight == 0.5) %>% 
+        select (sampleDate) %>% unlist () - 17532,
+      y = tempData %>% filter (treatment == 1, sampleHeight == 0.5) %>% 
+        select (RGI) %>% unlist (),
+      xlim = c (0, 365), ylim = c (0, 1.1), axes = FALSE,
+      las = 1, xlab = 'Day of year', ylab = 'Relative growth (fration)', 
+      col = addOpacity (tColours [['colour']] [1], 0.5), pch = 25) # Downward triangle for below (e.g., at 0.5m)
+points (x = tempData %>% filter (treatment == 1, sampleHeight == 1.5) %>% 
+          select (sampleDate) %>% unlist () - 17532,
+        y = tempData %>% filter (treatment == 1, sampleHeight == 1.5) %>% 
+          select (RGI) %>% unlist (), pch = 23, 
+        col = addOpacity (tColours [['colour']] [1], 0.5)) # Diamond for middle (e.g., 1.5m)
+points (x = tempData %>% filter (treatment == 1, sampleHeight == 2.5) %>% 
+          select (sampleDate) %>% unlist () - 17532,
+        y = tempData %>% filter (treatment == 1, sampleHeight == 2.5) %>% 
+          select (RGI) %>% unlist (), pch = 24, 
+        col = addOpacity (tColours [['colour']] [1], 0.5)) # Upward triangle for above (e.g., 2.5m)
+points (x = tempData %>% filter (treatment == 1, sampleHeight == 4.0) %>% 
+          select (sampleDate) %>% unlist () - 17532,
+        y = tempData %>% filter (treatment == 1, sampleHeight == 4.0) %>% 
+          select (RGI) %>% unlist (), pch = 21, 
+        col = addOpacity (tColours [['colour']] [1], 0.5)) # Upward triangle for above (e.g., 4.0m)
+axis (side = 1, at = seq (0, 360, 60))
+axis (side = 2, at = seq (0, 1, 0.2), las = 1)
+
+# Add panel for chilled plot
+par (mar = c (5,1,1,1))
+plot (x = tempData %>% filter (treatment == 5, sampleHeight == 0.5) %>% 
+        select (sampleDate) %>% unlist () - 17532,
+      y = tempData %>% filter (treatment == 5, sampleHeight == 0.5) %>% 
+        select (RGI) %>% unlist (),
+      xlim = c (0, 365), ylim = c (0, 1.1), axes = FALSE,
+      las = 1, xlab = 'Day of year', ylab = '', 
+      col = addOpacity (tColours [['colour']] [5], 0.5), pch = 25) # Downward triangle for below (e.g., at 0.5m)
+points (x = tempData %>% filter (treatment == 5, sampleHeight == 1.5) %>% 
+          select (sampleDate) %>% unlist () - 17532,
+        y = tempData %>% filter (treatment == 5, sampleHeight == 1.5) %>% 
+          select (RGI) %>% unlist (), pch = 23, 
+        col = addOpacity (tColours [['colour']] [5], 0.5)) # Diamond for middle (e.g., 1.5m)
+points (x = tempData %>% filter (treatment == 5, sampleHeight == 2.5) %>% 
+          select (sampleDate) %>% unlist () - 17532,
+        y = tempData %>% filter (treatment == 5, sampleHeight == 2.5) %>% 
+          select (RGI) %>% unlist (), pch = 24, 
+        col = addOpacity (tColours [['colour']] [5], 0.5)) # Upward triangle for above (e.g., 2.5m)
+points (x = tempData %>% filter (treatment == 5, sampleHeight == 4.0) %>% 
+          select (sampleDate) %>% unlist () - 17532,
+        y = tempData %>% filter (treatment == 5, sampleHeight == 4.0) %>% 
+          select (RGI) %>% unlist (), pch = 21, 
+        col = addOpacity (tColours [['colour']] [5], 0.5)) # Upward triangle for above (e.g., 4.0m)
+axis (side = 1, at = seq (0, 360, 60))
+axis (side = 2, at = seq (0, 1, 0.2), labels = rep ('', 6))
+
+
+
+
 # make box plot of onset and cessation of growth for each treatment
 #----------------------------------------------------------------------------------------
+growingSeasonDates <- growingSeasonDates %>% filter (treatment != 4)
 g <- ggplot (growingSeasonDates) +
   geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 0.5),
                 aes (x = sampleHeight, y = startOfGrowth, fill = factor (treatment)),
                 alpha = 0.1, 
-                colour = tColours [['colour']] [c (1,4,5)],
+                colour = tColours [['colour']] [c (1,5)],
                 position = position_dodge2 ()) +
   geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 0.5),
                 aes (x = sampleHeight, y = endOfGrowth, fill = factor (treatment)),
-               alpha = 0.7, colour = tColours [['colour']] [c (1,4,5)]) +
+               alpha = 0.7, colour = tColours [['colour']] [c (1,5)]) +
   geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 1.5),
                 aes (x = sampleHeight, y = startOfGrowth, fill = factor (treatment)),
-                alpha = 0.1, colour = tColours [['colour']] [c (1,4,5)]) +
+                alpha = 0.1, colour = tColours [['colour']] [c (1,5)]) +
   geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 1.5),
                 aes (x = sampleHeight, y = endOfGrowth, fill = factor (treatment)),
-                alpha = 0.7, colour = tColours [['colour']] [c (1,4,5)]) +
+                alpha = 0.7, colour = tColours [['colour']] [c (1,5)]) +
   geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 2.5),
                 aes (x = sampleHeight, y = startOfGrowth, fill = factor (treatment)),
-                alpha = 0.1, colour = tColours [['colour']] [c (1,4,5)]) +
+                alpha = 0.1, colour = tColours [['colour']] [c (1,5)]) +
   geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 2.5),
                 aes (x = sampleHeight, y = endOfGrowth, fill = factor (treatment)),
-                alpha = 0.7, colour = tColours [['colour']] [c (1,4,5)]) +
+                alpha = 0.7, colour = tColours [['colour']] [c (1,5)]) +
   geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 4.0),
                 aes (x = sampleHeight, y = startOfGrowth, fill = factor (treatment)),
-                alpha = 0.1, colour = tColours [['colour']] [c (1,4,5)]) +
+                alpha = 0.1, colour = tColours [['colour']] [c (1,5)]) +
   geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 4.0),
                 aes (x = sampleHeight, y = endOfGrowth, fill = factor (treatment)),
-                alpha = 0.7, colour = tColours [['colour']] [c (1,4,5)]) +
-  scale_fill_manual (values = tColours [['colour']] [c (1,4,5)], 
+                alpha = 0.7, colour = tColours [['colour']] [c (1,5)]) +
+  scale_fill_manual (values = tColours [['colour']] [c (1,5)], 
                      labels = c ('Control','Compressed','Chilled')) +
   labs (x = 'Sample height (m)', y = 'Day of year', fill = 'Treatment') +
   scale_x_discrete (limits = c (0.5, 1.5, 2.5, 4.0)) + 
   scale_y_continuous (breaks = seq (0, 360 , by = 60), limits = c (0, 365)) +
-  coord_flip () + theme_classic ()
+  coord_flip () + theme_classic () + theme (legend.position = 'none') +
+  geom_vline (xintercept = yday ('2018-06-25'), color = 'black')
 g
 
 # estimate treatment effect on start and end of growing season
