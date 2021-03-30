@@ -12,10 +12,11 @@ if (!existsFunction ('scam')) library ('scam')
 # create tibble for start and end of growing season dates
 #----------------------------------------------------------------------------------------
 growingSeasonDates <- tibble (treeId = rep (1:15, each = 4), 
-                              treatment = rep (c (1, 4, 5), each = 20),
+                              treatment = rep (c (5, 4, 1), each = 20),
                               sampleHeight = rep (c (0.5, 1.5, 2.5, 4.0), 15),
                               startOfGrowth = NA,
-                              endOfGrowth = NA)
+                              endOfGrowth = NA,
+                              maxRWIfit = NA)
 
 # set growing season threshold
 #----------------------------------------------------------------------------------------
@@ -80,7 +81,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
             pch = 19, col = tColours [['colour']] [t], ylim = c (0, 2.3)#,
             )#main = paste ('Tree',i,' height',h))
     
-      lines (x = 1:365, y = exp (predict (fit.gam, newdata = data.frame (doy = c (1:365)))),
+      lines (x = 1:365, y = exp (predict (fit.gam, newdata = data.frame (doy = 1:365))),
              col = tColours [['colour']] [t])
       
       # plot treatment period
@@ -92,7 +93,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     # get the maximal value of the GAM for the year (to correct the predicted values to 
     # growth fractions) 
     #------------------------------------------------------------------------------------
-    maxRWI <- max (exp (predict (fit.gam, newdata = data.frame (doy = c (1:365)))))
+    maxRWIfit <- max (exp (predict (fit.gam, newdata = data.frame (doy = 1:365))))
     
     # determine date when 5% of growth had occured 
     # within a 0.1% error on the fraction growth
@@ -100,7 +101,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     error <- 10000 # set error to a large number to start with
     iDoy <- 150 # start halfway through the year
     while (error < -0.001 | error > 0.001) {
-      growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWI
+      growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWIfit
       if (growthFraction > threshold) {
         if (iDoy != 150) {
           if (direction == 'later') break
@@ -129,7 +130,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     error <- 10000 # set error to a large number to start with
     iDoy <- 180 # start halfway through the year
     while (error < -0.001 | error > 0.001) {
-      growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWI
+      growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWIfit
       if (growthFraction > (1.0 - threshold)) {
         if (iDoy != 180) {
           if (direction == 'later') break
@@ -148,6 +149,9 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     
     # Save start of growth
     growingSeasonDates [['endOfGrowth']] [growingSeasonDates [['treeId']] == i & growingSeasonDates [['sampleHeight']] == h] <- iDoy
+    
+    # Save the maximum value of the fitted 
+    growingSeasonDates [['maxRWIfit']] [growingSeasonDates [['treeId']] == i & growingSeasonDates [['sampleHeight']] == h] <- maxRWIfit
     
     # plot 5% of volume growth had occured
     if (PLOT) points (x = iDoy, y = 2.25, pch = 5)
@@ -213,7 +217,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
             pch = 19, col = tColours [['colour']] [t], ylim = c (0, 2.3)#,
       )#main = paste ('Tree',i,' height',h))
       
-      lines (x = 1:365, y = exp (predict (fit.gam, newdata = data.frame (doy = c (1:365)))),
+      lines (x = 1:365, y = exp (predict (fit.gam, newdata = data.frame (doy = 1:365))),
              col = tColours [['colour']] [t])
       
       # plot treatment period
@@ -225,7 +229,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     # get the maximal value of the GAM for the year (to correct the predicted values to 
     # growth fractions) 
     #------------------------------------------------------------------------------------
-    maxRWI <- max (exp (predict (fit.gam, newdata = data.frame (doy = c (1:365)))))
+    maxRWIfit <- max (exp (predict (fit.gam, newdata = data.frame (doy = 1:365))))
     
     # determine date when 5% of growth had occured 
     # within a 0.1% error on the fraction growth
@@ -233,7 +237,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     error <- 10000 # set error to a large number to start with
     iDoy <- 150 # start halfway through the year
     while (error < -0.001 | error > 0.001) {
-      growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWI
+      growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWIfit
       if (growthFraction > threshold) {
         if (iDoy != 150) {
           if (direction == 'later') break
@@ -262,7 +266,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     error <- 10000 # set error to a large number to start with
     iDoy <- 180 # start halfway through the year
     while (error < -0.001 | error > 0.001) {
-      growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWI
+      growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWIfit
       if (growthFraction > (1.0 - threshold)) {
         if (iDoy != 180) {
           if (direction == 'later') break
@@ -281,6 +285,9 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     
     # Save start of growth
     growingSeasonDates [['endOfGrowth']] [growingSeasonDates [['treeId']] == i & growingSeasonDates [['sampleHeight']] == h] <- iDoy
+    
+    # Save the maximum value of the fitted 
+    growingSeasonDates [['maxRWIfit']] [growingSeasonDates [['treeId']] == i & growingSeasonDates [['sampleHeight']] == h] <- maxRWIfit
     
     # plot 5% of volume growth had occured
     if (PLOT) points (x = iDoy, y = 2.25, pch = 5)
@@ -346,7 +353,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
             pch = 19, col = tColours [['colour']] [t], ylim = c (0, 2.3)#,
       )#main = paste ('Tree',i,' height',h))
       
-      lines (x = 1:365, y = exp (predict (fit.gam, newdata = data.frame (doy = c (1:365)))),
+      lines (x = 1:365, y = exp (predict (fit.gam, newdata = data.frame (doy = 1:365))),
              col = tColours [['colour']] [t])
       
       # plot treatment period
@@ -357,7 +364,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     # get the maximal value of the GAM for the year (to correct the predicted values to 
     # growth fractions) 
     #------------------------------------------------------------------------------------
-    maxRWI <- max (exp (predict (fit.gam, newdata = data.frame (doy = c (1:365)))))
+    maxRWIfit <- max (exp (predict (fit.gam, newdata = data.frame (doy = 1:365))))
     
     # determine date when 5% of growth had occured 
     # within a 0.1% error on the fraction growth
@@ -365,7 +372,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     error <- 10000 # set error to a large number to start with
     iDoy <- 150 # start halfway through the year
     while (error < -0.001 | error > 0.001) {
-      growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWI
+      growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWIfit
       if (growthFraction > threshold) {
         if (iDoy != 150) {
           if (direction == 'later') break
@@ -394,7 +401,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     error <- 10000 # set error to a large number to start with
     iDoy <- 180 # start halfway through the year
     while (error < -0.001 | error > 0.001) {
-      growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWI
+      growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWIfit
       if (growthFraction > (1.0 - threshold)) {
         if (iDoy != 180) {
           if (direction == 'later') break
@@ -414,6 +421,9 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     # Save start of growth
     growingSeasonDates [['endOfGrowth']] [growingSeasonDates [['treeId']] == i & growingSeasonDates [['sampleHeight']] == h] <- iDoy
     
+    # Save the maximum value of the fitted 
+    growingSeasonDates [['maxRWIfit']] [growingSeasonDates [['treeId']] == i & growingSeasonDates [['sampleHeight']] == h] <- maxRWIfit
+    
     # plot 5% of volume growth had occured
     if (PLOT) points (x = iDoy, y = 2.25, pch = 5)
   }
@@ -423,5 +433,5 @@ if (PLOT) dev.off ()
 # clean up
 #----------------------------------------------------------------------------------------
 rm (PLOT, fit.gam, ringWidths, tempData, tColours, sColours, direction, eDoy, error, 
-    growthFraction, h, i, iDoy, maxRWI, sDoy, t, threshold)
+    growthFraction, h, i, iDoy, maxRWIfit, sDoy, t, threshold)
 #========================================================================================

@@ -30,115 +30,145 @@ if (!exists ('growingSeasonDates')) source ('extractGrowingSeasonDates.R')
 if (!exists ('ringWidths')) source ('readRingWidths.R')
 if (!exists ('incrementRingWidths')) source ('readIncrementRingWidths.R')
 
-# make two panel figure of growth over for control and compressed trees
+
+# extract ring width data
 #----------------------------------------------------------------------------------------
 tempData <- ringWidths %>% filter (treatment %in% c (1, 5)) %>%
   select (RWI2018, treeId, treatment, sampleHeight, sampleDate) %>%
-  group_by (sampleHeight, treeId) %>%
-  mutate (maxRWI =  max (RWI2018, na.rm = TRUE)) %>%
-  mutate (RGI = RWI2018 / maxRWI) %>%
-  ungroup ()
-layout (matrix (1:4, nrow = 4), widths = c (1,1,1,1.3))
-par (mar = c (5,5,1,1))
-plot (x = tempData %>% filter (treatment == 1, sampleHeight == 0.5) %>% 
-        select (sampleDate) %>% unlist () - 17532,
-      y = tempData %>% filter (treatment == 1, sampleHeight == 0.5) %>% 
-        select (RGI) %>% unlist (),
-      xlim = c (0, 365), ylim = c (0, 1.1), axes = FALSE,
-      las = 1, xlab = 'Day of year', ylab = 'Relative growth (fration)', 
-      col = addOpacity (tColours [['colour']] [1], 0.5), pch = 25) # Downward triangle for below (e.g., at 0.5m)
-points (x = tempData %>% filter (treatment == 1, sampleHeight == 1.5) %>% 
-          select (sampleDate) %>% unlist () - 17532,
-        y = tempData %>% filter (treatment == 1, sampleHeight == 1.5) %>% 
-          select (RGI) %>% unlist (), pch = 23, 
-        col = addOpacity (tColours [['colour']] [1], 0.5)) # Diamond for middle (e.g., 1.5m)
-points (x = tempData %>% filter (treatment == 1, sampleHeight == 2.5) %>% 
-          select (sampleDate) %>% unlist () - 17532,
-        y = tempData %>% filter (treatment == 1, sampleHeight == 2.5) %>% 
-          select (RGI) %>% unlist (), pch = 24, 
-        col = addOpacity (tColours [['colour']] [1], 0.5)) # Upward triangle for above (e.g., 2.5m)
-points (x = tempData %>% filter (treatment == 1, sampleHeight == 4.0) %>% 
-          select (sampleDate) %>% unlist () - 17532,
-        y = tempData %>% filter (treatment == 1, sampleHeight == 4.0) %>% 
-          select (RGI) %>% unlist (), pch = 21, 
-        col = addOpacity (tColours [['colour']] [1], 0.5)) # Upward triangle for above (e.g., 4.0m)
-axis (side = 1, at = seq (0, 360, 60))
-axis (side = 2, at = seq (0, 1, 0.2), las = 1)
+  group_by (sampleHeight, treeId) 
 
-# Add panel for chilled plot
-par (mar = c (5,1,1,1))
-plot (x = tempData %>% filter (treatment == 5, sampleHeight == 0.5) %>% 
-        select (sampleDate) %>% unlist () - 17532,
-      y = tempData %>% filter (treatment == 5, sampleHeight == 0.5) %>% 
-        select (RGI) %>% unlist (),
-      xlim = c (0, 365), ylim = c (0, 1.1), axes = FALSE,
-      las = 1, xlab = 'Day of year', ylab = '', 
-      col = addOpacity (tColours [['colour']] [5], 0.5), pch = 25) # Downward triangle for below (e.g., at 0.5m)
-points (x = tempData %>% filter (treatment == 5, sampleHeight == 1.5) %>% 
-          select (sampleDate) %>% unlist () - 17532,
-        y = tempData %>% filter (treatment == 5, sampleHeight == 1.5) %>% 
-          select (RGI) %>% unlist (), pch = 23, 
-        col = addOpacity (tColours [['colour']] [5], 0.5)) # Diamond for middle (e.g., 1.5m)
-points (x = tempData %>% filter (treatment == 5, sampleHeight == 2.5) %>% 
-          select (sampleDate) %>% unlist () - 17532,
-        y = tempData %>% filter (treatment == 5, sampleHeight == 2.5) %>% 
-          select (RGI) %>% unlist (), pch = 24, 
-        col = addOpacity (tColours [['colour']] [5], 0.5)) # Upward triangle for above (e.g., 2.5m)
-points (x = tempData %>% filter (treatment == 5, sampleHeight == 4.0) %>% 
-          select (sampleDate) %>% unlist () - 17532,
-        y = tempData %>% filter (treatment == 5, sampleHeight == 4.0) %>% 
-          select (RGI) %>% unlist (), pch = 21, 
-        col = addOpacity (tColours [['colour']] [5], 0.5)) # Upward triangle for above (e.g., 4.0m)
-axis (side = 1, at = seq (0, 360, 60))
-axis (side = 2, at = seq (0, 1, 0.2), labels = rep ('', 6))
-
-
-
-
-# make box plot of onset and cessation of growth for each treatment
+# add a row with the maxRWIfit from the growingSeasonDates tibble
 #----------------------------------------------------------------------------------------
-growingSeasonDates <- growingSeasonDates %>% filter (treatment != 4)
-g <- ggplot (growingSeasonDates) +
-  geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 0.5),
-                aes (x = sampleHeight, y = startOfGrowth, fill = factor (treatment)),
-                alpha = 0.1, 
-                colour = tColours [['colour']] [c (1,5)],
-                position = position_dodge2 ()) +
-  geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 0.5),
-                aes (x = sampleHeight, y = endOfGrowth, fill = factor (treatment)),
-               alpha = 0.7, colour = tColours [['colour']] [c (1,5)]) +
-  geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 1.5),
-                aes (x = sampleHeight, y = startOfGrowth, fill = factor (treatment)),
-                alpha = 0.1, colour = tColours [['colour']] [c (1,5)]) +
-  geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 1.5),
-                aes (x = sampleHeight, y = endOfGrowth, fill = factor (treatment)),
-                alpha = 0.7, colour = tColours [['colour']] [c (1,5)]) +
-  geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 2.5),
-                aes (x = sampleHeight, y = startOfGrowth, fill = factor (treatment)),
-                alpha = 0.1, colour = tColours [['colour']] [c (1,5)]) +
-  geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 2.5),
-                aes (x = sampleHeight, y = endOfGrowth, fill = factor (treatment)),
-                alpha = 0.7, colour = tColours [['colour']] [c (1,5)]) +
-  geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 4.0),
-                aes (x = sampleHeight, y = startOfGrowth, fill = factor (treatment)),
-                alpha = 0.1, colour = tColours [['colour']] [c (1,5)]) +
-  geom_boxplot (data = growingSeasonDates %>% filter (sampleHeight == 4.0),
-                aes (x = sampleHeight, y = endOfGrowth, fill = factor (treatment)),
-                alpha = 0.7, colour = tColours [['colour']] [c (1,5)]) +
-  scale_fill_manual (values = tColours [['colour']] [c (1,5)], 
-                     labels = c ('Control','Compressed','Chilled')) +
-  labs (x = 'Sample height (m)', y = 'Day of year', fill = 'Treatment') +
-  scale_x_discrete (limits = c (0.5, 1.5, 2.5, 4.0)) + 
-  scale_y_continuous (breaks = seq (0, 360 , by = 60), limits = c (0, 365)) +
-  coord_flip () + theme_classic () + theme (legend.position = 'none') +
-  geom_vline (xintercept = yday ('2018-06-25'), color = 'black')
-g
+tempData <- merge (tempData, growingSeasonDates, by = c ('treeId','treatment','sampleHeight')) %>%
+  mutate (RGI = RWI2018 / maxRWIfit)
+
+# make four panel figure of growth over time for control and chilled trees by sample height
+#----------------------------------------------------------------------------------------
+layout (matrix (1:4, nrow = 4), widths = c (1,1,1,1.4))
+for (h in c (4.0, 2.5, 1.5, 0.5)) {
+  
+  # determine panel margins
+  if (h != 0.5) {
+    par (mar = c (1, 5, 1, 1))
+  } else {
+    par (mar = c (5, 5, 1, 1))
+  }
+  
+  # plot 
+  plot (x = tempData %>% filter (treatment == 1, sampleHeight == h) %>% 
+          select (sampleDate) %>% unlist () - 17532,
+        y = tempData %>% filter (treatment == 1, sampleHeight == h) %>% 
+          select (RGI) %>% unlist (),
+        xlim = c (0, 365), ylim = c (0, 2.05), axes = FALSE, pch = 19, 
+        las = 1, xlab = ifelse (h != 0.5, '', 'Day of the year'), 
+        ylab = '', 
+        col = addOpacity (tColours [['colour']] [1], 0.5)) 
+
+  # add critical dates
+  #--------------------------------------------------------------------------------------
+  res <- abline (v = lubridate::yday (c ('2018-06-25','2018-09-03')), 
+                 col = '#999999', lty = 2, lwd = 1)
+  
+  points (x = tempData %>% filter (treatment == 5, sampleHeight == h) %>% 
+            select (sampleDate) %>% unlist () - 17532,
+          y = tempData %>% filter (treatment == 5, sampleHeight == h) %>% 
+            select (RGI) %>% unlist (), pch = 23, 
+          col = addOpacity (tColours [['colour']] [5], 0.5)) 
+
+  # add axis
+  if (h != 0.5) {
+    axis (side = 1, at = seq (0, 360, 60), labels = rep ('', 7))
+  } else {
+    axis (side = 1, at = seq (0, 360, 60))
+  }  
+  axis (side = 2, at = seq (0, 1.4, 0.2), las = 1)
+  mtext (side = 2, line = 3, text = 'Relative growth (fration)', at = 0.7, cex = 0.7)
+  
+  # add monotonic GAMs for each tree
+  for (t in c (1:5, 11:15)) {
+  
+    # get tree-specific volume growth
+    treeData <- tempData %>% mutate (doy = lubridate::yday (sampleDate)) %>% 
+      filter (treeId == t & sampleHeight == h) %>% arrange (by = sampleDate)
+      
+    # Assume that the ring measured in 2019 is the end of the year growth
+    if (sum (treeData [['sampleDate']] == as_date ('2019-10-24'), na.rm = TRUE) > 0) {
+      treeData [['sampleDate']] [treeData [['sampleDate']] == as_date ('2019-10-24')] <- as_date ('2018-12-31')
+      treeData [['doy']] [treeData [['sampleDate']] == as_date ('2018-12-31')] <- yday ('2018-12-31')
+    }
+    
+    # Fit general additive model to growth data
+    fit.gam <- scam::scam (RGI ~ s (doy, k = 8, bs = 'mpi'), 
+                           data   = treeData, 
+                           family = quasipoisson)
+    
+    lines (x = 1:365, y = exp (predict (fit.gam, newdata = data.frame (doy = 1:365))),
+           col = tColours [['colour']] [unique (treeData [['treatment']])], 
+           lty = ifelse (unique (treeData [['treatment']]) == 1, 1, 2), lwd = 0.3)
+  }
+  
+  # add monotonic GAM for treatment 
+  for (t in c (1, 5)) {
+    
+    # get treatment specific data
+    treatmentData <- tempData %>% mutate (doy = lubridate::yday (sampleDate)) %>% 
+      filter (treatment == t & sampleHeight == h) %>% arrange (by = sampleDate)
+  
+    # assume that the ring measured in 2019 is the end of the year growth
+    if (sum (treatmentData [['sampleDate']] == as_date ('2019-10-24'), na.rm = TRUE) > 0) {
+      treatmentData [['sampleDate']] [treatmentData [['sampleDate']] == as_date ('2019-10-24')] <- as_date ('2018-12-31')
+      treatmentData [['doy']] [treatmentData [['sampleDate']] == as_date ('2018-12-31')] <- yday ('2018-12-31')
+    }
+    
+    # Fit general additive model to growth data
+    fit.gam <- scam::scam (RGI ~ s (doy, k = 8, bs = 'mpi'), 
+                           data   = treatmentData, 
+                           family = quasipoisson)
+    
+    # add confidence interval for the model
+    m <- predict (fit.gam, newdata = data.frame (doy = 1:365), type = 'link', se.fit = TRUE) 
+    polygon (x = c (160:365, 365:160), 
+             y = exp (c (m$fit [160:365] + 2 * m$se.fit [160:365], 
+                         rev (m$fit [160:365] - 2 * m$se.fit [160:365]))), 
+             lty = 0,
+             col = addOpacity (tColours [['colour']] [t], 0.5))
+    
+    # add treatment mean behaviour
+    lines (x = 1:365, y = exp (m$fit), col = tColours [['colour']] [t], lwd = 2,
+           lty = ifelse (t == 1, 1, 2))
+    
+    # add mean and standard error for start of the growing season
+    arrows (x0 = mean (treatmentData [['startOfGrowth']]) - sd (treatmentData [['startOfGrowth']]),
+            x1 = mean (treatmentData [['startOfGrowth']]) + sd (treatmentData [['startOfGrowth']]), 
+            y0 = 1.9 + ifelse (t == 1, -0.1, 0.1), col = tColours [['colour']] [t], 
+            length = 0, angle = 90, code = 3, lwd = 2)
+    points (x = mean (treatmentData [['startOfGrowth']]), 
+            y = 1.9 + ifelse (t == 1, -0.1, 0.1), pch = ifelse (t == 1, 19, 23), 
+            col = tColours [['colour']] [t], cex = 1.5, bg = 'white', lwd = 2)
+    
+    # add mean and standard error for end of the growing season
+    arrows (x0 = mean (treatmentData [['endOfGrowth']]) - sd (treatmentData [['endOfGrowth']]),
+            x1 = mean (treatmentData [['endOfGrowth']]) + sd (treatmentData [['endOfGrowth']]), 
+            y0 = 1.9 + ifelse (t == 1, -0.1, 0.1), col = tColours [['colour']] [t], 
+            length = 0, angle = 90, code = 3, lwd = 2)
+    points (x = mean (treatmentData [['endOfGrowth']]), 
+            y = 1.9 + ifelse (t == 1, -0.1, 0.1), pch = ifelse (t == 1, 19, 23), 
+            col = tColours [['colour']] [t], cex = 1.5, bg = 'white', lwd = 2)
+  } # end treatment loop
+} # end sample height loop
+
+# add legend 
+legend (x = 0, y = 1.9, legend = c ('',''), bg = 'transparent', box.lty = 0,
+        lty = 1:2, col = tColours [['colour']] [c (1, 5)], lwd = 2)
+legend (x = 20, y = 1.9, legend = c ('control','chilled'), bg = 'transparent', box.lty = 0,
+        pch = c (19, 23), col = tColours [['colour']] [c (1, 5)])
+
 
 # estimate treatment effect on start and end of growing season
 #----------------------------------------------------------------------------------------
-tempData <- growingSeasonDates %>%
+tempData <- growingSeasonDates %>% filter (treatment %in% c (1, 5)) %>%
   mutate (treeId       = factor (treeId),
-          treatment    = factor (treatment, levels = c (5,4,1)),
+          treatment    = factor (treatment, levels = c (5, 1)),
           sampleHeight = factor (sampleHeight))
 mod1 <-lmer (formula = startOfGrowth ~ (1 | treeId) + treatment:sampleHeight, 
              data = tempData, REML = TRUE)
