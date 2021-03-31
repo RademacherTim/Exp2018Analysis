@@ -201,5 +201,81 @@ for (t in c (1, 4, 5)) {
 }
 legend (x = as_date ('2018-04-25'), y = 3.5, box.lty = 0, lty = 1:3, col = tColours [['colour']] [5], 
         legend = c ('2.5 m','1.5 m','0.5 m'), bg = 'transparent')
+
+
+# plot respiration in control and chilled trees for the three different sampling heights
+#----------------------------------------------------------------------------------------
+png (filename = './fig/Exp2018ChillingCO2EffluxRates.png', width = 400, height = 600)
+layout (matrix (1:3, nrow = 3, byrow = TRUE), heights = c (1, 1, 1.2))
+for (h in 3:1) {
+  
+  # determine margins
+  if (h == 1) {
+    par (mar = c (5, 5, 1, 1))
+  } else {
+    par (mar = c (1, 5, 1, 1))
+  }
+  
+  # plot control trees
+  con <- summaryRespData [['treatment']] == 1 & 
+    summaryRespData [['chamber']] == h & 
+    summaryRespData [['date']] < as_date ("2019-01-01")
+  plot (x = summaryRespData [['date']] [con],
+        y = summaryRespData [['meanRawResp']] [con], typ = 'l', las = 1,
+        xlab = ifelse (h == 1, '', 'Date'),
+        ylab = expression (paste (CO[2],' efflux rate (',mu, mol,' ', m^-2,' ', s^-1,')', sep = ' ')),
+        col = tColours [['colour']] [1], 
+        xlim = c (as_date ('2018-05-01'), as_date ('2018-11-10')),
+        ylim = c (0, 3.3), axes = FALSE)
+  
+  # plot control trees mean and standard error
+  polygon (x = c (summaryRespData [['date']] [con], rev (summaryRespData [['date']] [con])),
+           y = c (summaryRespData [['meanRawResp']] [con] + summaryRespData [['seRawResp']] [con],
+                  rev (summaryRespData [['meanRawResp']] [con] - summaryRespData [['seRawResp']] [con])),
+           col = addOpacity (tColours [['colour']] [1], 0.3), lty = 0)
+  lines (x = summaryRespData [['date']] [con],
+         y = summaryRespData [['meanRawResp']] [con], 
+         col = tColours [['colour']] [1], lty = 1, lwd = 2)
+  
+  # plot chilled trees
+  con <- summaryRespData [['treatment']] == 5 & 
+    summaryRespData [['chamber']] == h & 
+    summaryRespData [['date']] < as_date ("2019-01-01")
+  polygon (x = c (summaryRespData [['date']] [con], rev (summaryRespData [['date']] [con])),
+           y = c (summaryRespData [['meanRawResp']] [con] + summaryRespData [['seRawResp']] [con],
+                  rev (summaryRespData [['meanRawResp']] [con] - summaryRespData [['seRawResp']] [con])),
+           col = addOpacity (tColours [['colour']] [5], 0.3), lty = 0)
+  lines (x = summaryRespData [['date']] [con],
+         y = summaryRespData [['meanRawResp']] [con], 
+         col = tColours [['colour']] [5], lty = 2, lwd = 2)
+  
+  # add axes
+  #--------------------------------------------------------------------------------------
+  if (h == 1) {
+    axis (side = 1, labels = c ('May','Jun','Jul','Aug','Sep','Oct','Nov'),
+          at = c (as_date ('2018-05-01'), as_date ('2018-06-01'), as_date ('2018-07-01'), 
+                  as_date ('2018-08-01'), as_date ('2018-09-01'), as_date ('2018-10-01'), 
+                  as_date ('2018-11-01')))
+  } else {
+    axis (side = 1, labels = rep ('', 7),
+          at = c (as_date ('2018-05-01'), as_date ('2018-06-01'), as_date ('2018-07-01'), 
+                  as_date ('2018-08-01'), as_date ('2018-09-01'), as_date ('2018-10-01'), 
+                  as_date ('2018-11-01')))
+  }
+  axis (side = 2, las = 1, at = seq (0, 3.2, 0.4))
+  
+  # add critical dates
+  #--------------------------------------------------------------------------------------
+  res <- criticalDates (group = t, asDate = TRUE)
+  
+  # add legend
+  #--------------------------------------------------------------------------------------
+  if (h == 1) {
+    legend (x = as_date ('2018-05-01'), y = 3.2, box.lty = 0, bg = 'transparent', 
+            legend = c ('control', 'chilled'), lty = 1:2, lwd = 2, 
+            col = tColours [['colour']] [c (1, 5)])
+  }
+}
+dev.off ()
 #========================================================================================
 

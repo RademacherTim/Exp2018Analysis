@@ -94,7 +94,7 @@ summary (mod)
 # was this reduction in cell-wall area pronounced in cells that formed after treatment onset?
 #----------------------------------------------------------------------------------------
 tempData <- anatomicalData %>% 
-  filter (YEAR == 2018, PLOT %in% c (1, 5), period > as_date ('2018-09-03')) %>%
+  filter (YEAR == 2018, PLOT %in% c (1, 5), period > as_date ('2018-06-25')) %>%
   group_by (PLOT, TREE, sampleHeight, sampleDate) %>% 
   summarise (meanCWA = mean (CWA, na.rm = TRUE)) %>%
   mutate (treatment = factor (PLOT, levels = c (5, 1)),
