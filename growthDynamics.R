@@ -34,7 +34,7 @@ if (!exists ('incrementRingWidths')) source ('readIncrementRingWidths.R')
 # extract ring width data
 #----------------------------------------------------------------------------------------
 tempData <- ringWidths %>% filter (treatment %in% c (1, 5)) %>%
-  select (RWI2018, treeId, treatment, sampleHeight, sampleDate) %>%
+  select (Y2018, RWI2018, treeId, treatment, sampleHeight, sampleDate) %>%
   group_by (sampleHeight, treeId) 
 
 # add a row with the maxRWIfit from the growingSeasonDates tibble
@@ -44,6 +44,7 @@ tempData <- merge (tempData, growingSeasonDates, by = c ('treeId','treatment','s
 
 # make four panel figure of growth over time for control and chilled trees by sample height
 #----------------------------------------------------------------------------------------
+png (filename = './fig/Exp2018ChillingRelativeVolumeGrowthDynamics.png', width = 800 , height = 700)
 layout (matrix (1:4, nrow = 4), widths = c (1,1,1,1.4))
 for (h in c (4.0, 2.5, 1.5, 0.5)) {
   
@@ -162,7 +163,131 @@ legend (x = 0, y = 1.9, legend = c ('',''), bg = 'transparent', box.lty = 0,
         lty = 1:2, col = tColours [['colour']] [c (1, 5)], lwd = 2)
 legend (x = 20, y = 1.9, legend = c ('control','chilled'), bg = 'transparent', box.lty = 0,
         pch = c (19, 23), col = tColours [['colour']] [c (1, 5)])
+dev.off ()
 
+# make four panel figure of absolute growth over time for control and chilled trees by sample height
+#----------------------------------------------------------------------------------------
+png (filename = './fig/Exp2018ChillingAbsoluteVolumeGrowthDynamics.png', width = 800 , height = 700)
+layout (matrix (1:4, nrow = 4), widths = c (1,1,1,1.4))
+for (h in c (4.0, 2.5, 1.5, 0.5)) {
+  
+  # determine panel margins
+  if (h != 0.5) {
+    par (mar = c (1, 5, 1, 1))
+  } else {
+    par (mar = c (5, 5, 1, 1))
+  }
+  
+  # plot 
+  plot (x = tempData %>% filter (treatment == 1, sampleHeight == h) %>% 
+          select (sampleDate) %>% unlist () - 17532,
+        y = tempData %>% filter (treatment == 1, sampleHeight == h) %>% 
+          select (Y2018) %>% unlist (),
+        xlim = c (0, 365), ylim = c (0, 4600), axes = FALSE, pch = 19, 
+        las = 1, xlab = ifelse (h != 0.5, '', 'Day of the year'), 
+        ylab = '', 
+        col = addOpacity (tColours [['colour']] [1], 0.5)) 
+  
+  # add critical dates
+  #--------------------------------------------------------------------------------------
+  res <- abline (v = lubridate::yday (c ('2018-06-25','2018-09-03')), 
+                 col = '#999999', lty = 2, lwd = 1)
+  
+  points (x = tempData %>% filter (treatment == 5, sampleHeight == h) %>% 
+            select (sampleDate) %>% unlist () - 17532,
+          y = tempData %>% filter (treatment == 5, sampleHeight == h) %>% 
+            select (Y2018) %>% unlist (), pch = 23, 
+          col = addOpacity (tColours [['colour']] [5], 0.5)) 
+  
+  # add axis
+  if (h != 0.5) {
+    axis (side = 1, at = seq (0, 360, 60), labels = rep ('', 7))
+  } else {
+    axis (side = 1, at = seq (0, 360, 60))
+  }  
+  axis (side = 2, at = seq (0, 4000, 1000), las = 1)
+  mtext (side = 2, line = 3, 
+         text = expression (paste ('Volume growth (',mu,m,')',sep = '')), at = 2000, cex = 0.7)
+  
+  # add monotonic GAMs for each tree
+  for (t in c (1:5, 11:15)) {
+    
+    # get tree-specific volume growth
+    treeData <- tempData %>% mutate (doy = lubridate::yday (sampleDate)) %>% 
+      filter (treeId == t & sampleHeight == h) %>% arrange (by = sampleDate)
+    
+    # Assume that the ring measured in 2019 is the end of the year growth
+    if (sum (treeData [['sampleDate']] == as_date ('2019-10-24'), na.rm = TRUE) > 0) {
+      treeData [['sampleDate']] [treeData [['sampleDate']] == as_date ('2019-10-24')] <- as_date ('2018-12-31')
+      treeData [['doy']] [treeData [['sampleDate']] == as_date ('2018-12-31')] <- yday ('2018-12-31')
+    }
+    
+    # Fit general additive model to growth data
+    fit.gam <- scam::scam (Y2018 ~ s (doy, k = 8, bs = 'mpi'), 
+                           data   = treeData, 
+                           family = quasipoisson)
+    
+    lines (x = 1:365, y = exp (predict (fit.gam, newdata = data.frame (doy = 1:365))),
+           col = tColours [['colour']] [unique (treeData [['treatment']])], 
+           lty = ifelse (unique (treeData [['treatment']]) == 1, 1, 2), lwd = 0.3)
+  }
+  
+  # add monotonic GAM for treatment 
+  for (t in c (1, 5)) {
+    
+    # get treatment specific data
+    treatmentData <- tempData %>% mutate (doy = lubridate::yday (sampleDate)) %>% 
+      filter (treatment == t & sampleHeight == h) %>% arrange (by = sampleDate)
+    
+    # assume that the ring measured in 2019 is the end of the year growth
+    if (sum (treatmentData [['sampleDate']] == as_date ('2019-10-24'), na.rm = TRUE) > 0) {
+      treatmentData [['sampleDate']] [treatmentData [['sampleDate']] == as_date ('2019-10-24')] <- as_date ('2018-12-31')
+      treatmentData [['doy']] [treatmentData [['sampleDate']] == as_date ('2018-12-31')] <- yday ('2018-12-31')
+    }
+    
+    # Fit general additive model to growth data
+    fit.gam <- scam::scam (Y2018 ~ s (doy, k = 8, bs = 'mpi'), 
+                           data   = treatmentData, 
+                           family = quasipoisson)
+    
+    # add confidence interval for the model
+    m <- predict (fit.gam, newdata = data.frame (doy = 1:365), type = 'link', se.fit = TRUE) 
+    polygon (x = c (160:365, 365:160), 
+             y = exp (c (m$fit [160:365] + 2 * m$se.fit [160:365], 
+                         rev (m$fit [160:365] - 2 * m$se.fit [160:365]))), 
+             lty = 0,
+             col = addOpacity (tColours [['colour']] [t], 0.5))
+    
+    # add treatment mean behaviour
+    lines (x = 1:365, y = exp (m$fit), col = tColours [['colour']] [t], lwd = 2,
+           lty = ifelse (t == 1, 1, 2))
+    
+    # add mean and standard error for start of the growing season
+    arrows (x0 = mean (treatmentData [['startOfGrowth']]) - sd (treatmentData [['startOfGrowth']]),
+            x1 = mean (treatmentData [['startOfGrowth']]) + sd (treatmentData [['startOfGrowth']]), 
+            y0 = 4400 + ifelse (t == 1, -100, 100), col = tColours [['colour']] [t], 
+            length = 0, angle = 90, code = 3, lwd = 2)
+    points (x = mean (treatmentData [['startOfGrowth']]), 
+            y = 4400 + ifelse (t == 1, -100, 100), pch = ifelse (t == 1, 19, 23), 
+            col = tColours [['colour']] [t], cex = 1.5, bg = 'white', lwd = 2)
+    
+    # add mean and standard error for end of the growing season
+    arrows (x0 = mean (treatmentData [['endOfGrowth']]) - sd (treatmentData [['endOfGrowth']]),
+            x1 = mean (treatmentData [['endOfGrowth']]) + sd (treatmentData [['endOfGrowth']]), 
+            y0 = 4400 + ifelse (t == 1, -100, 100), col = tColours [['colour']] [t], 
+            length = 0, angle = 90, code = 3, lwd = 2)
+    points (x = mean (treatmentData [['endOfGrowth']]), 
+            y = 4400 + ifelse (t == 1, -100, 100), pch = ifelse (t == 1, 19, 23), 
+            col = tColours [['colour']] [t], cex = 1.5, bg = 'white', lwd = 2)
+  } # end treatment loop
+} # end sample height loop
+
+# add legend 
+legend (x = 0, y = 4400, legend = c ('',''), bg = 'transparent', box.lty = 0,
+        lty = 1:2, col = tColours [['colour']] [c (1, 5)], lwd = 2)
+legend (x = 20, y = 4400, legend = c ('control','chilled'), bg = 'transparent', box.lty = 0,
+        pch = c (19, 23), col = tColours [['colour']] [c (1, 5)])
+dev.off ()
 
 # estimate treatment effect on start and end of growing season
 #----------------------------------------------------------------------------------------
@@ -235,7 +360,7 @@ summary (mod5); rm (tempData)
 
 # plot final radial growth versus by treatment * sample height
 #----------------------------------------------------------------------------------------
-tempData <- filter (ringWidths, sampleDate == as_date ('2019-10-24')) %>% 
+tempData <- filter (ringWidths, sampleDate == as_date ('2019-10-24') & treatment %in% c (1, 5)) %>% 
   mutate (treeId       = factor (treeId),
           treatment    = factor (treatment, levels = c (5,4,1)),
           sampleHeight = factor (sampleHeight))
@@ -251,9 +376,9 @@ mod6 <- lmer (formula = RWI2018 ~ (1 | treeId) + treatment:sampleHeight,
               data = tempData, REML = TRUE)
 summary (mod6); rm (tempData)
 
-# How much growth had occured at the start of the experiment?
+# How much growth (fraction) had occured at the start of the experiment?
 #----------------------------------------------------------------------------------------
-tempData <- ringWidths %>% group_by (sampleHeight, treeId) %>%
+tempData <- ringWidths %>% filter (treatment %in% c (1, 5)) %>% group_by (sampleHeight, treeId) %>%
   mutate (maxRGI = max (Y2018, na.rm = TRUE)) %>%
   filter (sampleDate %in% c (as_date ('2018-06-19'), as_date ('2019-10-24'))) %>%
   mutate (f2018 = Y2018 / maxRGI) %>% ungroup
@@ -268,14 +393,40 @@ filter (tempData, sampleDate == as_date ('2018-06-19')) %>%
   summarise (mean = mean (f2018, na.rm = TRUE),
              se = se (f2018))
 
-# How much growth had occurred after the experimental onset
+# How much growth (fraction) had occurred after the experimental onset
 #----------------------------------------------------------------------------------------
 filter (tempData, sampleDate == as_date ('2018-06-19')) %>% 
   mutate (remainingGrowthFraction = 1 - f2018) %>%
   group_by (treatment, sampleHeight) %>%
   summarise (mean = mean (remainingGrowthFraction, na.rm = TRUE),
              se = se (remainingGrowthFraction))
-rm (tempData)
+
+# How much growth (absolute; in micrometer) had occured at the start of the experiment?
+#----------------------------------------------------------------------------------------
+# Across all height and treatments
+filter (tempData, sampleDate == as_date ('2018-06-19')) %>% 
+  select (Y2018) %>% 
+  summarise (mean = mean (Y2018, na.rm = TRUE),
+             se = se (Y2018))
+# By height and treatment
+filter (tempData, sampleDate == as_date ('2018-06-19')) %>%
+  group_by (treatment, sampleHeight) %>%
+  summarise (mean = mean (Y2018, na.rm = TRUE),
+             se = se (Y2018))
+
+# How much growth had occurred after the experimental onset
+#----------------------------------------------------------------------------------------
+tempData <- ringWidths %>% filter (treatment %in% c (1, 5)) %>% 
+  group_by (sampleHeight, treeId) %>%
+  mutate (endG = max (Y2018, na.rm = TRUE)) %>%
+  filter (sampleDate == as_date ('2018-09-06')) %>%
+  mutate (G2018 = endG - Y2018) %>% ungroup ()
+tempData <- tempData %>% mutate (treatment = factor (treatment, levels = c (5, 1)),
+                                 treeId = factor (treeId), 
+                                 sampleHeight = factor (sampleHeight, levels = c (0.5, 1.5, 2.5, 4.0)))
+mod7 <- lmer (formula = G2018 ~ (1 | treeId) + treatment:sampleHeight, 
+              data = tempData, REML = TRUE)
+summary (mod7)#; rm (tempData)
 
 # Were there differences in radial growth after the experimental onset
 #----------------------------------------------------------------------------------------
@@ -289,20 +440,24 @@ tempData <- ringWidths %>% group_by (sampleHeight, treeId) %>%
           treatment    = factor (treatment, levels = c (5,4,1)),
           sampleHeight = factor (sampleHeight))
 
-mod7 <- lmer (formula = remainingGrowthFraction ~ (1 | treeId) + treatment:sampleHeight, 
+mod8 <- lmer (formula = remainingGrowthFraction ~ (1 | treeId) + treatment:sampleHeight, 
               data = tempData, REML = TRUE)
-summary (mod7); rm (tempData)
+summary (mod8); rm (tempData)
 
 # Was radial growth comparable in the preceeding seven years?
 #----------------------------------------------------------------------------------------
 tempData <- ringWidths %>% 
-  filter (sampleDate %notin% c (as_date ('2018-01-01'), as_date ('2018-05-01'))) %>%
-  select (1:14) %>%
-  pivot_longer (cols = 7:14, names_prefix = 'Y', names_to = 'year', values_to = 'RW')
-mod8 <- lmer (formula = RW ~ (1 | treeId) + factor (year) + factor (sampleHeight) + 
-                             factor (treatment),
+  filter (sampleDate %notin% c (as_date ('2018-01-01'), as_date ('2018-05-01')),
+          treatment == 5) %>%
+  select (1:14) %>% 
+  pivot_longer (cols = 6:14, names_prefix = 'Y', names_to = 'year', values_to = 'RW') %>%
+  mutate (treeId = factor (treeId),
+          treatment = factor (treatment, levels = c (1,5)),
+          sampleHeight= factor (sampleHeight, levels = c (0.5, 1.5, 2.5, 4.0)),
+          year = factor (year))
+mod9 <- lmer (formula = RW ~ (1 | treeId) + year + sampleHeight,# + treatment,
               data = tempData)
-summary (mod8); rm (tempData)
+summary (mod9); rm (tempData)
 
 # How do the increment ring widths compare to microcore ring widths?
 #----------------------------------------------------------------------------------------
@@ -365,9 +520,9 @@ g <- ggplot (tempData) +
   scale_fill_manual (values = tColours [['colour']] [c (1,4,5)], labels = c ('Control','Compressed','Chilled'))
 g
 # Were there differences in the 2010 to 2017 ring width (previous years) among treatments?
-mod9 <- lmer (formula = RW ~ (1 | treeId) + year + treatment + sampleHeight,
+mod10 <- lmer (formula = RW ~ (1 | treeId) + year + treatment + sampleHeight,
               data = tempData, REML = TRUE)
-summary (mod9); rm (tempData)
+summary (mod10); rm (tempData)
 
 # Did groups grow differently in 2019?
 #----------------------------------------------------------------------------------------
@@ -384,9 +539,9 @@ g <- ggplot (tempData) +
   scale_fill_manual (values = tColours [['colour']] [c (1,4,5)], labels = c ('Control','Compressed','Chilled'))
 g
 # Were there differences in the 2019 ring width (following year) among treatments?
-mod10 <- lmer (formula = Y2019 ~ (1 | treeId) + treatment:sampleHeight,
+mod11 <- lmer (formula = Y2019 ~ (1 | treeId) + treatment:sampleHeight,
               data = tempData, REML = TRUE)
-summary (mod10); rm (tempData)
+summary (mod11); rm (tempData)
 
 # clean up 
 #----------------------------------------------------------------------------------------

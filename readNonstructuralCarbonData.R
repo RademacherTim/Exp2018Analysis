@@ -21,7 +21,6 @@ if (!existsFunction ('write.xlsx')) library ('openxlsx')
 #----------------------------------------------------------------------------------------
 setwd (originalDir)
 
-
 # read data from csv files with new column names
 #----------------------------------------------------------------------------------------
 temp1 <- read_csv (file = './data/nonstructuralCarbonData_LCS_HF_Exp2018.csv', 
@@ -199,6 +198,15 @@ temp <- filter (dataExp2018, substr (SampleID, 1, 6) == 'REF100' |
   group_by (BatchID, DateOfSugarAnalysis) %>% 
   summarise (n = sum (substr (SampleID, 1, 6) == 'REF100' | 
                         substr (SampleID, 1, 3) == 'LCS'))
+# temp [['n']]
+
+# Get number of samples per batch
+#----------------------------------------------------------------------------------------
+temp <- dataExp2018 %>% 
+  group_by (BatchID, DateOfSugarAnalysis) %>% 
+  filter (substr (SampleID, 1, 3) != 'LCS' & SampleID != 'B' & 
+          SampleID != 'TB' & substr (SampleID, 1, 3) != 'REF') %>% 
+  summarise (n = sum (!is.na (SampleID)))
 # temp [['n']]
 
 # switch back to original working directory
