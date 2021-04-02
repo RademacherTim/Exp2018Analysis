@@ -10,35 +10,43 @@ if (!existsFunction ('rollmean')) library ('zoo')
 
 # Function to plot fraction formed at critical dates (e.g., before, during, and after)
 #----------------------------------------------------------------------------------------
-plotFractionFormed <- function (data) {
+plotFractionFormed <- function (data, SHADING = FALSE) {
   colour <- '#999999'
   FF <- data %>% filter (PLOT == 5, period <= as_date ('2018-06-25')) %>% group_by (TREE) %>% 
     summarise (maxFF = max (RRADDISTR, na.rm = TRUE)) 
-  rect (ytop = 1500, ybottom = -100, 
-        xleft  = mean (FF [['maxFF']]) - se (FF [['maxFF']]),
-        xright = mean (FF [['maxFF']]) + se (FF [['maxFF']]),
-        col = addOpacity (colour, 0.3), lty = 0)
+  if (SHADING) {
+    rect (ytop = 1500, ybottom = -100, 
+          xleft  = mean (FF [['maxFF']]) - se (FF [['maxFF']]),
+          xright = mean (FF [['maxFF']]) + se (FF [['maxFF']]),
+          col = addOpacity (colour, 0.3), lty = 0)
+  }
   abline (v = mean (FF [['maxFF']]), col = colour, lty = 2, lwd = 2)
   FF <- data %>% filter (PLOT == 1, period <= as_date ('2018-06-25')) %>% group_by (TREE) %>% 
     summarise (maxFF = max (RRADDISTR, na.rm = TRUE)) 
-  rect (ytop = 1500, ybottom = -100, 
-        xleft  = mean (FF [['maxFF']]) - se (FF [['maxFF']]),
-        xright = mean (FF [['maxFF']]) + se (FF [['maxFF']]),
-        col = addOpacity (colour, 0.3), lty = 0)
+  if (SHADING) {
+    rect (ytop = 1500, ybottom = -100, 
+          xleft  = mean (FF [['maxFF']]) - se (FF [['maxFF']]),
+          xright = mean (FF [['maxFF']]) + se (FF [['maxFF']]),
+          col = addOpacity (colour, 0.3), lty = 0)
+  }
   abline (v = mean (FF [['maxFF']]), col = colour, lty = 1, lwd = 2)
   FF <- data %>% filter (PLOT == 5, period <= as_date ('2018-09-03')) %>% group_by (TREE) %>% 
     summarise (maxFF = max (RRADDISTR, na.rm = TRUE)) 
-  rect (ytop = 1500, ybottom = -100, 
-        xleft  = mean (FF [['maxFF']]) - se (FF [['maxFF']]),
-        xright = mean (FF [['maxFF']]) + se (FF [['maxFF']]),
-        col = addOpacity (colour, 0.3), lty = 0)
+  if (SHADING) {
+    rect (ytop = 1500, ybottom = -100, 
+          xleft  = mean (FF [['maxFF']]) - se (FF [['maxFF']]),
+          xright = mean (FF [['maxFF']]) + se (FF [['maxFF']]),
+          col = addOpacity (colour, 0.3), lty = 0)
+  }
   abline (v = mean (FF [['maxFF']]), col = colour, lty = 2, lwd = 2)
   FF <- data %>% filter (PLOT == 1, period <= as_date ('2018-09-03')) %>% group_by (TREE) %>% 
     summarise (maxFF = max (RRADDISTR, na.rm = TRUE)) 
-  rect (ytop = 1500, ybottom = -100, 
-        xleft  = mean (FF [['maxFF']]) - se (FF [['maxFF']]),
-        xright = mean (FF [['maxFF']]) + se (FF [['maxFF']]),
-        col = addOpacity (colour, 0.3), lty = 0)
+  if (SHADING) {
+    rect (ytop = 1500, ybottom = -100, 
+          xleft  = mean (FF [['maxFF']]) - se (FF [['maxFF']]),
+          xright = mean (FF [['maxFF']]) + se (FF [['maxFF']]),
+          col = addOpacity (colour, 0.3), lty = 0)
+  }
   abline (v = mean (FF [['maxFF']]), col = colour, lty = 1, lwd = 2)
 }
 
