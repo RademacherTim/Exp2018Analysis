@@ -156,5 +156,7 @@ if (LOCAL) {
  
 # Add the 15 minutes air temperature data to the 
 #----------------------------------------------------------------------------------------
-tempData <- right_join (tempData, tmp) %>% rename (t.air.1p5m = airt)
+tempData <- left_join (x = tempData, y = tmp, by = 'datetime') %>% 
+   rename (t.air.1p5m = airt)
+
 #========================================================================================
