@@ -45,7 +45,7 @@ tempData <- merge (tempData, growingSeasonDates, by = c ('treeId','treatment','s
 # make four panel figure of growth over time for control and chilled trees by sample height
 #----------------------------------------------------------------------------------------
 png (filename = './fig/Exp2018ChillingRelativeVolumeGrowthDynamics.png', width = 800 , height = 700)
-layout (matrix (1:4, nrow = 4), widths = c (1,1,1,1.4))
+layout (matrix (1:4, nrow = 4), heights = c (1,1,1,1.4))
 for (h in c (4.0, 2.5, 1.5, 0.5)) {
   
   # determine panel margins
@@ -60,7 +60,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
           select (sampleDate) %>% unlist () - 17532,
         y = tempData %>% filter (treatment == 1, sampleHeight == h) %>% 
           select (RGI) %>% unlist (),
-        xlim = c (0, 365), ylim = c (0, 2.05), axes = FALSE, pch = 19, 
+        xlim = c (110, 365), ylim = c (0, 2.05), axes = FALSE, pch = 19, 
         las = 1, xlab = ifelse (h != 0.5, '', 'Day of the year'), 
         ylab = '', 
         col = addOpacity (tColours [['colour']] [1], 0.5)) 
@@ -80,9 +80,9 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
   if (h != 0.5) {
     axis (side = 1, at = seq (0, 360, 60), labels = rep ('', 7))
   } else {
-    axis (side = 1, at = seq (0, 360, 60))
+    axis (side = 1, at = seq (0, 360, 60), cex.axis = 1.4)
   }  
-  axis (side = 2, at = seq (0, 1.4, 0.2), las = 1)
+  axis (side = 2, at = seq (0, 1.2, 0.3), las = 1, cex.axis = 1.4)
   mtext (side = 2, line = 3, text = 'Relative growth (fration)', at = 0.7, cex = 0.7)
   
   # add monotonic GAMs for each tree
@@ -139,8 +139,8 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
            lty = ifelse (t == 1, 1, 2))
     
     # add mean and standard error for start of the growing season
-    arrows (x0 = mean (treatmentData [['startOfGrowth']]) - sd (treatmentData [['startOfGrowth']]),
-            x1 = mean (treatmentData [['startOfGrowth']]) + sd (treatmentData [['startOfGrowth']]), 
+    arrows (x0 = mean (treatmentData [['startOfGrowth']]) - se (treatmentData [['startOfGrowth']]),
+            x1 = mean (treatmentData [['startOfGrowth']]) + se (treatmentData [['startOfGrowth']]), 
             y0 = 1.9 + ifelse (t == 1, -0.1, 0.1), col = tColours [['colour']] [t], 
             length = 0, angle = 90, code = 3, lwd = 2)
     points (x = mean (treatmentData [['startOfGrowth']]), 
@@ -148,8 +148,8 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
             col = tColours [['colour']] [t], cex = 1.5, bg = 'white', lwd = 2)
     
     # add mean and standard error for end of the growing season
-    arrows (x0 = mean (treatmentData [['endOfGrowth']]) - sd (treatmentData [['endOfGrowth']]),
-            x1 = mean (treatmentData [['endOfGrowth']]) + sd (treatmentData [['endOfGrowth']]), 
+    arrows (x0 = mean (treatmentData [['endOfGrowth']]) - se (treatmentData [['endOfGrowth']]),
+            x1 = mean (treatmentData [['endOfGrowth']]) + se (treatmentData [['endOfGrowth']]), 
             y0 = 1.9 + ifelse (t == 1, -0.1, 0.1), col = tColours [['colour']] [t], 
             length = 0, angle = 90, code = 3, lwd = 2)
     points (x = mean (treatmentData [['endOfGrowth']]), 
@@ -159,23 +159,23 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
 } # end sample height loop
 
 # add legend 
-legend (x = 0, y = 1.9, legend = c ('',''), bg = 'transparent', box.lty = 0,
-        lty = 1:2, col = tColours [['colour']] [c (1, 5)], lwd = 2)
-legend (x = 20, y = 1.9, legend = c ('control','chilled'), bg = 'transparent', box.lty = 0,
-        pch = c (19, 23), col = tColours [['colour']] [c (1, 5)])
+legend (x = 110, y = 1.4, legend = c ('',''), bg = 'transparent', box.lty = 0,
+        lty = 1:2, col = tColours [['colour']] [c (1, 5)], lwd = 2, cex = 1.4)
+legend (x = 125, y = 1.4, legend = c ('control','chilled'), bg = 'transparent', box.lty = 0,
+        pch = c (19, 23), col = tColours [['colour']] [c (1, 5)], cex = 1.4)
 dev.off ()
 
 # make four panel figure of absolute growth over time for control and chilled trees by sample height
 #----------------------------------------------------------------------------------------
 png (filename = './fig/Exp2018ChillingAbsoluteVolumeGrowthDynamics.png', width = 800 , height = 700)
-layout (matrix (1:4, nrow = 4), widths = c (1,1,1,1.4))
+layout (matrix (1:4, nrow = 4), heights = c (1,1,1,1.4))
 for (h in c (4.0, 2.5, 1.5, 0.5)) {
   
   # determine panel margins
   if (h != 0.5) {
-    par (mar = c (1, 5, 1, 1))
+    par (mar = c (1, 6, 1, 1))
   } else {
-    par (mar = c (5, 5, 1, 1))
+    par (mar = c (5, 6, 1, 1))
   }
   
   # plot 
@@ -183,7 +183,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
           select (sampleDate) %>% unlist () - 17532,
         y = tempData %>% filter (treatment == 1, sampleHeight == h) %>% 
           select (Y2018) %>% unlist (),
-        xlim = c (0, 365), ylim = c (0, 4600), axes = FALSE, pch = 19, 
+        xlim = c (110, 365), ylim = c (0, 4600), axes = FALSE, pch = 19, 
         las = 1, xlab = ifelse (h != 0.5, '', 'Day of the year'), 
         ylab = '', 
         col = addOpacity (tColours [['colour']] [1], 0.5)) 
@@ -203,10 +203,10 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
   if (h != 0.5) {
     axis (side = 1, at = seq (0, 360, 60), labels = rep ('', 7))
   } else {
-    axis (side = 1, at = seq (0, 360, 60))
+    axis (side = 1, at = seq (0, 360, 60), cex.axis = 1.4)
   }  
-  axis (side = 2, at = seq (0, 4000, 1000), las = 1)
-  mtext (side = 2, line = 3, 
+  axis (side = 2, at = seq (0, 4000, 1000), las = 1, cex.axis = 1.4)
+  mtext (side = 2, line = 4, 
          text = expression (paste ('Volume growth (',mu,m,')',sep = '')), at = 2000, cex = 0.7)
   
   # add monotonic GAMs for each tree
@@ -263,8 +263,8 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
            lty = ifelse (t == 1, 1, 2))
     
     # add mean and standard error for start of the growing season
-    arrows (x0 = mean (treatmentData [['startOfGrowth']]) - sd (treatmentData [['startOfGrowth']]),
-            x1 = mean (treatmentData [['startOfGrowth']]) + sd (treatmentData [['startOfGrowth']]), 
+    arrows (x0 = mean (treatmentData [['startOfGrowth']]) - se (treatmentData [['startOfGrowth']]),
+            x1 = mean (treatmentData [['startOfGrowth']]) + se (treatmentData [['startOfGrowth']]), 
             y0 = 4400 + ifelse (t == 1, -100, 100), col = tColours [['colour']] [t], 
             length = 0, angle = 90, code = 3, lwd = 2)
     points (x = mean (treatmentData [['startOfGrowth']]), 
@@ -272,8 +272,8 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
             col = tColours [['colour']] [t], cex = 1.5, bg = 'white', lwd = 2)
     
     # add mean and standard error for end of the growing season
-    arrows (x0 = mean (treatmentData [['endOfGrowth']]) - sd (treatmentData [['endOfGrowth']]),
-            x1 = mean (treatmentData [['endOfGrowth']]) + sd (treatmentData [['endOfGrowth']]), 
+    arrows (x0 = mean (treatmentData [['endOfGrowth']]) - se (treatmentData [['endOfGrowth']]),
+            x1 = mean (treatmentData [['endOfGrowth']]) + se (treatmentData [['endOfGrowth']]), 
             y0 = 4400 + ifelse (t == 1, -100, 100), col = tColours [['colour']] [t], 
             length = 0, angle = 90, code = 3, lwd = 2)
     points (x = mean (treatmentData [['endOfGrowth']]), 
@@ -283,9 +283,9 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
 } # end sample height loop
 
 # add legend 
-legend (x = 0, y = 4400, legend = c ('',''), bg = 'transparent', box.lty = 0,
+legend (x = 110, y = 4000, legend = c ('',''), bg = 'transparent', box.lty = 0,
         lty = 1:2, col = tColours [['colour']] [c (1, 5)], lwd = 2)
-legend (x = 20, y = 4400, legend = c ('control','chilled'), bg = 'transparent', box.lty = 0,
+legend (x = 125, y = 4000, legend = c ('control','chilled'), bg = 'transparent', box.lty = 0,
         pch = c (19, 23), col = tColours [['colour']] [c (1, 5)])
 dev.off ()
 
