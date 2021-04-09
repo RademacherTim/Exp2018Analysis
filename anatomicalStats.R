@@ -12,12 +12,25 @@
 
 # load dependencies
 #----------------------------------------------------------------------------------------
-library ('lme4')
-library ('tidyverse')
+if (!existsFunction ('lmer')) library ('lme4')
+if (!existsFunction ('%>%')) library ('tidyverse')
 
 # source anatomical data
 #----------------------------------------------------------------------------------------
 source ('processAnatomicalData.R')
+
+# Did one treatment cause an increases or decrease in ring width?
+#----------------------------------------------------------------------------------------
+tempData <- anatomicalData %>% 
+  filter (YEAR == 2018, PLOT %in% c (1, 5), sampleDate == as_date ('2018-11-15')) %>%
+  group_by (PLOT, TREE, sampleHeight) %>% 
+  summarise (maxRW = max (MRW)) %>%
+  mutate (treatment = factor (PLOT, levels = c (5, 1)),
+          treeId = factor (TREE),
+          sampleHeight = factor (sampleHeight))
+mod <- lmer (maxRW ~ (1|treeId) + treatment:sampleHeight, 
+             data = tempData, REML = TRUE)
+summary (mod); rm (tempData)
 
 # Did one treatment cause an increases or decrease in the number of cells formed?
 #----------------------------------------------------------------------------------------

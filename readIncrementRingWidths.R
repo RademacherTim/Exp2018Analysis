@@ -110,9 +110,9 @@ for (j in 1: length (jsonFiles)){
   
   # Sort out the ones that have not been checked yet for now
   #--------------------------------------------------------------------------------------
-  if ((treeID %in% c (9, 13, 15)) | 
-      (treeID %in% c (5, 10, 12, 14) & profileID == 1) | 
-      (treeID %in% c (8, 12)         & profileID == 2)) next
+  if ((treeID == 9) | 
+#      (treeID %in% c (5, 10, 12, 14) & profileID == 1) | 
+      (treeID == 8 & profileID == 2)) next
   
   # Extract growth measurement, associated years and types of markers
   #--------------------------------------------------------------------------------------
@@ -160,7 +160,9 @@ for (j in 1: length (jsonFiles)){
       # Determine the most recent year in second profile
       mostRecentYear <- max (years2)
       oldestYear <- min (years2)
-      growth2 <- c (rep (NA, 2020-mostRecentYear+1), rev (growth2), rep (NA, 119-length (growth2)))
+      growth2 <- c (rep (NA, 2020-mostRecentYear+1), 
+                    rev (growth2), 
+                    rep (NA, (119-length (growth2)) - (2020-mostRecentYear+1)))
       years2  <- c (seq (2020, mostRecentYear+1), rev (years2),  seq (oldestYear-1, 1900))
     }
   }# else if (years [1] == 2017) {
