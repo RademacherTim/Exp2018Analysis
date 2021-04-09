@@ -22,7 +22,8 @@ stemData2018 <- stemData2018 %>%
           ConcentrationSugarPerDW, ConcentrationStarchPerDW) %>% 
   rename (date = DateOfSampleCollection, tree = treeID, height = sampleHeight,
           sugar = ConcentrationSugarPerDW, starch = ConcentrationStarchPerDW) %>%
-  mutate (date = as_date (date))
+  mutate (date = as_date (date)) %>% 
+  filter (tree %in% c (1:5, 11:15))
 
 # get start and end dates for each treatment
 #----------------------------------------------------------------------------------------
@@ -43,7 +44,7 @@ stemData2018 <- stemData2018 %>%
   mutate (date      = factor (date),
           tree      = factor (tree),
           height    = factor (height,    levels = 3:1),
-          treatment = factor (treatment, levels = c (5, 4, 1)),
+          treatment = factor (treatment, levels = c (5, 1)),
           period    = factor (period,    levels = c ('during','after','before')),
           periodAlt = factor (periodAlt, levels = c ('chilling','non-chilling')))
 
@@ -52,7 +53,7 @@ stemData2018 <- stemData2018 %>%
 # effects to account for idiosyncratic differences due to factors such as variations 
 # in exact azimuth or systematic difference between trees
 #----------------------------------------------------------------------------------------
-M1 <- lmer (formula = sugar ~ (tree | height) + date + period:treatment:height, 
+M1 <- lmer (formula = sugar ~ (1 | tree) + date + period:treatment:height, 
             data = stemData2018,
             REML = TRUE)
 summary (M1)
@@ -61,7 +62,7 @@ summary (M1)
 # effects to account for idiosyncratic differences due to factors such as variations 
 # in exact azimuth or systematic difference between trees
 #----------------------------------------------------------------------------------------
-M2 <- lmer (formula = starch ~ (tree | height) + date + period:treatment:height, 
+M2 <- lmer (formula = starch ~ (1 | tree) + date + period:treatment:height, 
             data = stemData2018,
             REML = TRUE)
 summary (M2)
