@@ -19,7 +19,6 @@ options (warn = -1)
 # Source standard error function
 source ('plotingFunctions.R')
 
-
 # Read in allometric data file
 # Eventually this should be read from Harvard Forest Data Archive
 allometricData <- read_csv (file = './data/allometricDataExp2018.csv', col_types = cols ())
@@ -28,7 +27,7 @@ allometricData <- read_csv (file = './data/allometricDataExp2018.csv', col_types
 allometricData <- allometricData %>% filter (tree %in% c (1:5,11:15))
 
 # Delete irrelevant columns
-allometricData <- allometricData %>% select (-year, -previous.ID, -c50, -d50, -c150, -c250, -d250, -h1, -h2, -h3, -comments)
+allometricData <- allometricData %>% select (-year, -previous.ID, -c50, -d50, -c150, -c250, -d250, -h1, -h2, -h3, -comments, -file.ring.width.1, -file.ring.width.2, -file.ring.width.3)
 
 # Convert treatment from number to character string
 allometricData <- allometricData %>% mutate (treatment = ifelse (treatment == 1, 'control','chilled'))
@@ -91,6 +90,7 @@ kbl (allometricData,
      col.names = NULL) %>% 
   kable_styling () %>% 
   row_spec (c (1,5), hline_after = TRUE) %>%
+  #column_spec (column = c (1, 2, 4, 6, 8, 10), border_right = TRUE) %>%
   collapse_rows (columns = c (2, 4, 6, 8, 10), valign = 'top') %>% 
   add_header_above (c ('Tree ID', 'Treatment', 'd (cm)' = 2, 'h (m)' = 2, 'Age (year)' = 2, 'Radial growth (μm)' = 2,'Social status'))
  

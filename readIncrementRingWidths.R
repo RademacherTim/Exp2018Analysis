@@ -20,7 +20,7 @@ if (!exists ('tColours')) source ('plotingFunctions.R')
 #----------------------------------------------------------------------------------------
 setwd ('/media/tim/dataDisk/PlantGrowth/data/incrementCores/ringWidths/Exp2018/')
 
-# List all json output file from TRIAD
+# List all json output file from WIAD
 #----------------------------------------------------------------------------------------
 jsonFiles <- list.files (path = './', pattern = '.json')
 
@@ -63,7 +63,7 @@ incrementRingWidths <- tibble (treeId = numeric (), treatment = numeric (),
 k <- 0
 # Loop over json files and read them
 #----------------------------------------------------------------------------------------
-for (j in 1: length (jsonFiles)){
+for (j in 1: length (jsonFiles)) {
   
   # Read in TRIAD outputs
   #--------------------------------------------------------------------------------------
@@ -104,15 +104,9 @@ for (j in 1: length (jsonFiles)){
   # Check that sample Height were entered correctly
   #--------------------------------------------------------------------------------------
   profileID <- as.numeric (substr (temp [['sampleID']], 4, 6))
-  if (profileID %notin% 1:4) {
+  if (profileID %notin% 0:2) {
     stop (paste0 ('Error with profile ID ',treeID,profileID)) 
   }
-  
-  # Sort out the ones that have not been checked yet for now
-  #--------------------------------------------------------------------------------------
-  if ((treeID == 9) | 
-#      (treeID %in% c (5, 10, 12, 14) & profileID == 1) | 
-      (treeID == 8 & profileID == 2)) next
   
   # Extract growth measurement, associated years and types of markers
   #--------------------------------------------------------------------------------------
@@ -152,10 +146,23 @@ for (j in 1: length (jsonFiles)){
   if (nProfiles == 2) {
     growth2 <- as.numeric (growth2 [types2 %in% c ('Normal','Missing') & !is.na (years2)])
     years2  <- as.numeric (years2  [types2 %in% c ('Normal','Missing') & !is.na (years2)])
+    if (is.null (dim (growth2) [1])) nProfiles <- 1
   }
   if (years [1] == 2020) {
     growth <- c (growth, rep (NA, 119-length (growth)))
     years  <- c (years,  seq (years [length (years)]-1, 1900))
+    if (nProfiles == 2) {
+      # Determine the most recent year in second profile
+      mostRecentYear <- max (years2)
+      oldestYear <- min (years2)
+      growth2 <- c (rep (NA, 2020-mostRecentYear+1), 
+                    rev (growth2), 
+                    rep (NA, (119-length (growth2)) - (2020-mostRecentYear+1)))
+      years2  <- c (seq (2020, mostRecentYear+1), rev (years2),  seq (oldestYear-1, 1900))
+    } 
+  } else if (years [1] == 2019) {
+    growth <- c (NA, growth, rep (NA, 118-length (growth)))
+    years  <- c (2020, years,  seq (years [length (years)]-1, 1900))
     if (nProfiles == 2) {
       # Determine the most recent year in second profile
       mostRecentYear <- max (years2)
@@ -351,8 +358,11 @@ if (PLOT) {
 
 # Clean unnecessary variables from loop
 #----------------------------------------------------------------------------------------
+if (exists ('mostRecentYear')) rm (mostRecentYear)
+if (exists ('oldestYear')) rm (oldestYear)
+if (exists ('yPositions')) rm (yPositions)
 rm (temp, treeID, t, i, j, k, jsonFiles, sampleDate, sampleHeight, growth, growth2, 
-    types, types2, years, years2, len, growingSeason, yPositions, PLOT, sColours, 
-    tColours, mostRecentYear, nProfiles, oldestRingIndex, oldestYear, profileID, se, 
+    types, types2, years, years2, len, growingSeason, PLOT, sColours, 
+    tColours, nProfiles, oldestRingIndex, profileID, se, 
     '%notin%', criticalDates, addOpacity)
 
