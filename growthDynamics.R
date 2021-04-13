@@ -314,7 +314,8 @@ g <- ggplot (tempData) +
   coord_flip () +
   labs (x = 'Sample Height (m)',
         y = expression (paste ('Ring width (',mu,'m)', sep = ''))) +
-  scale_fill_manual (values = tColours [['colour']] [c (1,4,5)], labels = c ('Control','Compressed','Chilled'))
+  scale_fill_manual (values = tColours [['colour']] [c (1,4,5)], 
+                     labels = c ('Control','Compressed','Chilled'))
 g
 # Were there differences in final ring with among treatments?
 mod3 <- lmer (formula = Y2018 ~ (1 | treeId) + treatment:sampleHeight,

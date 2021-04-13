@@ -139,4 +139,46 @@ legend (x = 6, y = 1350, legend = c ('control','chilled'), pch = c (19,5), bg = 
 legend (x = 0, y = 1350, legend = rep ('', 2), lwd = 2, lty = 1:2,  bg = 'transparent',
         col = tColours [['colour']] [c (1, 5)], box.lty = 0)
 dev.off ()
+
+# Plot violin plot of meadian cell-wall area for fraction of the ring grown before, 
+# during and after chilling 
+#----------------------------------------------------------------------------------------
+anatoData <- anatomicalData  %>% 
+  filter (sampleHeight %notin% 1:2, YEAR %in% 2017:2018) %>% 
+  mutate (treatment = ifelse (PLOT == 1, 'control', 'chilled')) %>%
+  mutate (treatment = factor (treatment, levels = c ('control','chilled')))
+anatoData <- anatoData %>%
+  mutate (exPeriod = ifelse (period <= as_date ('2018-06-25'), 
+                             'before', 
+                             ifelse (period <= as_date ('2018-09-03'), 
+                                     'during', 
+                                     'after'))) %>%
+  mutate (exPeriod = factor (exPeriod, levels = c ('before','during','after')))
+
+# New facet label names to label 2017 correctly 
+exPeriod.labs <- c ("before", "during", "after","2017")
+names (exPeriod.labs) <- c ("before", "during", "after", NA)
+
+# plot median cell-wall area for control and chilled trees before the chilling 
+g <- ggplot (anatoData %>% 
+               mutate (sampleHeight = factor (sampleHeight, 
+                                              levels = c (4.0, 2.5, 1.5, 0.5)))) 
+g + geom_violin (aes (x = treatment, y = CWA, fill = treatment), 
+                 alpha = 0.3, trim = FALSE,
+                 colour = '#aaaaaaaa', 
+                 show.legend = FALSE, draw_quantiles = TRUE, na.rm = TRUE) + 
+  scale_fill_manual (values = tColours [['colour']] [c (1, 5)], 
+                     labels = c ('Control','Chilled')) + 
+  geom_boxplot (aes (x = treatment, y = CWA, fill = treatment), alpha = 0.8,
+                width = 0.2, colour = '#333333',
+                outlier.size = 0, na.rm = TRUE) +
+  scale_y_continuous (limits = c (0, 1200)) +
+  labs (title = "Cell-wall area", 
+        subtitle = expression (paste ('per 20 ',mu,'m tengential band', sep = '')),
+        x = "Treatment",
+        y = expression (paste ('Median cell-wall (',mu,m^2,')', sep = ''))) + 
+  coord_flip () +
+  facet_grid (sampleHeight ~ exPeriod, labeller = labeller (exPeriod = exPeriod.labs)) +
+  theme (legend.position = "none")
+
 #========================================================================================
