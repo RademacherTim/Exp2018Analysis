@@ -1,0 +1,272 @@
+---
+title: "Experiment 2018 Chilling Table 2"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library ('tidyverse')
+library ('kableExtra')
+source ('plotingFunctions.R')
+options (warn = -1)
+```
+
+## Table 1 
+
+
+```{r readTable, echo = FALSE}
+# Read anatomical data
+#----------------------------------------------------------------------------------------
+microcoreData <- read_csv (file = './data/anatomicalDataExp2018Chilling.csv',
+                           col_types = cols ())
+
+# Summarise data to extract important variables for volume and mass growth by period
+#----------------------------------------------------------------------------------------
+periodSummary <- microcoreData %>% group_by (TREE, treatment, sampleHeight, exPeriod) %>% 
+  summarise (RW        = max  (RADDISTR.BAND, na.rm = TRUE), # ring with  (μm)
+             cumCells  = max  (cumNCells, na.rm = TRUE),     # cumulative number of cells (n)
+             lumenD    = mean (DRAD,     na.rm = TRUE),     # radial lumen diameter (μm) 
+             CWT       = mean (CWTTAN,   na.rm = TRUE),     # tangential cell-wall thickness (μm)
+             CWTALL    = mean (CWTALL,   na.rm = TRUE),     # mean cell-wall thickness (μm)  
+             cumCWA    = max  (cumCWA,    na.rm = TRUE),     # cumulative cell-wall area (μm^2)
+             CWA       = mean (CWA,      na.rm = TRUE),     # cell-wall area  (μm^2) 
+             nCells    = mean (nCells,   na.rm = TRUE),     # mean number of cells per 20-μm band
+             lumenDTan = mean (DTAN,     na.rm = TRUE),     # tangential lumen diameter (μm)  
+             CWTRad    = mean (CWTRAD,   na.rm = TRUE),     # radial cell-wall thickness (μm)   
+             .groups  = 'keep') %>% 
+  ungroup () 
+
+# Add rows for 2018 mean at sample heights where we can apportion fractions
+#----------------------------------------------------------------------------------------
+summary2018 <- microcoreData %>% 
+  filter (YEAR == 2018, sampleHeight %notin% 1:2) %>% 
+  group_by (TREE, treatment, sampleHeight) %>%
+  summarise (lumenD    = mean (DRAD, na.rm = TRUE),
+             CWT       = mean (CWTTAN, na.rm = TRUE),
+             CWTALL    = mean (CWTALL, na.rm = TRUE),
+             CWA       = mean (CWA,    na.rm = TRUE),
+             nCells    = mean (nCells, na.rm = TRUE),
+             lumenDTan = mean (DTAN,   na.rm = TRUE),
+             CWTRad    = mean (CWTRAD, na.rm = TRUE),
+             .groups = 'keep') %>% 
+  add_column (exPeriod = '2018',.after = 'sampleHeight') %>% 
+  add_column (RW       = NA, .before = 'lumenD') %>%
+  add_column (cumCells = NA, .before = 'lumenD') %>%
+  add_column (cumCWA   = NA, .before = 'CWA') %>%
+  ungroup ()
+
+# Combine the experimental and 2017 data with the aggregate 2018 data
+#----------------------------------------------------------------------------------------
+periodSummary <- rbind (periodSummary, summary2018)
+
+# Add cumulative increment for 2018
+#----------------------------------------------------------------------------------------
+periodSummary <- add_column (periodSummary, RWinc = NA, .after = 'RW') %>%
+  add_column (CWAinc    = NA, .after = 'cumCWA') %>%
+  add_column (nCellsinc = NA, .after = 'cumCells')
+
+# Loop through data frame to add period increments for cumulative variables   
+#----------------------------------------------------------------------------------------
+for (r in 1:dim (periodSummary) [1]) {
+  t <- periodSummary [['TREE']] [r]
+  h <- periodSummary [['sampleHeight']] [r]
+  
+  # For before chilling and annual variable the increment is equal the cumulative value
+  #--------------------------------------------------------------------------------------  
+  if (periodSummary [['exPeriod']] [r] %in% c ('2017','2018','before')) {
+    periodSummary [['RWinc']] [r] <- periodSummary [['RW']] [r] 
+    periodSummary [['CWAinc']] [r] <- periodSummary [['cumCWA']] [r] 
+    periodSummary [['nCellsinc']] [r] <- periodSummary [['cumCells']] [r] 
+  
+  #  During the chilling the increment is equal to `during` - `before` 
+  #--------------------------------------------------------------------------------------
+  } else if (periodSummary [['exPeriod']] [r] == 'during') {
+    
+    # Determine conditions to find cumulative value for `before` chilling
+    #------------------------------------------------------------------------------------
+    con <- periodSummary [['exPeriod']] == 'before' &
+           periodSummary [['sampleHeight']] == h &
+           periodSummary [['TREE']] == t
+    
+    # Calculate increments
+    #------------------------------------------------------------------------------------
+    periodSummary [['RWinc']] [r] <- periodSummary [['RW']] [r] - periodSummary [['RW']] [con]
+    periodSummary [['CWAinc']] [r] <- periodSummary [['cumCWA']] [r] - periodSummary [['cumCWA']] [con]
+    periodSummary [['nCellsinc']] [r] <- periodSummary [['cumCells']] [r] - periodSummary [['cumCells']] [con]
+    
+  #  After the chilling the increment is equal to `after` - `during` 
+  #--------------------------------------------------------------------------------------
+  } else if (periodSummary [['exPeriod']] [r] == 'after') {
+    
+    # Determine conditions to find cumulative value for `during` chilling
+    #------------------------------------------------------------------------------------
+    con <- periodSummary [['exPeriod']] == 'during' &
+           periodSummary [['sampleHeight']] == h &
+           periodSummary [['TREE']] == t
+    
+    # Calculate increments
+    #------------------------------------------------------------------------------------
+    periodSummary [['RWinc']] [r] <- periodSummary [['RW']] [r] - periodSummary [['RW']] [con]
+    periodSummary [['CWAinc']] [r] <- periodSummary [['cumCWA']] [r] - periodSummary [['cumCWA']] [con]
+    periodSummary [['nCellsinc']] [r] <- periodSummary [['cumCells']] [r] - periodSummary [['cumCells']] [con]
+    
+  }
+}
+
+# Loop over all trees and sample heights to ddd values for full annual increment in 2018, 
+# where we can apportion fractions
+#----------------------------------------------------------------------------------------
+for (t in c (1:5, 11:15)) {
+  for (h in c (0.5, 1.5, 2.5, 4.0)) {
+    
+    # Get treatment
+    #------------------------------------------------------------------------------------
+    i <- ifelse (t %in% 1:5, 'chilled','control')
+    
+    # Get increment after chilling, aka at the end of the season
+    #------------------------------------------------------------------------------------
+    increments <- periodSummary %>% 
+      filter (TREE == t, sampleHeight == h, exPeriod == 'after') %>% 
+      select (RW, cumCWA, cumCells)
+    
+    # Verify that there is a proportion that grew after chilling
+    #------------------------------------------------------------------------------------
+    if (dim (increments) [1] != 1) {
+      
+      # Get increment at the end of the chilling, aka `during`
+      #----------------------------------------------------------------------------------
+      increments <- periodSummary %>% 
+        filter (TREE == t, sampleHeight == h, exPeriod == 'during') %>% 
+        select (RW, cumCWA, cumCells)
+      
+      # Determine condition for values to be replaced (i.e., `after` interval)
+      #----------------------------------------------------------------------------------
+      con <- periodSummary [['TREE']]    == t &     # corerct tree
+        periodSummary [['treatment']]    == i &     # correct treatment (just as a check)
+        periodSummary [['sampleHeight']] == h &     # correct sample height
+        periodSummary [['exPeriod']]     == 'after' # correct period
+
+      # Replace values for `after` interval
+      #------------------------------------------------------------------------------------
+      periodSummary [['RW']]    [con] <- increments [['RW']]
+      periodSummary [['RWinc']] [con] <- increments [['RW']]
+      periodSummary [['cumCWA']] [con] <- increments [['cumCWA']]
+      periodSummary [['CWAinc']] [con] <- increments [['cumCWA']]
+      periodSummary [['cumCells']]  [con] <- increments [['cumCells']]
+      periodSummary [['nCellsinc']] [con] <- increments [['cumCells']]
+    
+    }
+    
+    # Determine conditions for values to be replaced (i.e.,g `2018`)
+    #------------------------------------------------------------------------------------
+    con <- periodSummary [['TREE']]    == t &    # corerct tree
+      periodSummary [['treatment']]    == i &    # correct treatment (just as a check)
+      periodSummary [['sampleHeight']] == h &    # correct sample height
+      periodSummary [['exPeriod']]     == '2018' # correct period
+    
+    # Replace values for `2018`
+    #------------------------------------------------------------------------------------
+    periodSummary [['RW']]    [con] <- increments [['RW']]
+    periodSummary [['RWinc']] [con] <- increments [['RW']]
+    periodSummary [['cumCWA']] [con] <- increments [['cumCWA']]
+    periodSummary [['CWAinc']] [con] <- increments [['cumCWA']]
+    periodSummary [['cumCells']]  [con] <- increments [['cumCells']]
+    periodSummary [['nCellsinc']] [con] <- increments [['cumCells']]
+    
+  }
+}
+
+# Arrange the tibble 
+#----------------------------------------------------------------------------------------
+periodSummary <- periodSummary %>% arrange (TREE, sampleHeight, exPeriod) %>%
+  mutate (exPeriod = factor (exPeriod, 
+                             levels = c ('before','during','after','2017','2018')),
+          sampleHeight = factor (sampleHeight, 
+                                 levels = c (4.0, 2.5, 2.0, 1.5, 1.0, 0.5)))
+
+# Calcualte means and standard error of the means for each treatment and sampling height 
+# combination
+#----------------------------------------------------------------------------------------
+tableData <- periodSummary %>% 
+  group_by (treatment, sampleHeight, exPeriod) %>% 
+  summarise (meanRW        = mean (RW, na.rm = TRUE), seRW = se (RW),
+             meanRWinc     = mean (RWinc, na.rm = TRUE), seRWinc = se (RWinc),
+             meancumNCells = mean (cumCells, na.rm = TRUE), secumNCells = se (cumCells),
+             meanNCellsinc = mean (nCellsinc, na.rm = TRUE), seNCellsinc = se (nCellsinc),
+             meanLumenD    = mean (lumenD, na.rm = TRUE), seLumenD = se (lumenD),
+             meanCWT       = mean (CWT, na.rm = TRUE), seCWT = se (CWT),
+             meanCWTALL    = mean (CWTALL, na.rm = TRUE), seCWTALL = se (CWTALL),
+             meancumCWA    = mean (cumCWA, na.rm = TRUE), secumCWA = se (cumCWA),
+             meanCWAinc    = mean (CWAinc, na.rm = TRUE), seCWAinc = se (CWAinc),
+             meanCWA       = mean (CWA, na.rm = TRUE), seCWA = se (CWA),
+             meanNCells    = mean (nCells, na.rm = TRUE), seNCells = se (nCells),
+             meanLumenDTan = mean (lumenDTan, na.rm = TRUE), seLumenDTan = se (lumenDTan),
+             meanCWTRad    = mean (CWTRad, na.rm = TRUE), seCWTRad = se (CWTRad),
+             .groups = 'keep')
+
+# Change column order
+#----------------------------------------------------------------------------------------
+# allometricData <- allometricData %>% 
+#   relocate (D, .after = d150) %>% 
+#   relocate (H, .after = tree.height.2018) %>% 
+#   relocate (Age, .after = age) %>% 
+#   relocate (social.status, .after = seGRW) 
+
+# Round appropriately 
+#----------------------------------------------------------------------------------------
+tableData <- tableData %>%
+  mutate (meanRW = round (meanRW),
+          seRW = round (seRW),
+          meanRWinc = round (meanRWinc),
+          seRWinc = round (seRWinc),
+          meancumNCells = round (meancumNCells),
+          secumNCells = round (secumNCells),
+          meanNCellsinc = round (meanNCellsinc),
+          seNCellsinc = round (seNCellsinc),
+          meanLumenD = round (meanLumenD, 1),
+          seLumenD = round (seLumenD, 1),
+          meanCWT = round (meanCWT, 2),
+          seCWT = round (seCWT, 2),
+          meanCWTALL = round (meanCWTALL, 2),
+          seCWTALL = round (seCWTALL, 2),
+          meancumCWA = round (meancumCWA),
+          secumCWA = round (secumCWA),
+          meanCWAinc = round (meanCWAinc),
+          seCWAinc = round (seCWAinc),
+          meanCWA = round (meanCWA),
+          seCWA = round (seCWA),
+          meanNCells = round (meanNCells, 2),
+          seNCells = round (seNCells, 2),
+          meanLumenDTan = round (meanLumenDTan, 1),
+          seLumenDTan = round (seLumenDTan, 1),
+          meanCWTRad = round (meanCWTRad, 2),
+          seCWTRad = round (seCWTRad), 2) %>%
+  mutate (meanRW = sprintf ('%.0f \U00B1 %.0f', meanRW, seRW),
+          meanRWinc = sprintf ('%.0f \U00B1 %.0f', meanRWinc, seRWinc),
+          meancumNCells = sprintf ('%.0f \U00B1 %.0f', meancumNCells, secumNCells),
+          meanNCellsinc = sprintf ('%.0f \U00B1 %.0f', meanNCellsinc, seNCellsinc),
+          meanLumenD = sprintf ('%.0f \U00B1 %.0f', meanLumenD, seLumenD),
+          meanCWT = sprintf ('%.0f \U00B1 %.0f', meanCWT, seCWT),
+          meanCWTALL = sprintf ('%.0f \U00B1 %.0f', meanCWTALL, seCWTALL),
+          meancumCWA = sprintf ('%.0f \U00B1 %.0f', meancumCWA, secumCWA),
+          meanCWAinc = sprintf ('%.0f \U00B1 %.0f', meanCWAinc, seCWAinc),
+          meanCWA = sprintf ('%.0f \U00B1 %.0f', meanCWA, seCWA),
+          meanNCells = sprintf ('%.0f \U00B1 %.0f', meanNCells, seNCells),
+          meanLumenDTan = sprintf ('%.0f \U00B1 %.0f', meanLumenDTan, seLumenDTan),
+          meanCWTRad = sprintf ('%.0f \U00B1 %.0f', meanCWTRad, seCWTRad)) %>%
+  select (-seRW, -seRWinc, -secumNCells, -seNCellsinc, -seLumenD, -seCWT, 
+          -seCWTALL, -secumCWA, -seCWAinc, -seCWA, -seNCells, -seLumenDTan,
+          -seCWTRad)
+```
+
+```{r createTable, echo = FALSE}
+kbl (tableData, 
+     caption = 'Table 1 - lists ... ???. The table was automatically generated from publicly available data set (data set ID here) on the Harvard Forest Data Archive.',
+     col.names = NULL) %>% 
+  kable_styling () #%>% 
+  #row_spec (c (1,5), hline_after = TRUE) %>%
+  #column_spec (column = c (1, 2, 4, 6, 8, 10), border_right = TRUE) %>%
+  #collapse_rows (columns = c (2, 4, 6, 8, 10), valign = 'top') %>% 
+  #add_header_above (c ('Tree ID', 'Treatment', 'd (cm)' = 2, 'h (m)' = 2, 'Age (year)' = 2, 'Radial growth (μm)' = 2,'Social status'))
+ 
+```

@@ -209,7 +209,6 @@ cumulativeSummary <- cumulativeSummary %>% arrange (TREE, sampleHeight, exPeriod
           sampleHeight = factor (sampleHeight, 
                                  levels = c (4.0, 2.5, 2.0, 1.5, 1.0, 0.5)))
 
-
 tp <- cumulativeSummary %>% group_by (treatment, sampleHeight, exPeriod) %>%
   summarise (meanLumenRad = mean (lumenRad, na.rm = TRUE),
              seLumenRad   = se   (lumenRad))
