@@ -140,29 +140,33 @@ legend (x = 0, y = 1350, legend = rep ('', 2), lwd = 2, lty = 1:2,  bg = 'transp
         col = tColours [['colour']] [c (1, 5)], box.lty = 0)
 dev.off ()
 
-# Plot violin plot of meadian cell-wall area for fraction of the ring grown before, 
+# Plot violin plot of median cell-wall area for fraction of the ring grown before, 
 # during and after chilling 
 #----------------------------------------------------------------------------------------
 anatoData <- anatomicalData  %>% 
-  filter (sampleHeight %notin% 1:2, YEAR %in% 2017:2018) %>% 
+  filter (YEAR %in% 2017:2018) %>% 
   mutate (treatment = ifelse (PLOT == 1, 'control', 'chilled')) %>%
   mutate (treatment = factor (treatment, levels = c ('control','chilled')))
+
+# Make sure that all 2017 data points get the right label
 anatoData <- anatoData %>%
-  mutate (exPeriod = ifelse (period <= as_date ('2018-06-25'), 
-                             'before', 
-                             ifelse (period <= as_date ('2018-09-03'), 
-                                     'during', 
-                                     'after'))) %>%
-  mutate (exPeriod = factor (exPeriod, levels = c ('before','during','after')))
-
-# New facet label names to label 2017 correctly 
-exPeriod.labs <- c ("before", "during", "after","2017")
-names (exPeriod.labs) <- c ("before", "during", "after", NA)
-
+  mutate (exPeriod = YEAR)
+copy <- anatoData %>% filter (YEAR != 2017)
+copy [['exPeriod']] [copy [['period']] >  as_date ('2018-09-03')] <- 'after' 
+copy [['exPeriod']] [copy [['period']] <= as_date ('2018-09-03') &
+                     copy [['period']] >  as_date ('2018-06-25')] <- 'during' 
+copy [['exPeriod']] [copy [['period']] <= as_date ('2018-06-25')] <- 'before' 
+anatoData <- rbind (anatoData, 
+                    copy) %>%
+  mutate (exPeriod = factor (exPeriod, 
+                             levels = c ('before','during','after','2017','2018')))  %>% 
+  mutate (sampleHeight = factor (sampleHeight, 
+                                 levels = c (4.0, 2.5, 2.0, 1.5, 1.0, 0.5)))
+  
 # plot median cell-wall area for control and chilled trees before the chilling 
-g <- ggplot (anatoData %>% 
-               mutate (sampleHeight = factor (sampleHeight, 
-                                              levels = c (4.0, 2.5, 1.5, 0.5)))) 
+png (filename = './fig/Exp2018ChillingMeanCellWallArea.png', 
+     width = 700, height = 350)
+g <- ggplot (anatoData) 
 g + geom_violin (aes (x = treatment, y = CWA, fill = treatment), 
                  alpha = 0.3, trim = FALSE,
                  colour = '#aaaaaaaa', 
@@ -170,15 +174,16 @@ g + geom_violin (aes (x = treatment, y = CWA, fill = treatment),
   scale_fill_manual (values = tColours [['colour']] [c (1, 5)], 
                      labels = c ('Control','Chilled')) + 
   geom_boxplot (aes (x = treatment, y = CWA, fill = treatment), alpha = 0.8,
-                width = 0.2, colour = '#333333',
+                width = 0.3, colour = '#333333',
                 outlier.size = 0, na.rm = TRUE) +
-  scale_y_continuous (limits = c (0, 1200)) +
+  scale_y_continuous (breaks = seq (0, 1000, 500)) +
   labs (title = "Cell-wall area", 
-        subtitle = expression (paste ('per 20 ',mu,'m tengential band', sep = '')),
+        subtitle = expression (paste ('per 20 ',mu,'m tangential band', sep = '')),
         x = "Treatment",
-        y = expression (paste ('Median cell-wall (',mu,m^2,')', sep = ''))) + 
-  coord_flip () +
-  facet_grid (sampleHeight ~ exPeriod, labeller = labeller (exPeriod = exPeriod.labs)) +
-  theme (legend.position = "none")
-
+        y = expression (paste ('Mean cell-wall area (',mu,m^2,')', sep = ''))) + 
+  coord_flip (ylim = c (0, 1200), ) +
+  facet_grid (sampleHeight ~ exPeriod) +
+  theme_classic () +
+  theme (legend.position = "none", panel.spacing = unit (1, 'lines'))
+dev.off ()
 #========================================================================================

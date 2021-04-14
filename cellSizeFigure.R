@@ -143,4 +143,52 @@ legend (x = 6, y = 35, legend = c ('control','chilled'), pch = c (19,5), bg = 't
 legend (x = 0, y = 35, legend = rep ('', 2), lwd = 2, lty = 1:2,  bg = 'transparent',
         col = tColours [['colour']] [c (1, 5)], box.lty = 0)
 dev.off ()
+
+
+# Plot violin plot of median cell-wall area for fraction of the ring grown before, 
+# during and after chilling 
+#----------------------------------------------------------------------------------------
+anatoData <- anatomicalData  %>% 
+  filter (YEAR %in% 2017:2018) %>% 
+  mutate (treatment = ifelse (PLOT == 1, 'control', 'chilled')) %>%
+  mutate (treatment = factor (treatment, levels = c ('control','chilled')))
+
+# Make sure that all 2017 data points get the right label
+anatoData <- anatoData %>%
+  mutate (exPeriod = YEAR)
+copy <- anatoData %>% filter (YEAR != 2017)
+copy [['exPeriod']] [copy [['period']] >  as_date ('2018-09-03')] <- 'after' 
+copy [['exPeriod']] [copy [['period']] <= as_date ('2018-09-03') &
+                       copy [['period']] >  as_date ('2018-06-25')] <- 'during' 
+copy [['exPeriod']] [copy [['period']] <= as_date ('2018-06-25')] <- 'before' 
+anatoData <- rbind (anatoData, 
+                    copy) %>%
+  mutate (exPeriod = factor (exPeriod, 
+                             levels = c ('before','during','after','2017','2018')))  %>% 
+  mutate (sampleHeight = factor (sampleHeight, 
+                                 levels = c (4.0, 2.5, 2.0, 1.5, 1.0, 0.5)))
+
+# plot median cell-wall area for control and chilled trees before the chilling 
+png (filename = './fig/Exp2018ChillingMeanCellSize.png', 
+     width = 750, height = 450)
+g <- ggplot (anatoData) 
+g + geom_violin (aes (x = treatment, y = cellRadWidth, fill = treatment), 
+                 alpha = 0.3, trim = FALSE,
+                 colour = '#aaaaaaaa', 
+                 show.legend = FALSE, draw_quantiles = TRUE, na.rm = TRUE) + 
+  scale_fill_manual (values = tColours [['colour']] [c (1, 5)], 
+                     labels = c ('Control','Chilled')) + 
+  geom_boxplot (aes (x = treatment, y = cellRadWidth, fill = treatment), alpha = 0.8,
+                width = 0.3, colour = '#333333',
+                outlier.size = 0, na.rm = TRUE) +
+  scale_y_continuous (breaks = seq (0, 60, 20)) +
+  labs (title = "Cell size ", 
+        subtitle = expression (paste ('per 20 ',mu,'m tangential band', sep = '')),
+        x = "Treatment",
+        y = expression (paste ('Mean radial cell diameter (',mu,m,')', sep = ''))) + 
+  coord_flip (ylim = c (0, 70), ) +
+  facet_grid (sampleHeight ~ exPeriod) +
+  theme_classic () +
+  theme (legend.position = "none", panel.spacing = unit (1, 'lines'))#,
+dev.off ()
 #========================================================================================
