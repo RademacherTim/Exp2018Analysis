@@ -274,9 +274,9 @@ g <- ggplot (tp, aes (x = treatment, y = meanCWAinc, color = treatment)) +
   theme (legend.position = 'none')
 g
 
-# Plot mean and standard error of the mean cumulative cell-wall area increment
+# Plot mean and standard error of the mean cell-wall area increment for various periods
 #----------------------------------------------------------------------------------------
-png (filename = './fig/Exp2018ChillingCumulativeCWAIncrementMean.png', 
+png (filename = './fig/Exp2018ChillingCWAIncrement.png', 
      width = 700, height = 400)
 layout (matrix (1:5, nrow = 1), widths = c (1.3, 1, 1, 1, 1))
 # loop over sampling heights
@@ -303,14 +303,18 @@ for (d in c ('before','during','after','2017','2018')) {
         y = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
           ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
         ylab = ifelse (d == 'before', 'Sample height (m)',''), 
-        pch = 19, cex = 1.8,
+        col = 'white', 
         xlab = expression (paste ('Cumulative cell-wall area (',mu,m^2,')', sep = '')),
-        xlim = c (0, xmax), ylim = c (0, 4.2), axes = FALSE, col = tColours [['colour']] [5])
+        xlim = c (0, xmax), ylim = c (0, 4.2), axes = FALSE)
   segments (x0 = tp [['meanCWAinc']] [con] - tp [['seCWAinc']] [con],
             x1 = tp [['meanCWAinc']] [con] + tp [['seCWAinc']] [con],
             y0 = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
               ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
             col = tColours [['colour']] [5], lwd = 3)
+  points (x = tp [['meanCWAinc']] [con],
+          y = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
+            ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
+          pch = 23, bg = 'white', cex = 1.8, lwd = 3, col = tColours [['colour']] [5])
   con <- tp [['exPeriod']] == d & tp [['treatment']] == 'control'
   segments (x0 = tp [['meanCWAinc']] [con] - tp [['seCWAinc']] [con],
             x1 = tp [['meanCWAinc']] [con] + tp [['seCWAinc']] [con],
@@ -320,7 +324,7 @@ for (d in c ('before','during','after','2017','2018')) {
   points (x = tp [['meanCWAinc']] [con],
           y = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
             ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
-          pch = 21, cex = 1.8, col = tColours [['colour']] [1], lwd = 3, bg = 'white')
+          pch = 19, cex = 1.8, col = tColours [['colour']] [1], lwd = 3, bg = 'white')
   
   if (d != 'before') {
     #axis (side = 2, at = c (0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 4.0), labels = rep ('', 7))
@@ -334,9 +338,6 @@ for (d in c ('before','during','after','2017','2018')) {
   }
   
 }
-# Add column
-#legend (x = 6, y = 0.14, legend = c ('control','chilled'), lwd = 1, lty = 1:2, bg = 'transparent',
-#        col = addOpacity (tColours [['colour']] [c (1, 5)], 0.5), box.lty = 0)
 dev.off ()
 
 #========================================================================================

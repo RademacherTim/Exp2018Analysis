@@ -186,4 +186,93 @@ g + geom_violin (aes (x = treatment, y = CWA, fill = treatment),
   theme_classic () +
   theme (legend.position = "none", panel.spacing = unit (1, 'lines'))
 dev.off ()
+
+
+# Summarise data to get cumulative ring width formed for each period
+cumulativeSummary <- anatoData %>% group_by (TREE, treatment, sampleHeight, exPeriod) %>% 
+  summarise (CWT = mean (CWTTAN, na.rm = TRUE)) %>% ungroup ()
+
+# Add rows for 2018 mean at sample heights where we can apportion fractionstmp <- anatoData %>% filter (YEAR == 2018) %>% group_by (TREE, treatment, sampleHeight) %>%
+tmp <- anatoData %>% group_by (TREE, treatment, sampleHeight) %>% 
+  summarise (CWT = mean (CWTTAN, na.rm = TRUE)) %>% 
+  add_column (exPeriod = '2018') %>% ungroup ()
+cumulativeSummary <- rbind (cumulativeSummary, tmp)
+
+# Arrange the tibble 
+cumulativeSummary <- cumulativeSummary %>% arrange (TREE, sampleHeight, exPeriod) %>%
+  mutate (exPeriod = factor (exPeriod, 
+                             levels = c ('before','during','after','2017','2018')),
+          sampleHeight = factor (sampleHeight, 
+                                 levels = c (4.0, 2.5, 2.0, 1.5, 1.0, 0.5)))
+
+
+tp <- cumulativeSummary %>% group_by (treatment, sampleHeight, exPeriod) %>%
+  summarise (meanCWT = mean (CWT, na.rm = TRUE),
+             seCWT   = se   (CWT))
+
+# Plot mean and standard error of the mean lumen radius for various periods
+#----------------------------------------------------------------------------------------
+png (filename = './fig/Exp2018ChillingMeanCWT.png', 
+     width = 700, height = 400)
+layout (matrix (1:5, nrow = 1), widths = c (1.3, 1, 1, 1, 1))
+# loop over sampling heights
+#----------------------------------------------------------------------------------------
+offset <- 0.05
+for (d in c ('before','during','after','2017','2018')) {
+  
+  # determine panel marigns
+  if  (d == 'before') {
+    par (mar = c (5, 5, 1, 1))
+  } else {
+    par (mar = c (5, 1, 1, 1))
+  }
+  
+  if (d %in% c ('before','during','after')) {
+    xmin <- 2; xmax <- 6
+  } else {
+    xmin <- 2; xmax <- 6
+  }
+  
+  con <- tp [['exPeriod']] == d & tp [['treatment']] == 'chilled'
+  # create plot area
+  plot (x = tp [['meanCWT']] [con],
+        y = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
+          ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
+        ylab = ifelse (d == 'before', 'Sample height (m)',''), 
+        col = 'white', 
+        xlab = expression (paste ('Mean tangential cell-wall thickness (',mu,m,')', sep = '')),
+        xlim = c (xmin, xmax), ylim = c (0, 4.2), axes = FALSE)
+  segments (x0 = tp [['meanCWT']] [con] - tp [['seCWT']] [con],
+            x1 = tp [['meanCWT']] [con] + tp [['seCWT']] [con],
+            y0 = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
+              ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
+            col = tColours [['colour']] [5], lwd = 3)
+  points (x = tp [['meanCWT']] [con],
+          y = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
+            ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
+          pch = 23, bg = 'white', cex = 1.8, lwd = 3, col = tColours [['colour']] [5])
+  con <- tp [['exPeriod']] == d & tp [['treatment']] == 'control'
+  segments (x0 = tp [['meanCWT']] [con] - tp [['seCWT']] [con],
+            x1 = tp [['meanCWT']] [con] + tp [['seCWT']] [con],
+            y0 = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
+              ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
+            col = tColours [['colour']] [1], lwd = 3)
+  points (x = tp [['meanCWT']] [con],
+          y = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
+            ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
+          pch = 19, cex = 1.8, col = tColours [['colour']] [1], lwd = 3, bg = 'white')
+  
+  if (d != 'before') {
+    #axis (side = 2, at = c (0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 4.0), labels = rep ('', 7))
+  } else {
+    axis (side = 2, at = c (0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 4.0), las = 1)
+  }
+  if (d %in% c ('before','during','after')) {
+    axis (side = 1, at = seq (xmin, xmax, 2))
+  } else {
+    axis (side = 1, at = seq (xmin, xmax, 2))
+  }
+  
+}
+dev.off ()
 #========================================================================================
