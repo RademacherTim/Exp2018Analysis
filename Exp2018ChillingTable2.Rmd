@@ -15,6 +15,10 @@ options (warn = -1)
 
 
 ```{r readTable, echo = FALSE}
+# To-do
+#----------------------------------------------------------------------------------------
+# - investigate inconsistency of cell numbers, for example the chilled tree average in the after period increases by 11.2 cells but the increment is only 8.7
+
 # Read anatomical data
 #----------------------------------------------------------------------------------------
 microcoreData <- read_csv (file = './data/anatomicalDataExp2018Chilling.csv',
@@ -242,10 +246,10 @@ tableData <- tableData %>%
           seRW          = round (seRW),
           meanRWinc     = round (meanRWinc),
           seRWinc       = round (seRWinc),
-          meancumNCells = round (meancumNCells),
-          secumNCells   = round (secumNCells),
-          meanNCellsinc = round (meanNCellsinc),
-          seNCellsinc   = round (seNCellsinc),
+          meancumNCells = round (meancumNCells, 1),
+          secumNCells   = round (secumNCells, 1),
+          meanNCellsinc = round (meanNCellsinc, 1),
+          seNCellsinc   = round (seNCellsinc, 1),
           meanLumenD    = round (meanLumenD, 1),
           seLumenD      = round (seLumenD, 1),
           meanCWT       = round (meanCWT, 2),
@@ -266,8 +270,8 @@ tableData <- tableData %>%
           seCWTRad      = round (seCWTRad, 2)) %>%
   mutate (meanRW        = sprintf ('%.0f \U00B1 %.0f', meanRW, seRW),
           meanRWinc     = sprintf ('%.0f \U00B1 %.0f', meanRWinc, seRWinc),
-          meancumNCells = sprintf ('%.0f \U00B1 %.0f', meancumNCells, secumNCells),
-          meanNCellsinc = sprintf ('%.0f \U00B1 %.0f', meanNCellsinc, seNCellsinc),
+          meancumNCells = sprintf ('%.1f \U00B1 %.1f', meancumNCells, secumNCells),
+          meanNCellsinc = sprintf ('%.1f \U00B1 %.1f', meanNCellsinc, seNCellsinc),
           meanLumenD    = sprintf ('%.1f \U00B1 %.1f', meanLumenD, seLumenD),
           meanCWT       = sprintf ('%.2f \U00B1 %.2f', meanCWT, seCWT),
           meanCWTALL    = sprintf ('%.2f \U00B1 %.2f', meanCWTALL, seCWTALL),
