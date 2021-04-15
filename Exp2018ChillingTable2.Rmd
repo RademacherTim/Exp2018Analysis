@@ -11,7 +11,7 @@ source ('plotingFunctions.R')
 options (warn = -1)
 ```
 
-## Table 1 
+## Table S2 
 
 
 ```{r readTable, echo = FALSE}
@@ -182,7 +182,7 @@ periodSummary <- periodSummary %>% arrange (TREE, sampleHeight, exPeriod) %>%
   mutate (exPeriod = factor (exPeriod, 
                              levels = c ('before','during','after','2017','2018')),
           sampleHeight = factor (sampleHeight, 
-                                 levels = c (4.0, 2.5, 2.0, 1.5, 1.0, 0.5)))
+                                 levels = c (4.0, 2.5, 2.0, 1.5, 1.0, 0.5, NA)))
 
 # Calcualte means and standard error of the means for each treatment and sampling height 
 # combination
@@ -202,71 +202,109 @@ tableData <- periodSummary %>%
              meanNCells    = mean (nCells, na.rm = TRUE), seNCells = se (nCells),
              meanLumenDTan = mean (lumenDTan, na.rm = TRUE), seLumenDTan = se (lumenDTan),
              meanCWTRad    = mean (CWTRad, na.rm = TRUE), seCWTRad = se (CWTRad),
-             .groups = 'keep')
+             .groups = 'keep') %>%
+  ungroup ()
 
-# Change column order
+
+# Calculate treatment mean and standard errors of those means
 #----------------------------------------------------------------------------------------
-# allometricData <- allometricData %>% 
-#   relocate (D, .after = d150) %>% 
-#   relocate (H, .after = tree.height.2018) %>% 
-#   relocate (Age, .after = age) %>% 
-#   relocate (social.status, .after = seGRW) 
+treatmentSummary <- periodSummary %>% 
+  group_by (treatment, exPeriod) %>% 
+  summarise (meanRW        = mean (RW,        na.rm = TRUE), seRW        = se (RW),
+             meanRWinc     = mean (RWinc,     na.rm = TRUE), seRWinc     = se (RWinc),
+             meancumNCells = mean (cumCells,  na.rm = TRUE), secumNCells = se (cumCells),
+             meanNCellsinc = mean (nCellsinc, na.rm = TRUE), seNCellsinc = se (nCellsinc),
+             meanLumenD    = mean (lumenD,    na.rm = TRUE), seLumenD    = se (lumenD),
+             meanCWT       = mean (CWT,       na.rm = TRUE), seCWT       = se (CWT),
+             meanCWTALL    = mean (CWTALL,    na.rm = TRUE), seCWTALL    = se (CWTALL),
+             meancumCWA    = mean (cumCWA,    na.rm = TRUE), secumCWA    = se (cumCWA),
+             meanCWAinc    = mean (CWAinc,    na.rm = TRUE), seCWAinc    = se (CWAinc),
+             meanCWA       = mean (CWA,       na.rm = TRUE), seCWA       = se (CWA),
+             meanNCells    = mean (nCells,    na.rm = TRUE), seNCells    = se (nCells),
+             meanLumenDTan = mean (lumenDTan, na.rm = TRUE), seLumenDTan = se (lumenDTan),
+             meanCWTRad    = mean (CWTRad,    na.rm = TRUE), seCWTRad    = se (CWTRad),
+             .groups = 'keep') %>%
+  ungroup () %>% 
+  add_column (sampleHeight = NA, .after = 'treatment') %>%
+  mutate (sampleHeight = factor (sampleHeight))
 
+# Combine period and treatment summaries
+#----------------------------------------------------------------------------------------
+tableData <- rbind (tableData [1:24, ], 
+                    treatmentSummary %>% filter (treatment == 'chilled'),
+                    tableData [25:48, ], 
+                    treatmentSummary %>% filter (treatment == 'control'))
+  
 # Round appropriately 
 #----------------------------------------------------------------------------------------
 tableData <- tableData %>%
-  mutate (meanRW = round (meanRW),
-          seRW = round (seRW),
-          meanRWinc = round (meanRWinc),
-          seRWinc = round (seRWinc),
+  mutate (meanRW        = round (meanRW),
+          seRW          = round (seRW),
+          meanRWinc     = round (meanRWinc),
+          seRWinc       = round (seRWinc),
           meancumNCells = round (meancumNCells),
-          secumNCells = round (secumNCells),
+          secumNCells   = round (secumNCells),
           meanNCellsinc = round (meanNCellsinc),
-          seNCellsinc = round (seNCellsinc),
-          meanLumenD = round (meanLumenD, 1),
-          seLumenD = round (seLumenD, 1),
-          meanCWT = round (meanCWT, 2),
-          seCWT = round (seCWT, 2),
-          meanCWTALL = round (meanCWTALL, 2),
-          seCWTALL = round (seCWTALL, 2),
-          meancumCWA = round (meancumCWA),
-          secumCWA = round (secumCWA),
-          meanCWAinc = round (meanCWAinc),
-          seCWAinc = round (seCWAinc),
-          meanCWA = round (meanCWA),
-          seCWA = round (seCWA),
-          meanNCells = round (meanNCells, 2),
-          seNCells = round (seNCells, 2),
+          seNCellsinc   = round (seNCellsinc),
+          meanLumenD    = round (meanLumenD, 1),
+          seLumenD      = round (seLumenD, 1),
+          meanCWT       = round (meanCWT, 2),
+          seCWT         = round (seCWT, 2),
+          meanCWTALL    = round (meanCWTALL, 2),
+          seCWTALL      = round (seCWTALL, 2),
+          meancumCWA    = round (meancumCWA),
+          secumCWA      = round (secumCWA),
+          meanCWAinc    = round (meanCWAinc),
+          seCWAinc      = round (seCWAinc),
+          meanCWA       = round (meanCWA),
+          seCWA         = round (seCWA),
+          meanNCells    = round (meanNCells, 2),
+          seNCells      = round (seNCells, 2),
           meanLumenDTan = round (meanLumenDTan, 1),
-          seLumenDTan = round (seLumenDTan, 1),
-          meanCWTRad = round (meanCWTRad, 2),
-          seCWTRad = round (seCWTRad), 2) %>%
-  mutate (meanRW = sprintf ('%.0f \U00B1 %.0f', meanRW, seRW),
-          meanRWinc = sprintf ('%.0f \U00B1 %.0f', meanRWinc, seRWinc),
+          seLumenDTan   = round (seLumenDTan, 1),
+          meanCWTRad    = round (meanCWTRad, 2),
+          seCWTRad      = round (seCWTRad, 2)) %>%
+  mutate (meanRW        = sprintf ('%.0f \U00B1 %.0f', meanRW, seRW),
+          meanRWinc     = sprintf ('%.0f \U00B1 %.0f', meanRWinc, seRWinc),
           meancumNCells = sprintf ('%.0f \U00B1 %.0f', meancumNCells, secumNCells),
           meanNCellsinc = sprintf ('%.0f \U00B1 %.0f', meanNCellsinc, seNCellsinc),
-          meanLumenD = sprintf ('%.0f \U00B1 %.0f', meanLumenD, seLumenD),
-          meanCWT = sprintf ('%.0f \U00B1 %.0f', meanCWT, seCWT),
-          meanCWTALL = sprintf ('%.0f \U00B1 %.0f', meanCWTALL, seCWTALL),
-          meancumCWA = sprintf ('%.0f \U00B1 %.0f', meancumCWA, secumCWA),
-          meanCWAinc = sprintf ('%.0f \U00B1 %.0f', meanCWAinc, seCWAinc),
-          meanCWA = sprintf ('%.0f \U00B1 %.0f', meanCWA, seCWA),
-          meanNCells = sprintf ('%.0f \U00B1 %.0f', meanNCells, seNCells),
-          meanLumenDTan = sprintf ('%.0f \U00B1 %.0f', meanLumenDTan, seLumenDTan),
-          meanCWTRad = sprintf ('%.0f \U00B1 %.0f', meanCWTRad, seCWTRad)) %>%
+          meanLumenD    = sprintf ('%.1f \U00B1 %.1f', meanLumenD, seLumenD),
+          meanCWT       = sprintf ('%.2f \U00B1 %.2f', meanCWT, seCWT),
+          meanCWTALL    = sprintf ('%.2f \U00B1 %.2f', meanCWTALL, seCWTALL),
+          meancumCWA    = sprintf ('%.0f \U00B1 %.0f', meancumCWA, secumCWA),
+          meanCWAinc    = sprintf ('%.0f \U00B1 %.0f', meanCWAinc, seCWAinc),
+          meanCWA       = sprintf ('%.0f \U00B1 %.0f', meanCWA, seCWA),
+          meanNCells    = sprintf ('%.2f \U00B1 %.2f', meanNCells, seNCells),
+          meanLumenDTan = sprintf ('%.1f \U00B1 %.1f', meanLumenDTan, seLumenDTan),
+          meanCWTRad    = sprintf ('%.2f \U00B1 %.2f', meanCWTRad, seCWTRad)) %>%
   select (-seRW, -seRWinc, -secumNCells, -seNCellsinc, -seLumenD, -seCWT, 
           -seCWTALL, -secumCWA, -seCWAinc, -seCWA, -seNCells, -seLumenDTan,
-          -seCWTRad)
+          -seCWTRad) 
 ```
 
 ```{r createTable, echo = FALSE}
 kbl (tableData, 
-     caption = 'Table 1 - lists ... ???. The table was automatically generated from publicly available data set (data set ID here) on the Harvard Forest Data Archive.',
+     caption = 'Table S2 - lists mean and standard error of the mean for A LOT OF VARIABLES. The table was automatically generated from publicly available data set (data set ID here) on the Harvard Forest Data Archive.',
      col.names = NULL) %>% 
-  kable_styling () #%>% 
-  #row_spec (c (1,5), hline_after = TRUE) %>%
+  kable_styling (font_size = 10) %>% 
+  row_spec (c (1, 28), hline_after = TRUE) %>%
   #column_spec (column = c (1, 2, 4, 6, 8, 10), border_right = TRUE) %>%
-  #collapse_rows (columns = c (2, 4, 6, 8, 10), valign = 'top') %>% 
-  #add_header_above (c ('Tree ID', 'Treatment', 'd (cm)' = 2, 'h (m)' = 2, 'Age (year)' = 2, 'Radial growth (μm)' = 2,'Social status'))
+  collapse_rows (columns = 1:2, valign = 'top') %>% 
+  add_header_above (c ('Treatment', 
+                       'Sample height (m)', 
+                       'Period', 
+                       'rw~cum~ (μm)',
+                       'rw~inc~ (μm)',
+                       'Cells~cum~ (n)',
+                       'Cells~inc~ (n)',
+                       'd~tan~ (μm)',
+                       't~tan~ (μm)',
+                       't~all~ (μm)',
+                       'CWA~cum~ (μm^2^)',
+                       'CWA~inc~ (μm^2^)',
+                       'CWA~t~ (μm^2^)',
+                       'Cells (n)',
+                       'd~rad~ (μm)',
+                       't~rad~ (μm)'))
  
 ```
