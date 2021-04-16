@@ -146,7 +146,7 @@ FIRSTNCELLS <- TRUE
 for (r in 1:dim (anatomicalData) [1]) {
   if (r == 1 | FIRSTCWA) { 
     if (!is.na (anatomicalData [['CWA']] [r])) {
-      anatomicalData [['cumCWA']] [r] <- anatomicalData [['CWA']] [r]
+      anatomicalData [['cumCWA']] [r] <- anatomicalData [['CWA']] [r] * anatomicalData [['nCells']]
       
       # Switch FIRST off to move on once a non-NA value was entered 
       FIRSTCWA <- FALSE
@@ -162,14 +162,14 @@ for (r in 1:dim (anatomicalData) [1]) {
       anatomicalData [['sampleDate']]   [r] != anatomicalData [['sampleDate']]   [r-1]
     if (differentProfile) {
       if (!is.na (anatomicalData [['CWA']] [r])) {
-        anatomicalData [['cumCWA']]    [r] <- anatomicalData [['CWA']] [r]
+        anatomicalData [['cumCWA']] [r] <- anatomicalData [['CWA']] [r] * anatomicalData [['nCells']] [r]
       } else {
         FIRSTCWA <- TRUE
       }
     } else {
       if (!is.na (anatomicalData [['CWA']] [r])) {
-        anatomicalData [['cumCWA']] [r] <- anatomicalData [['CWA']] [r] + 
-          anatomicalData [['cumCWA']] [r-1]
+        anatomicalData [['cumCWA']] [r] <- anatomicalData [['CWA']] [r] * 
+          anatomicalData [['nCells']] [r] + anatomicalData [['cumCWA']] [r-1]
       } else {
         anatomicalData [['cumCWA']] [r] <- anatomicalData [['cumCWA']] [r-1]
       }

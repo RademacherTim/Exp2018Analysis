@@ -94,9 +94,12 @@ for (r in 1:dim (periodSummary) [1]) {
     
     # Calculate increments
     #------------------------------------------------------------------------------------
-    periodSummary [['RWinc']] [r] <- periodSummary [['RW']] [r] - periodSummary [['RW']] [con]
-    periodSummary [['CWAinc']] [r] <- periodSummary [['cumCWA']] [r] - periodSummary [['cumCWA']] [con]
-    periodSummary [['nCellsinc']] [r] <- periodSummary [['cumCells']] [r] - periodSummary [['cumCells']] [con]
+    periodSummary [['RWinc']] [r] <- periodSummary [['RW']] [r] - 
+      periodSummary [['RW']] [con]
+    periodSummary [['CWAinc']] [r] <- periodSummary [['cumCWA']] [r] - 
+      periodSummary [['cumCWA']] [con]
+    periodSummary [['nCellsinc']] [r] <- periodSummary [['cumCells']] [r] - 
+      periodSummary [['cumCells']] [con]
     
   #  After the chilling the increment is equal to `after` - `during` 
   #--------------------------------------------------------------------------------------
@@ -110,9 +113,12 @@ for (r in 1:dim (periodSummary) [1]) {
     
     # Calculate increments
     #------------------------------------------------------------------------------------
-    periodSummary [['RWinc']] [r] <- periodSummary [['RW']] [r] - periodSummary [['RW']] [con]
-    periodSummary [['CWAinc']] [r] <- periodSummary [['cumCWA']] [r] - periodSummary [['cumCWA']] [con]
-    periodSummary [['nCellsinc']] [r] <- periodSummary [['cumCells']] [r] - periodSummary [['cumCells']] [con]
+    periodSummary [['RWinc']] [r] <- periodSummary [['RW']] [r] - 
+      periodSummary [['RW']] [con]
+    periodSummary [['CWAinc']] [r] <- periodSummary [['cumCWA']] [r] - 
+      periodSummary [['cumCWA']] [con]
+    periodSummary [['nCellsinc']] [r] <- periodSummary [['cumCells']] [r] - 
+      periodSummary [['cumCells']] [con]
     
   }
 }
@@ -193,19 +199,19 @@ periodSummary <- periodSummary %>% arrange (TREE, sampleHeight, exPeriod) %>%
 #----------------------------------------------------------------------------------------
 tableData <- periodSummary %>% 
   group_by (treatment, sampleHeight, exPeriod) %>% 
-  summarise (meanRW        = mean (RW, na.rm = TRUE), seRW = se (RW),
-             meanRWinc     = mean (RWinc, na.rm = TRUE), seRWinc = se (RWinc),
-             meancumNCells = mean (cumCells, na.rm = TRUE), secumNCells = se (cumCells),
+  summarise (meanRW        = mean (RW,        na.rm = TRUE), seRW        = se (RW),
+             meanRWinc     = mean (RWinc,     na.rm = TRUE), seRWinc     = se (RWinc),
+             meancumNCells = mean (cumCells,  na.rm = TRUE), secumNCells = se (cumCells),
              meanNCellsinc = mean (nCellsinc, na.rm = TRUE), seNCellsinc = se (nCellsinc),
-             meanLumenD    = mean (lumenD, na.rm = TRUE), seLumenD = se (lumenD),
-             meanCWT       = mean (CWT, na.rm = TRUE), seCWT = se (CWT),
-             meanCWTALL    = mean (CWTALL, na.rm = TRUE), seCWTALL = se (CWTALL),
-             meancumCWA    = mean (cumCWA, na.rm = TRUE), secumCWA = se (cumCWA),
-             meanCWAinc    = mean (CWAinc, na.rm = TRUE), seCWAinc = se (CWAinc),
-             meanCWA       = mean (CWA, na.rm = TRUE), seCWA = se (CWA),
-             meanNCells    = mean (nCells, na.rm = TRUE), seNCells = se (nCells),
+             meanLumenD    = mean (lumenD,    na.rm = TRUE), seLumenD    = se (lumenD),
+             meanCWT       = mean (CWT,       na.rm = TRUE), seCWT       = se (CWT),
+             meanCWTALL    = mean (CWTALL,    na.rm = TRUE), seCWTALL    = se (CWTALL),
+             meancumCWA    = mean (cumCWA,    na.rm = TRUE), secumCWA    = se (cumCWA),
+             meanCWAinc    = mean (CWAinc,    na.rm = TRUE), seCWAinc    = se (CWAinc),
+             meanCWA       = mean (CWA,       na.rm = TRUE), seCWA       = se (CWA),
+             meanNCells    = mean (nCells,    na.rm = TRUE), seNCells    = se (nCells),
              meanLumenDTan = mean (lumenDTan, na.rm = TRUE), seLumenDTan = se (lumenDTan),
-             meanCWTRad    = mean (CWTRad, na.rm = TRUE), seCWTRad = se (CWTRad),
+             meanCWTRad    = mean (CWTRad,    na.rm = TRUE), seCWTRad    = se (CWTRad),
              .groups = 'keep') %>%
   ungroup ()
 

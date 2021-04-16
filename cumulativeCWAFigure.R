@@ -112,7 +112,7 @@ for (h in c (4.0, 2.5, 2.0, 1.5, 1.0, 0.5)) {
         y = tempData [['cumCWA']] [tempData [['PLOT']] == 5] * 1e-6,
         col = 'white', xlab = ifelse (h == 0.5, 'Percentage ring width (%)',''), 
         ylab = expression (paste ('Cumulative cell-wall area (',mm^2,')', sep = '')),
-        xlim = c (0, 100), ylim = c (0, 0.145), axes = FALSE)
+        xlim = c (0, 100), ylim = c (0, 0.045), axes = FALSE)
   
   # Add the average portion formed before, during and after the experiment
   if (h %notin% 1:2) plotFractionFormed (data = tempData) 
@@ -129,16 +129,16 @@ for (h in c (4.0, 2.5, 2.0, 1.5, 1.0, 0.5)) {
   } else {
     axis (side = 1, at = seq (0, 100, 10))
   }
-  axis (side = 2, at = seq (0, 0.14, 0.02), las = 1)
+  axis (side = 2, at = seq (0, 0.04, 0.02), las = 1)
   
   # Add smoothed mean signal
   plotRunningAverage (data = tempData)
   
 }
 # Add column
-legend (x = 6, y = 0.14, legend = c ('control','chilled'), lwd = 1, lty = 1:2, bg = 'transparent',
+legend (x = 6, y = 0.04, legend = c ('control','chilled'), lwd = 1, lty = 1:2, bg = 'transparent',
         col = addOpacity (tColours [['colour']] [c (1, 5)], 0.5), box.lty = 0)
-legend (x = 0, y = 0.14, legend = rep ('', 2), lwd = 2, lty = 1:2,  bg = 'transparent',
+legend (x = 0, y = 0.04, legend = rep ('', 2), lwd = 2, lty = 1:2,  bg = 'transparent',
         col = tColours [['colour']] [c (1, 5)], box.lty = 0)
 dev.off ()
 
@@ -292,9 +292,9 @@ for (d in c ('before','during','after','2017','2018')) {
   }
   
   if (d %in% c ('before','during','after')) {
-    xmax <- 50000
+    xmax <- 20000
   } else {
-    xmax <- 80000
+    xmax <- 40000
   }
   
   con <- tp [['exPeriod']] == d & tp [['treatment']] == 'chilled'
@@ -332,9 +332,9 @@ for (d in c ('before','during','after','2017','2018')) {
     axis (side = 2, at = c (0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 4.0), las = 1)
   }
   if (d %in% c ('before','during','after')) {
-    axis (side = 1, at = seq (0, xmax, 20000))
+    axis (side = 1, at = seq (0, xmax, 10000))
   } else {
-    axis (side = 1, at = seq (0, xmax, 40000))
+    axis (side = 1, at = seq (0, xmax, 10000))
   }
   
 }
