@@ -32,7 +32,7 @@ periodSummary <- microcoreData %>% group_by (TREE, treatment, sampleHeight, exPe
              lumenD    = mean (DRAD,     na.rm = TRUE),     # radial lumen diameter (μm) 
              CWT       = mean (CWTTAN,   na.rm = TRUE),     # tangential cell-wall thickness (μm)
              CWTALL    = mean (CWTALL,   na.rm = TRUE),     # mean cell-wall thickness (μm)  
-             cumCWA    = max  (cumCWA,    na.rm = TRUE),     # cumulative cell-wall area (μm^2)
+             cumCWA    = max  (cumCWA,   na.rm = TRUE),     # cumulative cell-wall area (μm^2)
              CWA       = mean (CWA,      na.rm = TRUE),     # cell-wall area  (μm^2) 
              nCells    = mean (nCells,   na.rm = TRUE),     # mean number of cells per 20-μm band
              lumenDTan = mean (DTAN,     na.rm = TRUE),     # tangential lumen diameter (μm)  
@@ -62,6 +62,38 @@ summary2018 <- microcoreData %>%
 # Combine the experimental and 2017 data with the aggregate 2018 data
 #----------------------------------------------------------------------------------------
 periodSummary <- rbind (periodSummary, summary2018)
+
+# Identify ections were growth had stopped during the experiment (i.e., no `after`)
+#----------------------------------------------------------------------------------------
+missingRows <- periodSummary %>% 
+  group_by (TREE, sampleHeight) %>% 
+  filter (n () %notin% c (2, 5)) %>% 
+  select (TREE, treatment, sampleHeight) %>% 
+  distinct () %>% ungroup ()
+
+# Identify cumulative values from previous period (i.e., `during`)
+#----------------------------------------------------------------------------------------
+for (i in 1:dim (missingRows)[1]) {
+  row <- periodSummary %>% 
+    filter (TREE == (missingRows %>% select (TREE)%>% slice (i) %>% unlist ()),
+            sampleHeight == (missingRows %>% select (sampleHeight) %>% slice (i) %>% unlist ()),
+            exPeriod == 'during')
+  periodSummary <- periodSummary %>% add_row (TREE = row [['TREE']],
+                                              treatment = row [['treatment']],
+                                              sampleHeight = row [['sampleHeight']],
+                                              exPeriod = 'after',
+                                              RW = row [['RW']],
+                                              cumCells = row [['cumCells']],
+                                              lumenD = NA,
+                                              CWT = NA,
+                                              CWTALL = NA,
+                                              cumCWA = row [['cumCWA']],
+                                              CWA = NA,
+                                              nCells = 0,
+                                              lumenDTan = NA,
+                                              CWTRad = NA)
+} 
+
 
 # Add cumulative increment for 2018
 #----------------------------------------------------------------------------------------
@@ -124,7 +156,7 @@ for (r in 1:dim (periodSummary) [1]) {
 }
 
 # Loop over all trees and sample heights to ddd values for full annual increment in 2018, 
-# where we can apportion fractions
+# where we cannot apportion fractions
 #----------------------------------------------------------------------------------------
 for (t in c (1:5, 11:15)) {
   for (h in c (0.5, 1.5, 2.5, 4.0)) {
@@ -244,7 +276,12 @@ tableData <- rbind (tableData [1:24, ],
                     treatmentSummary %>% filter (treatment == 'chilled'),
                     tableData [25:48, ], 
                     treatmentSummary %>% filter (treatment == 'control'))
-  
+
+# Write a csv copy if required
+#----------------------------------------------------------------------------------------
+WRITE <- FALSE
+if (WRITE) write_csv (tableData, 'tableData.csv')
+
 # Round appropriately 
 #----------------------------------------------------------------------------------------
 tableData <- tableData %>%
@@ -289,7 +326,7 @@ tableData <- tableData %>%
           meanCWTRad    = sprintf ('%.2f \U00B1 %.2f', meanCWTRad, seCWTRad)) %>%
   select (-seRW, -seRWinc, -secumNCells, -seNCellsinc, -seLumenD, -seCWT, 
           -seCWTALL, -secumCWA, -seCWAinc, -seCWA, -seNCells, -seLumenDTan,
-          -seCWTRad) 
+          -seCWTRad)
 ```
 
 ```{r createTable, echo = FALSE}
