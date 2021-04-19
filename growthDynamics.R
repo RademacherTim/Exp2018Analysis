@@ -167,8 +167,9 @@ dev.off ()
 
 # make four panel figure of absolute growth over time for control and chilled trees by sample height
 #----------------------------------------------------------------------------------------
+PLOTTREE <- FALSE
 png (filename = './fig/Exp2018ChillingAbsoluteVolumeGrowthDynamics.png', width = 800 , height = 700)
-layout (matrix (1:4, nrow = 4), heights = c (1,1,1,1.4))
+layout (matrix (1:4, nrow = 4), heights = c (1,1,1,1.3))
 for (h in c (4.0, 2.5, 1.5, 0.5)) {
   
   # determine panel margins
@@ -183,53 +184,71 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
           select (sampleDate) %>% unlist () - 17532,
         y = tempData %>% filter (treatment == 1, sampleHeight == h) %>% 
           select (Y2018) %>% unlist (),
-        xlim = c (110, 365), ylim = c (0, 4600), axes = FALSE, pch = 19, 
-        las = 1, xlab = ifelse (h != 0.5, '', 'Day of the year'), 
+        xlim = c (110, 365), ylim = c (0, ifelse (PLOTTREE, 4600, 2400)), 
+        axes = FALSE, pch = 19, las = 1, 
+        xlab = ifelse (h != 0.5, '', 'Day of the year'), 
         ylab = '', 
-        col = addOpacity (tColours [['colour']] [1], 0.5)) 
+        col = 'white') 
   
   # add critical dates
   #--------------------------------------------------------------------------------------
   res <- abline (v = lubridate::yday (c ('2018-06-25','2018-09-03')), 
                  col = '#999999', lty = 2, lwd = 1)
   
-  points (x = tempData %>% filter (treatment == 5, sampleHeight == h) %>% 
-            select (sampleDate) %>% unlist () - 17532,
-          y = tempData %>% filter (treatment == 5, sampleHeight == h) %>% 
-            select (Y2018) %>% unlist (), pch = 23, 
-          col = addOpacity (tColours [['colour']] [5], 0.5)) 
-  
+  # Add points for chilled trees
+  #--------------------------------------------------------------------------------------
+  if (PLOTTREE) {
+    points (x = tempData %>% filter (treatment == 5, sampleHeight == h) %>% 
+              select (sampleDate) %>% unlist () - 17532,
+            y = tempData %>% filter (treatment == 5, sampleHeight == h) %>% 
+              select (Y2018) %>% unlist (), pch = 23, 
+            col = addOpacity (tColours [['colour']] [5], 0.5)) 
+    points (x = tempData %>% filter (treatment == 1, sampleHeight == h) %>% 
+              select (sampleDate) %>% unlist () - 17532,
+            y = tempData %>% filter (treatment == 1, sampleHeight == h) %>% 
+              select (Y2018) %>% unlist (), pch = 19, 
+            col = addOpacity (tColours [['colour']] [1], 0.5)) 
+  }
   # add axis
   if (h != 0.5) {
     axis (side = 1, at = seq (0, 360, 60), labels = rep ('', 7))
   } else {
     axis (side = 1, at = seq (0, 360, 60), cex.axis = 1.4)
   }  
-  axis (side = 2, at = seq (0, 4000, 1000), las = 1, cex.axis = 1.4)
+  if (PLOTTREE) {
+    axis (side = 2, at = seq (0, 4000, 1000), labels = seq (0, 4000, 1000), las = 1, 
+          cex.axis = 1.4)
+  } else {
+    axis (side = 2, at = seq (0, 2000, 1000), labels = seq (0, 2000, 1000), las = 1, 
+          cex.axis = 1.4)
+  }
   mtext (side = 2, line = 4, 
-         text = expression (paste ('Volume growth (',mu,m,')',sep = '')), at = 2000, cex = 0.7)
+         text = expression (paste ('Volume growth (',mu,m,')',sep = '')), 
+         at = ifelse (PLOTTREE, 2000, 1000), cex = 0.7)
   
   # add monotonic GAMs for each tree
-  for (t in c (1:5, 11:15)) {
+  if (PLOTTREE) {
+    for (t in c (1:5, 11:15)) {
     
-    # get tree-specific volume growth
-    treeData <- tempData %>% mutate (doy = lubridate::yday (sampleDate)) %>% 
-      filter (treeId == t & sampleHeight == h) %>% arrange (by = sampleDate)
-    
-    # Assume that the ring measured in 2019 is the end of the year growth
-    if (sum (treeData [['sampleDate']] == as_date ('2019-10-24'), na.rm = TRUE) > 0) {
-      treeData [['sampleDate']] [treeData [['sampleDate']] == as_date ('2019-10-24')] <- as_date ('2018-12-31')
-      treeData [['doy']] [treeData [['sampleDate']] == as_date ('2018-12-31')] <- yday ('2018-12-31')
+      # get tree-specific volume growth
+      treeData <- tempData %>% mutate (doy = lubridate::yday (sampleDate)) %>% 
+        filter (treeId == t & sampleHeight == h) %>% arrange (by = sampleDate)
+      
+      # Assume that the ring measured in 2019 is the end of the year growth
+      if (sum (treeData [['sampleDate']] == as_date ('2019-10-24'), na.rm = TRUE) > 0) {
+        treeData [['sampleDate']] [treeData [['sampleDate']] == as_date ('2019-10-24')] <- as_date ('2018-12-31')
+        treeData [['doy']] [treeData [['sampleDate']] == as_date ('2018-12-31')] <- yday ('2018-12-31')
+      }
+      
+      # Fit general additive model to growth data
+      fit.gam <- scam::scam (Y2018 ~ s (doy, k = 8, bs = 'mpi'), 
+                             data   = treeData, 
+                             family = quasipoisson)
+      
+      lines (x = 1:365, y = exp (predict (fit.gam, newdata = data.frame (doy = 1:365))),
+             col = tColours [['colour']] [unique (treeData [['treatment']])], 
+             lty = ifelse (unique (treeData [['treatment']]) == 1, 1, 2), lwd = 0.3)
     }
-    
-    # Fit general additive model to growth data
-    fit.gam <- scam::scam (Y2018 ~ s (doy, k = 8, bs = 'mpi'), 
-                           data   = treeData, 
-                           family = quasipoisson)
-    
-    lines (x = 1:365, y = exp (predict (fit.gam, newdata = data.frame (doy = 1:365))),
-           col = tColours [['colour']] [unique (treeData [['treatment']])], 
-           lty = ifelse (unique (treeData [['treatment']]) == 1, 1, 2), lwd = 0.3)
   }
   
   # add monotonic GAM for treatment 
@@ -256,7 +275,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
              y = exp (c (m$fit [160:365] + 2 * m$se.fit [160:365], 
                          rev (m$fit [160:365] - 2 * m$se.fit [160:365]))), 
              lty = 0,
-             col = addOpacity (tColours [['colour']] [t], 0.5))
+             col = addOpacity (tColours [['colour']] [t], 0.3))
     
     # add treatment mean behaviour
     lines (x = 1:365, y = exp (m$fit), col = tColours [['colour']] [t], lwd = 2,
@@ -265,27 +284,29 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     # add mean and standard error for start of the growing season
     arrows (x0 = mean (treatmentData [['startOfGrowth']]) - se (treatmentData [['startOfGrowth']]),
             x1 = mean (treatmentData [['startOfGrowth']]) + se (treatmentData [['startOfGrowth']]), 
-            y0 = 4400 + ifelse (t == 1, -100, 100), col = tColours [['colour']] [t], 
+            y0 = ifelse (PLOTTREE, 4400, 2200) + ifelse (t == 1, -100, 100), col = tColours [['colour']] [t], 
             length = 0, angle = 90, code = 3, lwd = 2)
     points (x = mean (treatmentData [['startOfGrowth']]), 
-            y = 4400 + ifelse (t == 1, -100, 100), pch = ifelse (t == 1, 19, 23), 
+            y = ifelse (PLOTTREE, 4400, 2200) + ifelse (t == 1, -100, 100), pch = ifelse (t == 1, 19, 23), 
             col = tColours [['colour']] [t], cex = 1.5, bg = 'white', lwd = 2)
     
     # add mean and standard error for end of the growing season
     arrows (x0 = mean (treatmentData [['endOfGrowth']]) - se (treatmentData [['endOfGrowth']]),
             x1 = mean (treatmentData [['endOfGrowth']]) + se (treatmentData [['endOfGrowth']]), 
-            y0 = 4400 + ifelse (t == 1, -100, 100), col = tColours [['colour']] [t], 
+            y0 = ifelse (PLOTTREE, 4400, 2200) + ifelse (t == 1, -100, 100), col = tColours [['colour']] [t], 
             length = 0, angle = 90, code = 3, lwd = 2)
     points (x = mean (treatmentData [['endOfGrowth']]), 
-            y = 4400 + ifelse (t == 1, -100, 100), pch = ifelse (t == 1, 19, 23), 
+            y = ifelse (PLOTTREE, 4400, 2200) + ifelse (t == 1, -100, 100), pch = ifelse (t == 1, 19, 23), 
             col = tColours [['colour']] [t], cex = 1.5, bg = 'white', lwd = 2)
   } # end treatment loop
 } # end sample height loop
 
 # add legend 
-legend (x = 110, y = 4000, legend = c ('',''), bg = 'transparent', box.lty = 0,
+legend (x = 110, y = ifelse (PLOTTREE, 4000, 1900), legend = c ('',''), 
+        bg = 'transparent', box.lty = 0, cex = 1.8,
         lty = 1:2, col = tColours [['colour']] [c (1, 5)], lwd = 2)
-legend (x = 125, y = 4000, legend = c ('control','chilled'), bg = 'transparent', box.lty = 0,
+legend (x = 125, y = ifelse (PLOTTREE, 4000, 1900), legend = c ('control','chilled'), 
+        bg = 'transparent', box.lty = 0, cex = 1.8, lwd = 2, lty = 0,
         pch = c (19, 23), col = tColours [['colour']] [c (1, 5)])
 dev.off ()
 

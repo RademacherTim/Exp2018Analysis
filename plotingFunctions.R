@@ -18,9 +18,15 @@ se <-  function (x) {
 
 # set colours for treatments: control, girdled, compressed, double compressed and chilled
 #----------------------------------------------------------------------------------------
-tColours <- tibble (colour = c ('#91b9a4','#C0334D','#F18904','#5C4A72','#0073cf'),
+# tColours <- tibble (colour = c ('#91b9a4','#C0334D','#F18904','#5C4A72','#0073cf'),
+#                     treatment = c ('control','girdled','compressed','double compressed',
+#                                    'chilled'))
+tColours <- tibble (colour = c ('#aab300','#C0334D','#F18904','#5C4A72','#0073cf'),
                     treatment = c ('control','girdled','compressed','double compressed',
                                    'chilled'))
+# tColours <- tibble (colour = c ('#55a51c','#C0334D','#F18904','#5C4A72','#0073cf'),
+#                     treatment = c ('control','girdled','compressed','double compressed',
+#                                    'chilled'))
 
 # set colours for carbon sinks: growth, respiration, change in NSC concentrations. 
 #----------------------------------------------------------------------------------------

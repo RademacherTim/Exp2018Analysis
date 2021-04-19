@@ -479,10 +479,10 @@ lines (x = tempData [['datetime']] [con],
 
 # add legend 
 #----------------------------------------------------------------------------------------
-legend (x = as_datetime ('2018-08-25 22:00:00'), y = 36, box.lty = 0, 
-        col = tColours [['colour']] [c (2, 5, 1)], lty = c (1, 1, 1), lwd = c (2, 2, 3),
-        legend = c ('air','chilled phloem','control phloem'),
-        cex = 1, bg = 'transparent')
+# legend (x = as_datetime ('2018-08-25 22:00:00'), y = 36, box.lty = 0, 
+#         col = tColours [['colour']] [c (2, 5, 1)], lty = c (1, 1, 1), lwd = c (2, 2, 3),
+#         legend = c ('air','chilled phloem','control phloem'),
+#         cex = 1, bg = 'transparent')
 dev.off ()
 
 # plot temperature of chilled and control trees at 1 and 2m 
@@ -524,7 +524,7 @@ lines (x = tempData [['datetime']],
 lines (x = tempData [['datetime']], 
        y = tempData %>% select (t.01.2p0m, t.02.2p0m, t.03.2p0m, t.04.2p0m, t.05.2p0m) %>% 
          rowMeans (na.rm = TRUE),
-       col = tColours [['colour']] [5], lty = 1, lwd = 1)
+       col = tColours [['colour']] [5], lty = 1, lwd = 2)
 
 # add temperatures at 1.5 m
 #----------------------------------------------------------------------------------------
@@ -558,7 +558,7 @@ lines (x = tempData [['datetime']],
 #----------------------------------------------------------------------------------------
 lines (x = tempData [['datetime']], 
        y = tempData %>% select (t.01.1p5m, t.02.1p5m, t.03.1p5m, t.04.1p5m, t.05.1p5m) %>% rowMeans (na.rm = TRUE),
-       col = tColours [['colour']] [5], lty = 1, lwd = 1)
+       col = tColours [['colour']] [5], lty = 1, lwd = 2)
 
 # add existing measurements from compressed and control trees
 #----------------------------------------------------------------------------------------
@@ -604,12 +604,13 @@ lines (x = tempData [['datetime']],
 lines (x = tempData [['datetime']], 
        y = tempData %>% select (t.01.1p0m, t.02.1p0m, t.03.1p0m, t.04.1p0m, t.05.1p0m) %>% 
          rowMeans (na.rm = TRUE),
-       col = tColours [['colour']] [5], lty = 1, lwd = 1)
+       col = tColours [['colour']] [5], lty = 1, lwd = 2)
 
 # add legend 
 #----------------------------------------------------------------------------------------
-legend (x = as_datetime ('2018-09-15'), y = 35, box.lty = 0, 
-        col = tColours [['colour']] [c (2, 1, 5)], 
-        legend = c ('air temperature','control phloem','chilled phloem'),
-        lwd = c (1, 2, 1), cex = 1, bg = 'transparent')
+# legend (x = as_datetime ('2018-09-15'), y = 40, box.lty = 0, 
+#         col = tColours [['colour']] [c (2, 1, 5)], 
+#         legend = c ('air temperature','control phloem','chilled phloem'),
+#         lwd = c (1, 2, 1), cex = 1, bg = 'transparent')
 dev.off ()
+

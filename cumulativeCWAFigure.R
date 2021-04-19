@@ -273,6 +273,7 @@ g <- ggplot (tp, aes (x = treatment, y = meanCWAinc, color = treatment)) +
   theme_classic () +
   theme (legend.position = 'none')
 g
+dev.off ()
 
 # Plot mean and standard error of the mean cell-wall area increment for various periods
 #----------------------------------------------------------------------------------------
