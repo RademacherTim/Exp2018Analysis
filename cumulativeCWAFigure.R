@@ -163,7 +163,7 @@ anatoData [['exPeriod']] [anatoData [['YEAR']] == 2018 &
 
 # Summarise data to get cumulative CWA formed for each period
 cumulativeSummary <- anatoData %>% group_by (TREE, treatment, sampleHeight, exPeriod) %>% 
-  summarise (cumCWA = max (cumCWA, na.rm = TRUE)) %>% ungroup ()
+  summarise (cumCWA = max (cumCWA, na.rm = TRUE), .groups = 'keep') %>% ungroup ()
 
 # Add cumulative CWA increment for 2018
 cumulativeSummary <- add_column (cumulativeSummary, cumCWAinc = NA) 
@@ -235,45 +235,44 @@ cumulativeSummary <- cumulativeSummary %>% arrange (TREE, sampleHeight, exPeriod
 
 
 # plot median cell-wall area for control and chilled trees before the chilling 
-g <- ggplot (cumulativeSummary) 
+# g <- ggplot (cumulativeSummary) 
+# 
+# png (filename = './fig/Exp2018ChillingCumulativeCellWallArea.png', width = 750, height = 450)
+# g + #geom_violin (aes (x = treatment, y = cumCWAinc, fill = treatment), 
+#     #             alpha = 0.3, trim = FALSE,
+#     #             colour = '#aaaaaaaa', 
+#     #             show.legend = FALSE, draw_quantiles = TRUE, na.rm = TRUE) + 
+#   scale_fill_manual (values = tColours [['colour']] [c (5, 1)], 
+#                     labels = c ('control','chilled')) + 
+#   geom_boxplot (aes (x = treatment, y = cumCWAinc, fill = treatment), alpha = 0.8,
+#                 width = 0.5, colour = '#333333',
+#                 outlier.size = 0, na.rm = TRUE) +
+#   scale_y_continuous (breaks = seq (0, 60000, 20000), 
+#                       labels = c ('0','20K','40K','60K')) +
+#   labs (title = "Cumulative cell-wall area", 
+#         subtitle = expression (paste ('per 20 ',mu,'m tangential band', sep = '')),
+#         x = "Treatment",
+#         y = expression (paste ('Cumulative cell-wall area increment (',mu,m^2,')', sep = ''))) + 
+#   coord_flip (ylim = c (0, 60000)) +
+#   facet_grid (sampleHeight ~ exPeriod) +
+#   theme_classic () +
+#   theme (legend.position = "none", panel.spacing = unit (1, 'lines'))#,
+# dev.off ()
 
-png (filename = './fig/Exp2018ChillingCumulativeCellWallArea.png', width = 750, height = 450)
-g + #geom_violin (aes (x = treatment, y = cumCWAinc, fill = treatment), 
-    #             alpha = 0.3, trim = FALSE,
-    #             colour = '#aaaaaaaa', 
-    #             show.legend = FALSE, draw_quantiles = TRUE, na.rm = TRUE) + 
-  scale_fill_manual (values = tColours [['colour']] [c (5, 1)], 
-                    labels = c ('control','chilled')) + 
-  geom_boxplot (aes (x = treatment, y = cumCWAinc, fill = treatment), alpha = 0.8,
-                width = 0.5, colour = '#333333',
-                outlier.size = 0, na.rm = TRUE) +
-  scale_y_continuous (breaks = seq (0, 60000, 20000), 
-                      labels = c ('0','20K','40K','60K')) +
-  labs (title = "Cumulative cell-wall area", 
-        subtitle = expression (paste ('per 20 ',mu,'m tangential band', sep = '')),
-        x = "Treatment",
-        y = expression (paste ('Cumulative cell-wall area increment (',mu,m^2,')', sep = ''))) + 
-  coord_flip (ylim = c (0, 60000)) +
-  facet_grid (sampleHeight ~ exPeriod) +
-  theme_classic () +
-  theme (legend.position = "none", panel.spacing = unit (1, 'lines'))#,
-dev.off ()
-
-layout ()
 tp <- cumulativeSummary %>% group_by (treatment, sampleHeight, exPeriod) %>%
   summarise (meanCWAinc = mean (cumCWAinc, na.rm = TRUE),
-             seCWAinc   = se   (cumCWAinc))
-g <- ggplot (tp, aes (x = treatment, y = meanCWAinc, color = treatment)) + 
-  geom_point (size = 2.5) +
-  geom_errorbar (aes (ymin = meanCWAinc - seCWAinc, 
-                      ymax = meanCWAinc + seCWAinc),
-                 width = 0.0, size = 1) +
-  facet_grid (sampleHeight ~ exPeriod, scales = 'free') +
-  coord_flip (ylim = c (0, 60000)) +
-  theme_classic () +
-  theme (legend.position = 'none')
-g
-dev.off ()
+             seCWAinc   = se   (cumCWAinc), .groups = 'keep')
+# g <- ggplot (tp, aes (x = treatment, y = meanCWAinc, color = treatment)) + 
+#   geom_point (size = 2.5) +
+#   geom_errorbar (aes (ymin = meanCWAinc - seCWAinc, 
+#                       ymax = meanCWAinc + seCWAinc),
+#                  width = 0.0, size = 1) +
+#   facet_grid (sampleHeight ~ exPeriod, scales = 'free') +
+#   coord_flip (ylim = c (0, 60000)) +
+#   theme_classic () +
+#   theme (legend.position = 'none')
+# g
+# dev.off ()
 
 # Plot mean and standard error of the mean cell-wall area increment for various periods
 #----------------------------------------------------------------------------------------
@@ -282,7 +281,7 @@ png (filename = './fig/Exp2018ChillingCWAIncrement.png',
 layout (matrix (1:5, nrow = 1), widths = c (1.3, 1, 1, 1, 1))
 # loop over sampling heights
 #----------------------------------------------------------------------------------------
-offset <- 0.05
+offset <- 0.08
 for (d in c ('before','during','after','2017','2018')) {
   
   # determine panel marigns
@@ -311,21 +310,34 @@ for (d in c ('before','during','after','2017','2018')) {
             x1 = tp [['meanCWAinc']] [con] + tp [['seCWAinc']] [con],
             y0 = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
               ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
-            col = tColours [['colour']] [5], lwd = 3)
+            col = tColours [['colour']] [ifelse (d == 'before', 4, 
+                                                 ifelse (d == 'during', 5, 
+                                                         ifelse (d == 'after', 6, 5)))], 
+            lwd = 3)
   points (x = tp [['meanCWAinc']] [con],
           y = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
             ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
-          pch = 23, bg = 'white', cex = 1.8, lwd = 3, col = tColours [['colour']] [5])
+          pch = 23, bg = 'white', cex = 1.8, lwd = 3, 
+          col = tColours [['colour']] [ifelse (d == 'before', 4, 
+                                               ifelse (d == 'during', 5, 
+                                                       ifelse (d == 'after', 6, 5)))])
   con <- tp [['exPeriod']] == d & tp [['treatment']] == 'control'
   segments (x0 = tp [['meanCWAinc']] [con] - tp [['seCWAinc']] [con],
             x1 = tp [['meanCWAinc']] [con] + tp [['seCWAinc']] [con],
             y0 = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
               ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
-            col = tColours [['colour']] [1], lwd = 3)
+            col = tColours [['colour']] [ifelse (d == 'before', 1, 
+                                                 ifelse (d == 'during', 2,
+                                                         ifelse (d == 'after', 3, 1)))], 
+            lwd = 3)
   points (x = tp [['meanCWAinc']] [con],
           y = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
             ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
-          pch = 19, cex = 1.8, col = tColours [['colour']] [1], lwd = 3, bg = 'white')
+          pch = 19, cex = 1.8, 
+          col = tColours [['colour']] [ifelse (d == 'before', 1, 
+                                               ifelse (d == 'during', 2,
+                                                       ifelse (d == 'after', 3, 1)))], 
+          lwd = 3, bg = 'white')
   
   if (d != 'before') {
     #axis (side = 2, at = c (0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 4.0), labels = rep ('', 7))

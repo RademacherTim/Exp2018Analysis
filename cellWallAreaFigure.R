@@ -191,12 +191,12 @@ dev.off ()
 # Summarise data to get cumulative ring width formed for each period
 cumulativeSummary <- anatoData %>% group_by (TREE, treatment, sampleHeight, exPeriod) %>% 
   summarise (CWT = mean (CWTTAN, na.rm = TRUE),
-             CWA = mean (CWA, na.rm = TRUE)) %>% ungroup ()
+             CWA = mean (CWA, na.rm = TRUE), .groups = 'keep') %>% ungroup ()
 
 # Add rows for 2018 mean at sample heights where we can apportion fractionstmp <- anatoData %>% filter (YEAR == 2018) %>% group_by (TREE, treatment, sampleHeight) %>%
 tmp <- anatoData %>% group_by (TREE, treatment, sampleHeight) %>% 
   summarise (CWT = mean (CWTTAN, na.rm = TRUE),
-             CWA = mean (CWA, na.rm = TRUE)) %>% 
+             CWA = mean (CWA, na.rm = TRUE), .groups = 'keep') %>% 
   add_column (exPeriod = '2018') %>% ungroup ()
 cumulativeSummary <- rbind (cumulativeSummary, tmp)
 
@@ -220,7 +220,7 @@ png (filename = './fig/Exp2018ChillingMeanCWT.png',
 layout (matrix (1:5, nrow = 1), widths = c (1.3, 1, 1, 1, 1))
 # loop over sampling heights
 #----------------------------------------------------------------------------------------
-offset <- 0.05
+offset <- 0.08
 for (d in c ('before','during','after','2017','2018')) {
   
   # determine panel marigns
@@ -298,7 +298,7 @@ png (filename = './fig/Exp2018ChillingMeanCWA.png',
 layout (matrix (1:5, nrow = 1), widths = c (1.3, 1, 1, 1, 1))
 # loop over sampling heights
 #----------------------------------------------------------------------------------------
-offset <- 0.05
+offset <- 0.08
 for (d in c ('before','during','after','2017','2018')) {
   
   # determine panel marigns

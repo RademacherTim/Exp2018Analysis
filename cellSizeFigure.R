@@ -214,7 +214,6 @@ for (r in 1:dim (cumulativeSummary) [1]) {
   cumulativeSummary [['densityFluctuation']] [r] <- growingSeasonDates %>%
     filter (treeId == t, sampleHeight == h) %>% select (densityFluctuation) %>% 
     unlist ()
-  
 }
 
 # Arrange the tibble 
@@ -250,7 +249,7 @@ png (filename = './fig/Exp2018ChillingMeanLumenRadius.png',
 layout (matrix (1:5, nrow = 1), widths = c (1.3, 1, 1, 1, 1))
 # loop over sampling heights
 #----------------------------------------------------------------------------------------
-offset <- 0.05
+offset <- 0.08
 for (d in c ('before','during','after','2017','2018')) {
   
   # determine panel marigns
