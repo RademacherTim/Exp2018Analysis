@@ -11,9 +11,9 @@ if (!existsFunction ('scam')) library ('scam')
 
 # create tibble for start and end of growing season dates
 #----------------------------------------------------------------------------------------
-growingSeasonDates <- tibble (treeId = rep (1:15, each = 4), 
-                              treatment = rep (c (5, 4, 1), each = 20),
-                              sampleHeight = rep (c (0.5, 1.5, 2.5, 4.0), 15),
+growingSeasonDates <- tibble (treeId = rep ( c (1:5,11:15), each = 4), 
+                              treatment = rep (c (5, 1), each = 20),
+                              sampleHeight = rep (c (0.5, 1.5, 2.5, 4.0), 10),
                               startOfGrowth = NA,
                               endOfGrowth = NA,
                               maxRWIfit = NA)
@@ -161,13 +161,13 @@ if (PLOT) dev.off ()
 
 # determine growing season dates and plot growth over time for compressed trees
 #----------------------------------------------------------------------------------------
-if (PLOT) {
+#if (PLOT) {
   png (file = './fig/woodGrowthOverTimeCompressedTrees.png', width = 1255, height = 622)
   layout (matrix (1:20, nrow = 4, byrow = TRUE), widths = c (1.2, 1, 1, 1, 1, 1), 
           heights = c (1, 1, 1, 1.3))
 }
 # Loop over heights
-for (h in c (4.0, 2.5, 1.5, 0.5)) {
+#for (h in c (4.0, 2.5, 1.5, 0.5)) {
   # Loop over trees
   for (i in 6:10) 
   {
@@ -293,7 +293,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     if (PLOT) points (x = iDoy, y = 2.25, pch = 5)
   }
 }
-if (PLOT) dev.off ()
+#if (PLOT) dev.off ()
 
 # determine growing season dates and plot growth over time for control trees
 #----------------------------------------------------------------------------------------
@@ -429,9 +429,31 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
   }
 }
 if (PLOT) dev.off ()
-  
+
+# Introduce 1 and 2m for which there is not sufficient data to fit a GAM  
+#----------------------------------------------------------------------------------------
+growingSeasonDates <- growingSeasonDates %>% 
+  add_row (treeId        = rep (c (1:5, 11:15), each = 2),
+           treatment     = rep (c (5, 1), each = 10),
+           sampleHeight  = rep (1:2, 10),
+           startOfGrowth = NA,
+           endOfGrowth   = NA, 
+           maxRWIfit     = NA) %>%
+  arrange (treeId, treatment, sampleHeight)
+
+# read in manually determine growing season dates and presence of intra-annual density 
+# fluctuation
+#----------------------------------------------------------------------------------------
+iadf <- read_csv ('./data/Exp2018ChillingDensityFluctuations.csv', col_types = cols (),
+                  na = 'NA') %>%
+  filter (treatment != 4)
+
+# combine the growing season dates and intra-annual density fluctuation data
+#----------------------------------------------------------------------------------------
+growingSeasonDates <- cbind (growingSeasonDates, iadf [4:9])
+
 # clean up
 #----------------------------------------------------------------------------------------
 rm (PLOT, fit.gam, ringWidths, tempData, tColours, sColours, direction, eDoy, error, 
-    growthFraction, h, i, iDoy, maxRWIfit, sDoy, t, threshold)
+    growthFraction, h, i, iadf, iDoy, maxRWIfit, sDoy, t, threshold)
 #========================================================================================

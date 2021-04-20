@@ -22,7 +22,7 @@ se <-  function (x) {
 #                     treatment = c ('control','girdled','compressed','double compressed',
 #                                    'chilled'))
 tColours <- tibble (colour = c ('#aab300','#55a51c','#445026','#68ace5','#0072cf','#003e74','#C0334D'),
-                    treatment = c ('control','control2','control3','chilled2','chilled',
+                    treatment = c ('control','control2','control3','chilled','chilled2',
                                    'chilled3','air'))
 
 # set colours for carbon sinks: growth, respiration, change in NSC concentrations. 

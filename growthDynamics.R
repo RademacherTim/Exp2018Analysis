@@ -169,7 +169,7 @@ dev.off ()
 #----------------------------------------------------------------------------------------
 PLOTTREE <- FALSE
 png (filename = './fig/Exp2018ChillingAbsoluteVolumeGrowthDynamics.png', width = 800 , height = 700)
-layout (matrix (1:4, nrow = 4), heights = c (1,1,1,1.3))
+layout (matrix (1:4, nrow = 4), heights = c (1, 1, 1, 1.3))
 for (h in c (4.0, 2.5, 1.5, 0.5)) {
   
   # determine panel margins
@@ -282,32 +282,75 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
            lty = ifelse (t == 1, 1, 2))
     
     # add mean and standard error for start of the growing season
-    arrows (x0 = mean (treatmentData [['startOfGrowth']]) - se (treatmentData [['startOfGrowth']]),
-            x1 = mean (treatmentData [['startOfGrowth']]) + se (treatmentData [['startOfGrowth']]), 
-            y0 = ifelse (PLOTTREE, 4400, 2200) + ifelse (t == 1, -100, 100), col = tColours [['colour']] [t], 
+    arrows (x0 = mean (treatmentData [['startOfGrowth']]) - 
+              se (treatmentData [['startOfGrowth']]),
+            x1 = mean (treatmentData [['startOfGrowth']]) + 
+              se (treatmentData [['startOfGrowth']]), 
+            y0 = ifelse (PLOTTREE, 4400, 2100) + ifelse (t == 1, -100, 100), 
+            col = tColours [['colour']] [t], 
             length = 0, angle = 90, code = 3, lwd = 2)
     points (x = mean (treatmentData [['startOfGrowth']]), 
-            y = ifelse (PLOTTREE, 4400, 2200) + ifelse (t == 1, -100, 100), pch = ifelse (t == 1, 19, 23), 
-            col = tColours [['colour']] [t], cex = 1.5, bg = 'white', lwd = 2)
+            y = ifelse (PLOTTREE, 4400, 2100) + ifelse (t == 1, -100, 100), 
+            pch = ifelse (t == 1, 19, 23), 
+            col = tColours [['colour']] [t], cex = 2.5, bg = 'white', lwd = 2)
     
     # add mean and standard error for end of the growing season
-    arrows (x0 = mean (treatmentData [['endOfGrowth']]) - se (treatmentData [['endOfGrowth']]),
-            x1 = mean (treatmentData [['endOfGrowth']]) + se (treatmentData [['endOfGrowth']]), 
-            y0 = ifelse (PLOTTREE, 4400, 2200) + ifelse (t == 1, -100, 100), col = tColours [['colour']] [t], 
+    arrows (x0 = mean (treatmentData [['endOfSeasonDOY']], na.rm = TRUE) - 
+              se (treatmentData [['endOfSeasonDOY']]),
+            x1 = mean (treatmentData [['endOfSeasonDOY']], na.rm = TRUE) + 
+              se (treatmentData [['endOfSeasonDOY']]), 
+            y0 = ifelse (PLOTTREE, 4400, 2100) + ifelse (t == 1, -100, 100), 
+            col = tColours [['colour']] [t], 
             length = 0, angle = 90, code = 3, lwd = 2)
-    points (x = mean (treatmentData [['endOfGrowth']]), 
-            y = ifelse (PLOTTREE, 4400, 2200) + ifelse (t == 1, -100, 100), pch = ifelse (t == 1, 19, 23), 
-            col = tColours [['colour']] [t], cex = 1.5, bg = 'white', lwd = 2)
+    points (x = mean (treatmentData [['endOfSeasonDOY']], na.rm = TRUE), 
+            y = ifelse (PLOTTREE, 4400, 2100) + ifelse (t == 1, -100, 100), 
+            pch = ifelse (t == 1, 19, 23), 
+            col = tColours [['colour']] [t], cex = 2.5, bg = 'white', lwd = 2)
+    
+    
+    # add mean and standard error of the end of growing season for trees with 
+    # intra-annual density fluctuation 
+    #------------------------------------------------------------------------------------
+    if (t == 5 & sum (treatmentData [['densityFluctuation']], na.rm = TRUE) > 0) {
+      arrows (x0 = mean (treatmentData [['endOfSeasonDOY']] [treatmentData [['densityFluctuation']]] , na.rm = TRUE) - 
+                se (treatmentData [['endOfSeasonDOY']] [treatmentData [['densityFluctuation']]]),
+              x1 = mean (treatmentData [['endOfSeasonDOY']] [treatmentData [['densityFluctuation']]], na.rm = TRUE) + 
+                se (treatmentData [['endOfSeasonDOY']] [treatmentData [['densityFluctuation']]]), 
+              y0 = ifelse (PLOTTREE, 4400, 2100) + ifelse (t == 1, -100, 100), 
+              col = '#666666', 
+              length = 0, angle = 90, code = 3, lwd = 2)
+      points (x = mean (treatmentData [['endOfSeasonDOY']] [treatmentData [['densityFluctuation']]], na.rm = TRUE), 
+              y = ifelse (PLOTTREE, 4400, 2100) + ifelse (t == 1, -100, 100), 
+              pch = ifelse (t == 1, 19, 24), 
+              col = '#666666', cex = 2, bg = 'white', lwd = 2)
+      
+      arrows (x0 = mean (treatmentData [['endOfSeasonDOY']] [!treatmentData [['densityFluctuation']]] , na.rm = TRUE) - 
+                se (treatmentData [['endOfSeasonDOY']] [!treatmentData [['densityFluctuation']]]),
+              x1 = mean (treatmentData [['endOfSeasonDOY']] [!treatmentData [['densityFluctuation']]], na.rm = TRUE) + 
+                se (treatmentData [['endOfSeasonDOY']] [!treatmentData [['densityFluctuation']]]), 
+              y0 = ifelse (PLOTTREE, 4400, 2100) + ifelse (t == 1, -100, 100), 
+              col = '#666666', 
+              length = 0, angle = 90, code = 3, lwd = 2)
+      points (x = mean (treatmentData [['endOfSeasonDOY']] [!treatmentData [['densityFluctuation']]], na.rm = TRUE), 
+              y = ifelse (PLOTTREE, 4400, 2100) + ifelse (t == 1, -100, 100), 
+              pch = ifelse (t == 1, 19, 25), 
+              col = '#666666', cex = 2, bg = 'white', lwd = 2)
+      #if (h == 1.5) {
+      #  legend (x = 125, y = ifelse (PLOTTREE, 4000, 1900), legend = c ('with','without'), 
+      #          bg = 'transparent', box.lty = 0, cex = 1.8, lwd = 2, lty = 0,
+      #          pch = c (24, 25), col = tColours [['colour']] [5])
+      #}
+    }
   } # end treatment loop
 } # end sample height loop
 
 # add legend 
-legend (x = 110, y = ifelse (PLOTTREE, 4000, 1900), legend = c ('',''), 
-        bg = 'transparent', box.lty = 0, cex = 1.8,
-        lty = 1:2, col = tColours [['colour']] [c (1, 5)], lwd = 2)
-legend (x = 125, y = ifelse (PLOTTREE, 4000, 1900), legend = c ('control','chilled'), 
-        bg = 'transparent', box.lty = 0, cex = 1.8, lwd = 2, lty = 0,
-        pch = c (19, 23), col = tColours [['colour']] [c (1, 5)])
+#legend (x = 110, y = ifelse (PLOTTREE, 4000, 1900), legend = c ('',''), 
+#        bg = 'transparent', box.lty = 0, cex = 1.8,
+#        lty = 1:2, col = tColours [['colour']] [c (1, 5)], lwd = 2)
+#legend (x = 125, y = ifelse (PLOTTREE, 4000, 1900), legend = c ('control','chilled'), 
+#        bg = 'transparent', box.lty = 0, cex = 1.8, lwd = 2, lty = 0,
+#        pch = c (19, 23), col = tColours [['colour']] [c (1, 5)])
 dev.off ()
 
 # estimate treatment effect on start and end of growing season

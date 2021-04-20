@@ -46,13 +46,12 @@ VERBOSE <- FALSE
 #----------------------------------------------------------------------------------------
 for (r in 1:dim (anatomicalData) [1]) {
   
-  # If not 2018, skip. Only have temporal resolution to for 2018 with multiple samples
+  # If not 2018, skip. Only have temporal resolution for 2018 with multiple samples
   #--------------------------------------------------------------------------------------
   if (anatomicalData [['YEAR']] [r] != 2018) next
-  if (anatomicalData [['sampleHeight']] [r] %in% 1:2) next
   
   # Get tree ID, treatment and sample height of the sample
-  #--------------------------------------------------------------------------------------
+  #------------------------------------------------------------------------------------
   treeID <- as.numeric (substr (anatomicalData [['TREE']] [r], 1, 2))
   h <- anatomicalData [['sampleHeight']] [r]
   t <- anatomicalData [['PLOT']] [r]
@@ -64,56 +63,68 @@ for (r in 1:dim (anatomicalData) [1]) {
     select (sampleDate, RWI2018) %>%
     mutate (doy = lubridate::yday (sampleDate)) 
   
-  # Assume that the ring measured in 2019 is the end of the year growth
+  # Is this a sample from 1 or 2m, where we only hav two samples
   #--------------------------------------------------------------------------------------
-  if (sum (tempData [['sampleDate']] == as_date ('2019-10-24'), na.rm = TRUE) > 0) 
-  {
-    tempData [['sampleDate']] [tempData [['sampleDate']] == as_date ('2019-10-24')] <- as_date ('2018-12-31')
-    tempData [['doy']] [tempData [['sampleDate']] == as_date ('2018-12-31')] <- yday ('2018-12-31')
-  }
+  if (anatomicalData [['sampleHeight']] [r] %in% 1:2) {
   
-  # Fit general additive model to growth data
-  #--------------------------------------------------------------------------------------
-  fit.gam <- scam (RWI2018 ~ s (doy, k = 8, bs = 'mpi'), 
-                   data = tempData, 
-                   family = quasipoisson)
-  
-  # get the maximal value of the GAM for the year (to correct the predicted values to 
-  # growth fractions) 
-  #------------------------------------------------------------------------------------
-  maxRWI <- max (exp (predict (fit.gam, newdata = data.frame (doy = c (1:365)))))
-  
-  # associate tangential band with a period of growth using the general additive model
-  #--------------------------------------------------------------------------------------
-  if (!is.na (anatomicalData [['RRADDISTR']] [r])) {
-    #print (paste ('Tree',treeID,' height',h,' line',i))
+    next # I still need to work on measuring the ring width, if I really want to apportion 
+    # this with a simple fraction 
     
-    # find the best guess of the day of the year when this tangential band grew 
-    # within a 0.1% error on the fraction growth
-    #------------------------------------------------------------------------------------
-    error <- 10000 # set error to a large number to start with
-    iDoy <- 180 # start halfway through the year
-    while (error < -0.1 | error > 0.1) {
-      growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWI
-      if ((growthFraction * 100) > anatomicalData [['RRADDISTR']] [r]) {
-        if (iDoy != 180) {
-          if (direction == 'later') break
-        }
-        iDoy <- iDoy - 1
-        direction <- 'earlier'
-      } else {
-        if (iDoy != 180) {
-          if (direction == 'earlier') break
-        }
-        iDoy <- iDoy + 1
-        direction <- 'later'
-      }
-      error <- (growthFraction * 100) - anatomicalData [['RRADDISTR']] [r]
+  # Sample from a height with frequent sample to fit a General Additive model
+  #--------------------------------------------------------------------------------------  
+  } else {
+    
+    # Assume that the ring measured in 2019 is the end of the year growth
+    #--------------------------------------------------------------------------------------
+    if (sum (tempData [['sampleDate']] == as_date ('2019-10-24'), na.rm = TRUE) > 0) 
+    {
+      tempData [['sampleDate']] [tempData [['sampleDate']] == as_date ('2019-10-24')] <- as_date ('2018-12-31')
+      tempData [['doy']] [tempData [['sampleDate']] == as_date ('2018-12-31')] <- yday ('2018-12-31')
     }
     
-    # Associate the estimated date of growth with the tangential band
-    anatomicalData [['period']] [r] <- as_date (iDoy, origin = '2018-01-01')
+    # Fit general additive model to growth data
+    #--------------------------------------------------------------------------------------
+    fit.gam <- scam (RWI2018 ~ s (doy, k = 8, bs = 'mpi'), 
+                     data = tempData, 
+                     family = quasipoisson)
     
+    # get the maximal value of the GAM for the year (to correct the predicted values to 
+    # growth fractions) 
+    #------------------------------------------------------------------------------------
+    maxRWI <- max (exp (predict (fit.gam, newdata = data.frame (doy = c (1:365)))))
+    
+    # associate tangential band with a period of growth using the general additive model
+    #--------------------------------------------------------------------------------------
+    if (!is.na (anatomicalData [['RRADDISTR']] [r])) {
+      #print (paste ('Tree',treeID,' height',h,' line',i))
+      
+      # find the best guess of the day of the year when this tangential band grew 
+      # within a 0.1% error on the fraction growth
+      #------------------------------------------------------------------------------------
+      error <- 10000 # set error to a large number to start with
+      iDoy <- 180 # start halfway through the year
+      while (error < -0.1 | error > 0.1) {
+        growthFraction <- exp (predict (fit.gam, newdata = data.frame (doy = iDoy))) / maxRWI
+        if ((growthFraction * 100) > anatomicalData [['RRADDISTR']] [r]) {
+          if (iDoy != 180) {
+            if (direction == 'later') break
+          }
+          iDoy <- iDoy - 1
+          direction <- 'earlier'
+        } else {
+          if (iDoy != 180) {
+            if (direction == 'earlier') break
+          }
+          iDoy <- iDoy + 1
+          direction <- 'later'
+        }
+        error <- (growthFraction * 100) - anatomicalData [['RRADDISTR']] [r]
+      }
+      
+      # Associate the estimated date of growth with the tangential band
+      anatomicalData [['period']] [r] <- as_date (iDoy, origin = '2018-01-01')
+      
+    }
   }
   
   if (VERBOSE) {

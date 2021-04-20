@@ -6,6 +6,7 @@
 #----------------------------------------------------------------------------------------
 READ <- FALSE; if (READ) source ('processAnatomicalData.R')
 if (!exists ('tColours')) source ('plotingFunctions.R')
+if (!exists ('growingSeasonDates')) source ('extractGrowingSeasonDates.R')
 if (!existsFunction ('rollmean')) library ('zoo')
 
 # Function to plot fraction formed at critical dates (e.g., before, during, and after)
@@ -193,25 +194,54 @@ g + geom_violin (aes (x = treatment, y = cellRadWidth, fill = treatment),
 dev.off ()
 
 # Summarise data to get cumulative ring width formed for each period
+#----------------------------------------------------------------------------------------
 cumulativeSummary <- anatoData %>% group_by (TREE, treatment, sampleHeight, exPeriod) %>% 
   summarise (lumenRad = mean (DRAD, na.rm = TRUE)) %>% ungroup ()
 
-# Add rows for 2018 mean at sample heights where we can apportion fractionstmp <- anatoData %>% filter (YEAR == 2018) %>% group_by (TREE, treatment, sampleHeight) %>%
+# Add rows for 2018 mean at sample heights where we can apportion fractions
+#----------------------------------------------------------------------------------------
 tmp <- anatoData %>% group_by (TREE, treatment, sampleHeight) %>% 
   summarise (lumenRad = mean (DRAD, na.rm = TRUE)) %>% 
   add_column (exPeriod = '2018') %>% ungroup ()
 cumulativeSummary <- rbind (cumulativeSummary, tmp)
 
+# Add column for whether tree has a density fluctuation or not
+#----------------------------------------------------------------------------------------
+cumulativeSummary <- cumulativeSummary %>% add_column (densityFluctuation = NA)
+for (r in 1:dim (cumulativeSummary) [1]) {
+  t <- cumulativeSummary [['TREE']] [r]
+  h <- cumulativeSummary [['sampleHeight']] [r]
+  cumulativeSummary [['densityFluctuation']] [r] <- growingSeasonDates %>%
+    filter (treeId == t, sampleHeight == h) %>% select (densityFluctuation) %>% 
+    unlist ()
+  
+}
+
 # Arrange the tibble 
+#----------------------------------------------------------------------------------------
 cumulativeSummary <- cumulativeSummary %>% arrange (TREE, sampleHeight, exPeriod) %>%
   mutate (exPeriod = factor (exPeriod, 
                              levels = c ('before','during','after','2017','2018')),
           sampleHeight = factor (sampleHeight, 
                                  levels = c (4.0, 2.5, 2.0, 1.5, 1.0, 0.5)))
 
-tp <- cumulativeSummary %>% group_by (treatment, sampleHeight, exPeriod) %>%
+# Get summary stats for all trees in each treatment
+#----------------------------------------------------------------------------------------
+tp <- cumulativeSummary %>% 
+  group_by (treatment, sampleHeight, exPeriod) %>%
   summarise (meanLumenRad = mean (lumenRad, na.rm = TRUE),
-             seLumenRad   = se   (lumenRad))
+             seLumenRad   = se   (lumenRad),
+             .groups = 'keep')
+
+# Get summary stats for dividing into tree with and without Intra-annual density fluctuation
+#----------------------------------------------------------------------------------------
+tpWith <- cumulativeSummary %>% 
+  group_by (treatment, sampleHeight, exPeriod, densityFluctuation) %>%
+  summarise (meanLumenRad = mean (lumenRad, na.rm = TRUE),
+             seLumenRad   = se   (lumenRad),
+             .groups = 'keep')
+
+
 
 # Plot mean and standard error of the mean lumen radius for various periods
 #----------------------------------------------------------------------------------------
@@ -245,26 +275,72 @@ for (d in c ('before','during','after','2017','2018')) {
         col = 'white', 
         xlab = expression (paste ('Mean lumen diameter (',mu,m,')', sep = '')),
         xlim = c (xmin, xmax), ylim = c (0, 4.2), axes = FALSE)
+  
+  # Plot summary stats for all chilled trees
   segments (x0 = tp [['meanLumenRad']] [con] - tp [['seLumenRad']] [con],
             x1 = tp [['meanLumenRad']] [con] + tp [['seLumenRad']] [con],
             y0 = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
               ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
-            col = tColours [['colour']] [5], lwd = 3)
+            col = tColours [['colour']] [ifelse (d == 'before', 4, 
+                                                 ifelse (d == 'during', 5, 
+                                                         ifelse (d == 'after', 6, 5)))], lwd = 3)
   points (x = tp [['meanLumenRad']] [con],
           y = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
             ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
-          pch = 23, bg = 'white', cex = 1.8, lwd = 3, col = tColours [['colour']] [5])
+          pch = 23, bg = 'white', cex = 1.8, lwd = 3, 
+          col = tColours [['colour']] [ifelse (d == 'before', 4, 
+                                               ifelse (d == 'during', 5, 
+                                                       ifelse (d == 'after', 6, 5)))])
+
+  # Plot summary stats for chilled trees with density fluctuation
+  # con <- tpWith [['exPeriod']] == d & 
+  #   tpWith [['treatment']] == 'chilled' & 
+  #   tpWith [['densityFluctuation']]
+  # segments (x0 = tpWith [['meanLumenRad']] [con] - tpWith [['seLumenRad']] [con],
+  #           x1 = tpWith [['meanLumenRad']] [con] + tpWith [['seLumenRad']] [con],
+  #           y0 = as.numeric (levels (tpWith [['sampleHeight']] [con])) [tpWith [['sampleHeight']] [con]] + 
+  #             ifelse (tpWith [['treatment']] [con] == 'chilled', -offset, offset),
+  #           col = '#666666', lwd = 3)
+  # points (x = tpWith[['meanLumenRad']] [con],
+  #         y = as.numeric (levels (tpWith [['sampleHeight']] [con]))[tpWith [['sampleHeight']] [con]] + 
+  #           ifelse (tpWith [['treatment']] [con] == 'chilled', -offset, offset),
+  #         pch = 24, bg = 'white', cex = 1.8, lwd = 3, 
+  #         col = '#666666')
+  # 
+  # Plot summary stats for chilled trees without density fluctuation
+  # con <- tpWith [['exPeriod']] == d & 
+  #   tpWith [['treatment']] == 'chilled' & 
+  #   !(tpWith [['densityFluctuation']])
+  # segments (x0 = tpWith [['meanLumenRad']] [con] - tpWith [['seLumenRad']] [con],
+  #           x1 = tpWith [['meanLumenRad']] [con] + tpWith [['seLumenRad']] [con],
+  #           y0 = as.numeric (levels (tpWith [['sampleHeight']] [con])) [tpWith [['sampleHeight']] [con]] + 
+  #             ifelse (tpWith [['treatment']] [con] == 'chilled', -offset, offset),
+  #           col = '#666666', lwd = 3)
+  # points (x = tpWith[['meanLumenRad']] [con],
+  #         y = as.numeric (levels (tpWith [['sampleHeight']] [con]))[tpWith [['sampleHeight']] [con]] + 
+  #           ifelse (tpWith [['treatment']] [con] == 'chilled', -offset, offset),
+  #         pch = 25, bg = 'white', cex = 1.8, lwd = 3, 
+  #         col = '#666666')
+  # 
+  # Plot summary statistics for all control trees
   con <- tp [['exPeriod']] == d & tp [['treatment']] == 'control'
   segments (x0 = tp [['meanLumenRad']] [con] - tp [['seLumenRad']] [con],
             x1 = tp [['meanLumenRad']] [con] + tp [['seLumenRad']] [con],
-            y0 = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
+            y0 = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] +
               ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
-            col = tColours [['colour']] [1], lwd = 3)
+            col = tColours [['colour']] [ifelse (d == 'before', 1,
+                                                 ifelse (d == 'during', 2,
+                                                         ifelse (d == 'after', 3, 1)))], lwd = 3)
   points (x = tp [['meanLumenRad']] [con],
-          y = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
+          y = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] +
             ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
-          pch = 19, cex = 1.8, col = tColours [['colour']] [1], lwd = 3, bg = 'white')
-  
+          pch = 19, cex = 1.8,
+          col = tColours [['colour']] [ifelse (d == 'before', 1,
+                                               ifelse (d == 'during', 2,
+                                                       ifelse (d == 'after', 3, 1)))],
+          lwd = 3, bg = 'white')
+
+
   if (d != 'before') {
     #axis (side = 2, at = c (0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 4.0), labels = rep ('', 7))
   } else {
