@@ -249,21 +249,32 @@ for (d in c ('before','during','after','2017','2018')) {
             x1 = tp [['meanCWT']] [con] + tp [['seCWT']] [con],
             y0 = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
               ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
-            col = tColours [['colour']] [5], lwd = 3)
+            col = tColours [['colour']] [ifelse (d == 'before', 4, 
+                                                 ifelse (d == 'during', 5, 
+                                                         ifelse (d == 'after', 6, 5)))], lwd = 3)
   points (x = tp [['meanCWT']] [con],
           y = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
             ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
-          pch = 23, bg = 'white', cex = 1.8, lwd = 3, col = tColours [['colour']] [5])
+          pch = 23, bg = 'white', cex = 1.8, lwd = 3, 
+          col = tColours [['colour']] [ifelse (d == 'before', 4, 
+                                               ifelse (d == 'during', 5, 
+                                                       ifelse (d == 'after', 6, 5)))])
   con <- tp [['exPeriod']] == d & tp [['treatment']] == 'control'
   segments (x0 = tp [['meanCWT']] [con] - tp [['seCWT']] [con],
             x1 = tp [['meanCWT']] [con] + tp [['seCWT']] [con],
             y0 = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
               ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
-            col = tColours [['colour']] [1], lwd = 3)
+            col = tColours [['colour']] [ifelse (d == 'before', 1, 
+                                                 ifelse (d == 'during', 2, 
+                                                         ifelse (d =='after', 3, 1)))], lwd = 3)
   points (x = tp [['meanCWT']] [con],
           y = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
             ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
-          pch = 19, cex = 1.8, col = tColours [['colour']] [1], lwd = 3, bg = 'white')
+          pch = 19, cex = 1.8, 
+          col = tColours [['colour']] [ifelse (d == 'before', 1, 
+                                               ifelse (d == 'during', 2, 
+                                                       ifelse (d == 'after', 3, 1)))], 
+          lwd = 3, bg = 'white')
   
   if (d != 'before') {
     #axis (side = 2, at = c (0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 4.0), labels = rep ('', 7))
@@ -316,21 +327,33 @@ for (d in c ('before','during','after','2017','2018')) {
             x1 = tp [['meanCWA']] [con] + tp [['seCWA']] [con],
             y0 = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
               ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
-            col = tColours [['colour']] [5], lwd = 3)
+            col = tColours [['colour']] [ifelse (d == 'before', 4, 
+                                                 ifelse (d == 'during', 5, 
+                                                         ifelse (d == 'after', 6, 5)))], lwd = 3)
   points (x = tp [['meanCWA']] [con],
           y = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
             ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
-          pch = 23, bg = 'white', cex = 1.8, lwd = 3, col = tColours [['colour']] [5])
+          pch = 23, bg = 'white', cex = 1.8, lwd = 3, 
+          col = tColours [['colour']] [ifelse (d == 'before', 4, 
+                                               ifelse (d == 'during', 5, 
+                                                       ifelse (d == 'after', 6, 5)))])
   con <- tp [['exPeriod']] == d & tp [['treatment']] == 'control'
   segments (x0 = tp [['meanCWA']] [con] - tp [['seCWA']] [con],
             x1 = tp [['meanCWA']] [con] + tp [['seCWA']] [con],
             y0 = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
               ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
-            col = tColours [['colour']] [1], lwd = 3)
+            col = tColours [['colour']] [ifelse (d == 'before', 1, 
+                                                 ifelse (d == 'during', 2, 
+                                                         ifelse (d == 'after', 3, 1)))], 
+            lwd = 3)
   points (x = tp [['meanCWA']] [con],
           y = as.numeric (levels (tp [['sampleHeight']] [con]))[tp [['sampleHeight']] [con]] + 
             ifelse (tp [['treatment']] [con] == 'chilled', -offset, offset),
-          pch = 19, cex = 1.8, col = tColours [['colour']] [1], lwd = 3, bg = 'white')
+          pch = 19, cex = 1.8, 
+          col = tColours [['colour']] [ifelse (d == 'before', 1, 
+                                               ifelse (d == 'during', 2,
+                                                       ifelse (d == 'after', 3, 1)))], 
+          lwd = 3, bg = 'white')
   
   if (d != 'before') {
     #axis (side = 2, at = c (0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 4.0), labels = rep ('', 7))
