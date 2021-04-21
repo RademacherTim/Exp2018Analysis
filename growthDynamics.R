@@ -364,82 +364,10 @@ mod1 <-lmer (formula = startOfGrowth ~ (1 | treeId) + treatment:sampleHeight,
 summary (mod1)
 mod2 <-lmer (formula = endOfGrowth ~ (1 | treeId) + treatment:sampleHeight, 
              data = tempData, REML = TRUE)
-summary (mod2); rm (tempData)
-
-# plot final radial growth versus by treatment * sample height
-#----------------------------------------------------------------------------------------
-tempData <- filter (ringWidths, sampleDate == as_date ('2018-11-15')) %>% 
-  mutate (treeId       = factor (treeId),
-          treatment    = factor (treatment, levels = c (5,4,1)),
-          sampleHeight = factor (sampleHeight))
-g <- ggplot (tempData) +
-  geom_boxplot (aes (x = sampleHeight, y = Y2018, fill = treatment),
-                alpha = 0.7, colour = rep (tColours [['colour']] [c (1,4,5)], 4)) + 
-  coord_flip () +
-  labs (x = 'Sample Height (m)',
-        y = expression (paste ('Ring width (',mu,'m)', sep = ''))) +
-  scale_fill_manual (values = tColours [['colour']] [c (1,4,5)], 
-                     labels = c ('Control','Compressed','Chilled'))
-g
-# Were there differences in final ring with among treatments?
-mod3 <- lmer (formula = Y2018 ~ (1 | treeId) + treatment:sampleHeight,
-              data = tempData, REML = TRUE)
+summary (mod2)
+mod3 <-lmer (formula = endOfSeasonDOY ~ (1 | treeId) + treatment:sampleHeight, 
+             data = tempData, REML = TRUE)
 summary (mod3); rm (tempData)
-
-# plot final radial growth versus by treatment * sample height
-#----------------------------------------------------------------------------------------
-tempData <- filter (ringWidths, sampleDate == as_date ('2019-10-24')) %>% 
-  mutate (treeId       = factor (treeId),
-          treatment    = factor (treatment, levels = c (5,4,1)),
-          sampleHeight = factor (sampleHeight))
-g <- ggplot (tempData) +
-  geom_boxplot (aes (x = sampleHeight, y = Y2018, fill = treatment),
-                alpha = 0.7, colour = rep (tColours [['colour']] [c (1,4,5)], 4)) + 
-  coord_flip () +
-  labs (x = 'Sample Height (m)',
-        y = expression (paste ('Ring width (',mu,'m)', sep = ''))) +
-  scale_fill_manual (values = tColours [['colour']] [c (1,4,5)], labels = c ('Control','Compressed','Chilled'))
-g
-# Were there differences in final ring with among treatments?
-mod4 <- lmer (formula = Y2018 ~ (1 | treeId) + treatment:sampleHeight,
-              data = tempData, REML = TRUE)
-summary (mod4); rm (tempData)
-
-# plot final radial growth versus by treatment * sample height
-#----------------------------------------------------------------------------------------
-tempData <- filter (ringWidths, sampleDate == as_date ('2018-11-15')) %>% 
-  mutate (treeId       = factor (treeId),
-          treatment    = factor (treatment, levels = c (5,4,1)),
-          sampleHeight = factor (sampleHeight))
-g <- ggplot (tempData) +
-  geom_boxplot (aes (x = sampleHeight, y = RWI2018, fill = treatment),
-                alpha = 0.7, colour = rep (tColours [['colour']] [c (1,4,5)], 4)) + 
-  coord_flip () +
-  labs (x = 'Sample Height (m)', y = 'Radial growth index') +
-  scale_fill_manual (values = tColours [['colour']] [c (1,4,5)], labels = c ('Control','Compressed','Chilled'))
-g
-# Were there differences in final ring with among treatments?
-mod5 <- lmer (formula = RWI2018 ~ (1 | treeId) + treatment:sampleHeight,
-              data = tempData, REML = TRUE)
-summary (mod5); rm (tempData)
-
-# plot final radial growth versus by treatment * sample height
-#----------------------------------------------------------------------------------------
-tempData <- filter (ringWidths, sampleDate == as_date ('2019-10-24') & treatment %in% c (1, 5)) %>% 
-  mutate (treeId       = factor (treeId),
-          treatment    = factor (treatment, levels = c (5,4,1)),
-          sampleHeight = factor (sampleHeight))
-g <- ggplot (tempData) +
-  geom_boxplot (aes (x = sampleHeight, y = RWI2018, fill = treatment),
-                alpha = 0.7, colour = rep (tColours [['colour']] [c (1,4,5)], 4)) + 
-  coord_flip () +
-  labs (x = 'Sample Height (m)', y = 'Radial growth index') +
-  scale_fill_manual (values = tColours [['colour']] [c (1,4,5)], labels = c ('Control','Compressed','Chilled'))
-g
-# Were there differences in final ring with among treatments?
-mod6 <- lmer (formula = RWI2018 ~ (1 | treeId) + treatment:sampleHeight,
-              data = tempData, REML = TRUE)
-summary (mod6); rm (tempData)
 
 # How much growth (fraction) had occured at the start of the experiment?
 #----------------------------------------------------------------------------------------
@@ -540,6 +468,7 @@ axis (side = 2, las = 1)
 # Draw a 1:1 line
 #----------------------------------------------------------------------------------------
 abline (a = 0, b = 1, col = '#66666699') 
+
 # Draw mean measurements and their standard error 
 #----------------------------------------------------------------------------------------
 for (t in 1:15) {
@@ -570,7 +499,7 @@ for (t in 1:15) {
 # Did groups grow differently in previous years?
 #----------------------------------------------------------------------------------------
 tempData <- ringWidths %>%
-  filter (sampleDate %notin% c (as_date ('2018-01-01'), as_date ('2018-05-01'))) %>%
+  filter (treatment %in% c (1, 5), sampleDate %notin% c (as_date ('2018-01-01'), as_date ('2018-05-01'))) %>%
   mutate (treeId       = factor (treeId),
           treatment    = factor (treatment, levels = c (1,4,5)),
           sampleHeight = factor (sampleHeight, levels = c (4.0,2.5,1.5,0.5))) %>% 
@@ -592,7 +521,7 @@ summary (mod10); rm (tempData)
 # Did groups grow differently in 2019?
 #----------------------------------------------------------------------------------------
 tempData <- ringWidths %>%
-  filter (sampleDate == as_date ('2019-10-24')) %>%
+  filter (sampleDate == as_date ('2019-10-24'), treatment %in% c (1, 5)) %>%
   mutate (treeId       = factor (treeId),
           treatment    = factor (treatment, levels = c (5,4,1)),
           sampleHeight = factor (sampleHeight))
@@ -604,7 +533,7 @@ g <- ggplot (tempData) +
   scale_fill_manual (values = tColours [['colour']] [c (1,4,5)], labels = c ('Control','Compressed','Chilled'))
 g
 # Were there differences in the 2019 ring width (following year) among treatments?
-mod11 <- lmer (formula = Y2019 ~ (1 | treeId) + treatment:sampleHeight,
+mod11 <- lmer (formula = Y2019 ~ (1 | treeId) + treatment + treatment:sampleHeight,
               data = tempData, REML = TRUE)
 summary (mod11); rm (tempData)
 

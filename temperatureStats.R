@@ -7,6 +7,7 @@
 # load dependencies
 #----------------------------------------------------------------------------------------
 library ('lme4')
+library ('brms')
 library ('tidyverse')
 library ('lubridate')
 source ('plotingFunctions.R')
@@ -158,13 +159,13 @@ dailyAverage <- dailyAverage %>%
   mutate (period    = factor (period,    levels = c ('during','after','before')),
           periodAlt = factor (periodAlt, levels = c ('chilling','non-chilling')),
           height    = factor (height,    levels = c ('2p0m','1p0m','1p5m')),
-          treatment = factor (treatment, levels = c ('chilled','phloem','air')),
+          treatment = factor (treatment, levels = c ('chilled','air','phloem')),
           datetime  = factor (datetime),
           tree      = factor (tree))
 
 # estimate temperature effect of chilling (e.g., before, during and after chilling)
 #----------------------------------------------------------------------------------------
-M1 <- lmer (formula = temp ~ (tree|height) + datetime + period:height:treatment,
+M1 <- lmer (formula = temp ~ datetime + period:height:treatment + (1 | tree / height),
             data = dailyAverage,
             REML = TRUE)
 
@@ -227,20 +228,20 @@ nightTimeAverage <- nightTimeAverage %>% filter (!is.nan (temp), !is.na (temp))
 nightTimeAverage <- nightTimeAverage %>% 
   mutate (period    = factor (period,    levels = c ('during','after','before')),
           height    = factor (height,    levels = c ('2p0m','1p0m','1p5m')),
-          treatment = factor (treatment, levels = c ('chilled','phloem','air')),
+          treatment = factor (treatment, levels = c ('chilled','air','phloem')),
           datetime  = factor (midday),
           tree      = factor (tree))
   
 # estimate night time temperature effect of chilling (e.g., before, during and after chilling)
 #----------------------------------------------------------------------------------------
-M2 <- lmer (formula = temp ~ (tree|height) + datetime + period:height:treatment,
+M2 <- lmer (formula = temp ~ datetime + period:height:treatment + (1 | tree / height),
             data = nightTimeAverage,
             REML = TRUE)
 
 # average day-time values 
 #----------------------------------------------------------------------------------------
 dayTimeAverage <- hourlyData %>% 
-  filter (lubridate::hour (datetime) >= 10 | lubridate::hour (datetime) <= 18) %>% 
+  filter (lubridate::hour (datetime) >= 10 & lubridate::hour (datetime) <= 18) %>% 
   group_by (datetime = cut (datetime, breaks = '1 day')) %>%
   summarise (t.oak.1p5m = mean (t.oak.1p5m, na.rm = TRUE),
              t.air.2p0m = mean (t.air.2p0m, na.rm = TRUE), 
@@ -300,13 +301,13 @@ dayTimeAverage <- dayTimeAverage %>% filter (!is.nan (temp), !is.na (temp))
 dayTimeAverage <- dayTimeAverage %>% 
   mutate (period    = factor (period,    levels = c ('during','after','before')),
           height    = factor (height,    levels = c ('2p0m','1p0m','1p5m')),
-          treatment = factor (treatment, levels = c ('chilled','phloem','air')),
+          treatment = factor (treatment, levels = c ('chilled','air','phloem')),
           datetime  = factor (datetime),
           tree      = factor (tree))
 
 # estimate temperature effect of chilling (e.g., before, during and after chilling)
 #----------------------------------------------------------------------------------------
-M3 <- lmer (formula = temp ~ (tree|height) + datetime + period:height:treatment,
+M3 <- lmer (formula = temp ~ datetime + period:height:treatment + (1 | tree / height),
             data = dayTimeAverage,
             REML = TRUE)
 
@@ -323,7 +324,7 @@ temp <- tempData %>% filter (datetime > startDate, datetime < endDate) %>%
                 names_pattern = '(.*)\\.(.*)', 
                 values_to = 'temp') %>%
   filter (!is.na (temp), !is.nan (temp)) %>%
-  group_by (temp < 5.0) 
+  group_by (temp < 5.0)
 sum (temp [['temp < 5']] [temp [['height']] == '1p0m'], na.rm = TRUE) / 
   length (temp [['temp < 5']] [temp [['height']] == '1p0m']) * 100.0
 sum (temp [['temp < 5']] [temp [['height']] == '2p0m'], na.rm = TRUE) / 
@@ -346,6 +347,46 @@ se   (temp [['temp']] [temp [['height']] == '1p0m'])
 mean (temp [['temp']] [temp [['height']] == '2p0m'], na.rm = TRUE)
 sd   (temp [['temp']] [temp [['height']] == '2p0m'], na.rm = TRUE)
 se   (temp [['temp']] [temp [['height']] == '2p0m'])
+
+# calculate mean night-time temperature during chilling
+#----------------------------------------------------------------------------------------
+temp <- tempData %>% filter (datetime > startDate, datetime < endDate) %>% 
+  filter (lubridate::hour (datetime) >= 22 | lubridate::hour (datetime) <= 6) %>%
+  select (datetime, t.01.2p0m, t.01.1p0m, t.02.2p0m, t.02.1p0m, t.03.2p0m, t.03.1p0m, 
+          t.04.2p0m, t.04.1p0m, t.05.2p0m, t.05.1p0m) %>% 
+  pivot_longer (cols = !datetime, 
+                names_to =  c ('tree','height'), 
+                names_prefix = 't.', 
+                names_pattern = '(.*)\\.(.*)', 
+                values_to = 'temp') %>%
+  filter (!is.na (temp), !is.nan (temp)) 
+mean (temp [['temp']] [temp [['height']] == '1p0m'], na.rm = TRUE)
+sd   (temp [['temp']] [temp [['height']] == '1p0m'], na.rm = TRUE)
+se   (temp [['temp']] [temp [['height']] == '1p0m'])
+mean (temp [['temp']] [temp [['height']] == '2p0m'], na.rm = TRUE)
+sd   (temp [['temp']] [temp [['height']] == '2p0m'], na.rm = TRUE)
+se   (temp [['temp']] [temp [['height']] == '2p0m'])
+
+# calculate mean day-time temperature during chilling
+#----------------------------------------------------------------------------------------
+temp <- tempData %>% filter (datetime > startDate, datetime < endDate) %>% 
+  filter (lubridate::hour (datetime) >= 10 & lubridate::hour (datetime) <= 18) %>%
+  select (datetime, t.01.2p0m, t.01.1p0m, t.02.2p0m, t.02.1p0m, t.03.2p0m, t.03.1p0m, 
+          t.04.2p0m, t.04.1p0m, t.05.2p0m, t.05.1p0m) %>% 
+  pivot_longer (cols = !datetime, 
+                names_to =  c ('tree','height'), 
+                names_prefix = 't.', 
+                names_pattern = '(.*)\\.(.*)', 
+                values_to = 'temp') %>%
+  filter (!is.na (temp), !is.nan (temp)) 
+mean (temp [['temp']] [temp [['height']] == '1p0m'], na.rm = TRUE)
+sd   (temp [['temp']] [temp [['height']] == '1p0m'], na.rm = TRUE)
+se   (temp [['temp']] [temp [['height']] == '1p0m'])
+mean (temp [['temp']] [temp [['height']] == '2p0m'], na.rm = TRUE)
+sd   (temp [['temp']] [temp [['height']] == '2p0m'], na.rm = TRUE)
+se   (temp [['temp']] [temp [['height']] == '2p0m'])
+
+
 
 # calculate average phloem temperature for each tree (i.e., which trees was chilled most 
 # successfuly)

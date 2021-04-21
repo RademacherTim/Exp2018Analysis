@@ -17,19 +17,22 @@ if (!existsFunction ('%>%')) library ('tidyverse')
 
 # source anatomical data
 #----------------------------------------------------------------------------------------
-source ('processAnatomicalData.R')
+if (!exists (anatomicalData)) source ('processAnatomicalData.R')
 
-# Did one treatment cause an increases or decrease in ring width?
+# Did one treatment cause an increases or decrease in ring width compared with a 2017 baseline?
 #----------------------------------------------------------------------------------------
-tempData <- anatomicalData %>% 
-  filter (YEAR == 2018, PLOT %in% c (1, 5), sampleDate == as_date ('2018-11-15')) %>%
-  group_by (PLOT, TREE, sampleHeight) %>% 
+tmpData <- anatomicalData %>% 
+  filter (PLOT %in% c (1, 5)) %>%
+  group_by (YEAR, PLOT, TREE, sampleHeight, sampleDate) %>%  
   summarise (maxRW = max (MRW)) %>%
-  mutate (treatment = factor (PLOT, levels = c (5, 1)),
+  mutate (year = factor (YEAR, levels = c (2018:1989)),
+          treatment = factor (PLOT, levels = c (5, 1)),
           treeId = factor (TREE),
-          sampleHeight = factor (sampleHeight))
-mod <- lmer (maxRW ~ (1|treeId) + treatment:sampleHeight, 
-             data = tempData, REML = TRUE)
+          sampleHeight = factor (sampleHeight, levels = c (0.5, 1.0, 1.5, 2.0, 2.5, 4.0)),
+          sampleDate = factor (sampleDate))
+mod <- lmer (maxRW ~ (1 | treeId) + (1 | sampleDate) + year + treatment + treatment:sampleHeight, 
+             data = tmpData, 
+             REML = TRUE)
 summary (mod); rm (tempData)
 
 # Did one treatment cause an increases or decrease in the number of cells formed?
