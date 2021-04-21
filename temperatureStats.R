@@ -347,6 +347,42 @@ mean (temp [['temp']] [temp [['height']] == '2p0m'], na.rm = TRUE)
 sd   (temp [['temp']] [temp [['height']] == '2p0m'], na.rm = TRUE)
 se   (temp [['temp']] [temp [['height']] == '2p0m'])
 
+# calculate average phloem temperature for each tree (i.e., which trees was chilled most 
+# successfuly)
+#----------------------------------------------------------------------------------------
+temp <- tempData %>% filter (datetime > startDate, datetime < endDate) %>% 
+  select (datetime, t.01.2p0m, t.01.1p0m, t.02.2p0m, t.02.1p0m, t.03.2p0m, t.03.1p0m, 
+          t.04.2p0m, t.04.1p0m, t.05.2p0m, t.05.1p0m) %>% 
+  pivot_longer (cols = !datetime, 
+                names_to =  c ('tree','height'), 
+                names_prefix = 't.', 
+                names_pattern = '(.*)\\.(.*)', 
+                values_to = 'temp') %>%
+  filter (!is.na (temp), !is.nan (temp)) %>% group_by (tree) %>% 
+  summarise (meanTemp = mean (temp, na.rm = TRUE), 
+             seTemp = sd (temp, na.rm = TRUE),
+             .groups = 'keep')
+
+# Get midday temperatures on the 25th of August 2018
+#----------------------------------------------------------------------------------------
+temp <- tempData %>% filter (datetime > startDate, datetime < endDate) %>% 
+  select (datetime, t.01.2p0m, t.01.1p0m, t.01.1p5m, t.02.2p0m, 
+          t.02.1p5m, t.02.1p0m, t.03.2p0m, t.03.1p5m, t.03.1p0m, t.04.2p0m, t.04.1p5m, 
+          t.04.1p0m, t.05.2p0m, t.05.1p5m, t.05.1p0m, t.air.1p5m) %>% 
+  pivot_longer (cols = !datetime, 
+                names_to =  c ('tree','height'), 
+                names_prefix = 't.', 
+                names_pattern = '(.*)\\.(.*)', 
+                values_to = 'temp') %>%
+  filter (!is.na (temp), !is.nan (temp)) %>%
+  filter (datetime >= as_datetime ('2018-08-25 11:00:00'),
+          datetime <= as_datetime ('2018-08-25 13:00:00')) %>% 
+  mutate (dTemp = temp - 24.5) %>% # Because the air temperature was 24.5 C at midday
+  filter (tree != 'air') %>% 
+  mutate (treatment = ifelse (as.numeric (tree) <= 5, 5, 1)) %>%
+  group_by (treatment, height) %>%
+  summarise (meanDTemp = mean (dTemp), seDTemp = se (dTemp), .groups = 'drop')
+
 # clean-up 
 #----------------------------------------------------------------------------------------
 rm (M1, M2, M3, dailyAverage, dayTimeAverage, nightTimeAverage, temp)
