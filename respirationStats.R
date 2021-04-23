@@ -6,9 +6,9 @@
 
 # load dependencies
 #----------------------------------------------------------------------------------------
-library ('lme4')
-library ('tidyverse')
-library ('lubridate')
+if (!existsFunction ('lmer')) library ('lme4')
+if (!existsFunction ('tibble')) library ('tidyverse')
+if (!existsFunction ('as_date')) library ('lubridate')
 
 # read processed respiration data
 #----------------------------------------------------------------------------------------
@@ -50,5 +50,4 @@ M1 <- lmer (formula = flux.raw ~ (1| tree) + date + period:treatment:height,
             data = respDataExp2018,
             REML = TRUE)
 summary (M1)
-
 #========================================================================================
