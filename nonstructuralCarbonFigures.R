@@ -5,7 +5,7 @@
 
 # source colour schemes and ploting functions
 #----------------------------------------------------------------------------------------
-source ('./plotingFunctions.R')
+if (!exists ('tColours')) source ('./plotingFunctions.R')
 
 # source processed data
 #----------------------------------------------------------------------------------------

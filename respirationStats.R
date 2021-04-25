@@ -46,7 +46,7 @@ respDataExp2018 <- respDataExp2018 %>%
 # idiosyncratic differences due to factors such as variations in exact azimuth or solar 
 # exposure due to varying thickness of overlaying canopy 
 #----------------------------------------------------------------------------------------
-M1 <- lmer (formula = flux.raw ~ (1| tree) + date + period:treatment:height, 
+M1 <- lmer (formula = flux.raw ~ (1 | tree) + date + period:treatment:height, 
             data = respDataExp2018,
             REML = TRUE)
 summary (M1)

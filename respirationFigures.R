@@ -152,7 +152,8 @@ summaryRespData <- respDataExp2018 %>%
   group_by (date, treatment, chamber) %>%
   summarise (meanRawResp = mean (flux.raw, na.rm = TRUE),
              sdRawResp = sd (flux.raw, na.rm = TRUE),
-             seRawResp = se (flux.raw)) 
+             seRawResp = se (flux.raw),
+             .groups = 'keep') 
 
 # plot respiration in control, compressed and chilled treatments for 2018 only
 #----------------------------------------------------------------------------------------
