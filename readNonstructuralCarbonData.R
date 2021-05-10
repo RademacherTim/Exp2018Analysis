@@ -185,19 +185,22 @@ COV <- filter (dataExp2018, substr (SampleID, 1, 7) == 'LCS Oak' |
   group_by (SampleID) %>% 
   select (SampleID, ConcentrationSugarPerDW, ConcentrationStarchPerDW) %>% 
   summarise (covSugar  = sd (ConcentrationSugarPerDW) / mean (ConcentrationSugarPerDW),
-             covStarch = sd (ConcentrationStarchPerDW) / mean (ConcentrationStarchPerDW))
+             covStarch = sd (ConcentrationStarchPerDW) / mean (ConcentrationStarchPerDW),
+             .groups = 'keep')
   
 # Get the number of blanks and controls per batch
 #----------------------------------------------------------------------------------------
 temp <- filter (dataExp2018, SampleID == 'B' | SampleID == 'TB') %>% 
   group_by (BatchID, DateOfSugarAnalysis) %>% 
-  summarise (n = sum (SampleID == 'B' | SampleID == 'TB'))
+  summarise (n = sum (SampleID == 'B' | SampleID == 'TB'),
+             .groups = 'keep')
 # range (temp [['n']])
 temp <- filter (dataExp2018, substr (SampleID, 1, 6) == 'REF100' | 
                   substr (SampleID, 1, 3) == 'LCS') %>%
   group_by (BatchID, DateOfSugarAnalysis) %>% 
   summarise (n = sum (substr (SampleID, 1, 6) == 'REF100' | 
-                        substr (SampleID, 1, 3) == 'LCS'))
+                        substr (SampleID, 1, 3) == 'LCS'),
+             .groups = 'keep')
 # temp [['n']]
 
 # Get number of samples per batch
@@ -206,7 +209,8 @@ temp <- dataExp2018 %>%
   group_by (BatchID, DateOfSugarAnalysis) %>% 
   filter (substr (SampleID, 1, 3) != 'LCS' & SampleID != 'B' & 
           SampleID != 'TB' & substr (SampleID, 1, 3) != 'REF') %>% 
-  summarise (n = sum (!is.na (SampleID)))
+  summarise (n = sum (!is.na (SampleID)),
+             .groups = 'keep')
 # temp [['n']]
 
 # switch back to original working directory

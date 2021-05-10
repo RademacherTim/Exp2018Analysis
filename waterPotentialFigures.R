@@ -24,6 +24,7 @@ phi <- phi %>% mutate (week = cut (date, '1 week')) %>% mutate (week = as_date (
 
 # make boxplots by date
 #----------------------------------------------------------------------------------------
+png (filename = './fig/Exp2018ChillingWaterPotential.png', width = 900, height = 400)
 par (mar = c (5, 6, 1, 1))
 boxplot (phi.branch ~ treatment, data = phi [phi [['week']] < as_date ('2018-10-01') &
                                              phi [['treatment']] != 4, ], 
@@ -45,4 +46,5 @@ axis (side = 1, at = 4:5, labels = c ('control','chilled'))
 abline (v = 3, col = '#666666')
 text (labels = c ('branches', 'needles'), y = 0, x = c (0.3, 3.5), col = '#666666', 
       cex = 1.5)
+dev.off ()
 #========================================================================================
