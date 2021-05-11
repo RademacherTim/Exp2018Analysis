@@ -132,10 +132,10 @@ rawDataWood2018  <- readRawNSCData (fileDir = getwd (),
                                     fileName = './data/nonstructuralCarbonData_wood_HF_Exp2018.xlsx',
                                     workSheet = 'Sheet 1',
                                     IDs = c ('RCLabNumber', 'SampleID', 'Tissue', 'BatchID'))
-rawDataRoots2018  <- readRawNSCData (fileDir = getwd (),
-                                     fileName = './data/nonstructuralCarbonData_roots_HF_Exp2018.xlsx',
-                                     workSheet = 'Sheet 1',
-                                     IDs = c ('RCLabNumber', 'SampleID', 'Tissue', 'BatchID'))
+  rawDataRoots2018  <- readRawNSCData (fileDir = getwd (),
+                                       fileName = './data/nonstructuralCarbonData_roots_HF_Exp2018.xlsx',
+                                       workSheet = 'Sheet 1',
+                                       IDs = c ('RCLabNumber', 'SampleID', 'Tissue', 'BatchID'))
 
 #----------------------------------------------------------------------------------------
 # process the raw data taking into account different calibration curve for the wood 
@@ -182,7 +182,7 @@ rm (rawDataWood2018, rawDataWoodLCS2018)
 
 # process root data
 #----------------------------------------------------------------------------------------
-processedDataRoots2018 <- processNSCs (rawData = rawDataRoots2018,
+processedDataRoots2018_1 <- processNSCs (rawData = rawDataRoots2018,
                                        cvLimitSample = 0.25,
                                        cvLimitTube = 0.25,
                                        LCS = 'Oak')

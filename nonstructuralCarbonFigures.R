@@ -251,7 +251,7 @@ for (t in c (1, 4, 5)) {
 
 # plot stem xylem soluble sugar concentration by treatment and sampling height
 #----------------------------------------------------------------------------------------
-png (filename = './fig/Exp2018ChillingSolubleSugarConcentrations.png', width = 400, height = 600)
+png (filename = './fig/Exp2018ChillingSolubleSugarConcentrationsWood.png', width = 400, height = 600)
 layout (matrix (1:3, nrow = 3, byrow = TRUE), height = c (1, 1, 1.2))
 for (h in 3:1) {
   
@@ -327,7 +327,7 @@ dev.off ()
 
 # plot stem xylem starch concentration by treatment and sampling height
 #----------------------------------------------------------------------------------------
-png (filename = './fig/Exp2018ChillingStarchConcentrations.png', width = 400, height = 600)
+png (filename = './fig/Exp2018ChillingStarchConcentrationsWood.png', width = 400, height = 600)
 layout (matrix (1:3, nrow = 3, byrow = TRUE), height = c (1, 1, 1.2))
 for (h in 3:1) {
   
@@ -403,7 +403,7 @@ dev.off ()
 
 # summarise the root data by treatment 
 #----------------------------------------------------------------------------------------
-summaryDataStem <- rootData2018 %>% 
+summaryDataRoots <- rootData2018 %>% 
   group_by (DateOfSampleCollection, treatment) %>% 
   summarise (meanSugar = mean (ConcentrationSugarPerDW), 
              sdSugar   = sd (ConcentrationSugarPerDW), 
@@ -416,89 +416,97 @@ summaryDataStem <- rootData2018 %>%
 # plot root starch concentration by treatment
 #----------------------------------------------------------------------------------------
 png (filename = './fig/Exp2018ChillingSolubleSugarConcentrationsRoots.png', 
-     width = 400, height = 600)
+     width = 500, height = 300)
+par (mfrow = c (1, 1))
 par (mar = c (5, 5, 1, 1))
-con <- summaryDataStem [['treatment']] == 1
-plot (x = summaryDataStem [['DateOfSampleCollection']] [con],
-      y = summaryDataStem [['meanSugar']] [con], 
+con <- summaryDataRoots [['treatment']] == 1
+plot (x = summaryDataRoots [['DateOfSampleCollection']] [con],
+      y = summaryDataRoots [['meanSugar']] [con], 
       typ = 'l', xlab = '', ylab = 'Root soluble sugar concentration (% dry weight)', las = 1,
-      ylim = c (0, 1.5), col = 'white', axes = FALSE)
+      xlim = c (as_datetime ('2018-05-01'), as_datetime ('2018-12-01')), ylim = c (0, 1.2), 
+      col = 'white', axes = FALSE)
 
 # plot mean and standard error of soluble starch concentrations for control trees
-con <- summaryDataStem [['treatment']] == 1
-polygon (x = c (summaryDataStem [['DateOfSampleCollection']] [con], 
-                rev (summaryDataStem [['DateOfSampleCollection']] [con])),
-         y = c (summaryDataStem [['meanSugar']] [con] - summaryDataStem [['seSugar']] [con],  
-                rev (summaryDataStem [['meanSugar']] [con] + summaryDataStem [['seSugar']] [con])),
+con <- summaryDataRoots [['treatment']] == 1
+polygon (x = c (summaryDataRoots [['DateOfSampleCollection']] [con], 
+                rev (summaryDataRoots [['DateOfSampleCollection']] [con])),
+         y = c (summaryDataRoots [['meanSugar']] [con] - summaryDataRoots [['seSugar']] [con],  
+                rev (summaryDataRoots [['meanSugar']] [con] + summaryDataRoots [['seSugar']] [con])),
          col = addOpacity (tColours [['colour']] [1], 0.3), lty = 0)
-lines (x = summaryDataStem [['DateOfSampleCollection']] [con],
-       y = summaryDataStem [['meanSugar']] [con], lty = 1, 
+lines (x = summaryDataRoots [['DateOfSampleCollection']] [con],
+       y = summaryDataRoots [['meanSugar']] [con], lty = 1, 
        lwd = 2, col = tColours [['colour']] [1])
 
 # plot mean and standard error of soluble starch concentrations for chilled trees
-con <- summaryDataStem [['treatment']] == 5
-polygon (x = c (summaryDataStem [['DateOfSampleCollection']] [con], 
-                rev (summaryDataStem [['DateOfSampleCollection']] [con])),
-         y = c (summaryDataStem [['meanSugar']] [con] - summaryDataStem [['seSugar']] [con],  
-                rev (summaryDataStem [['meanSugar']] [con] + summaryDataStem [['seSugar']] [con])),
+con <- summaryDataRoots [['treatment']] == 5
+polygon (x = c (summaryDataRoots [['DateOfSampleCollection']] [con], 
+                rev (summaryDataRoots [['DateOfSampleCollection']] [con])),
+         y = c (summaryDataRoots [['meanSugar']] [con] - summaryDataRoots [['seSugar']] [con],  
+                rev (summaryDataRoots [['meanSugar']] [con] + summaryDataRoots [['seSugar']] [con])),
          col = addOpacity (tColours [['colour']] [5], 0.3), lty = 0)
-lines (x = summaryDataStem [['DateOfSampleCollection']] [con],
-       y = summaryDataStem [['meanSugar']] [con], lty = 2, 
+lines (x = summaryDataRoots [['DateOfSampleCollection']] [con],
+       y = summaryDataRoots [['meanSugar']] [con], lty = 2, 
        lwd = 2, col = tColours [['colour']] [5])
 
 # adda axes
 #--------------------------------------------------------------------------------------
-axis (side = 1, labels = c ('May','Jun','Jul','Aug','Sep','Oct','Nov'),
+axis (side = 1, labels = c ('May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'),
       at = c (as_datetime ('2018-05-01'), as_datetime ('2018-06-01'), as_datetime ('2018-07-01'), 
               as_datetime ('2018-08-01'), as_datetime ('2018-09-01'), as_datetime ('2018-10-01'), 
-              as_datetime ('2018-11-01')))
-axis (side = 2, las = 1, at = seq (0, 1.5, 0.5))
+              as_datetime ('2018-11-01'), as_datetime ('2018-12-01')))
+axis (side = 2, las = 1, at = seq (0, 1.2, 0.4))
 
 # add critical dates
 #--------------------------------------------------------------------------------------
 criticalDates (group = 5, asDate = FALSE)
 
+# add legend
+#--------------------------------------------------------------------------------------
+legend (x = as_datetime ('2018-05-01'), y = 1.2, box.lty = 0, bg = 'transparent', 
+        legend = c ('control', 'chilled'), lty = 1:2, lwd = 2, 
+        col = tColours [['colour']] [c (1, 5)])
 dev.off ()
 
 # plot root starch concentration by treatment
 #----------------------------------------------------------------------------------------
 png (filename = './fig/Exp2018ChillingStarchConcentrationsRoots.png', 
-     width = 400, height = 600)
+     width = 500, height = 300)
 par (mar = c (5, 5, 1, 1))
-con <- summaryDataStem [['treatment']] == 1
-plot (x = summaryDataStem [['DateOfSampleCollection']] [con],
-      y = summaryDataStem [['meanStarch']] [con], 
+con <- summaryDataRoots [['treatment']] == 1
+plot (x = summaryDataRoots [['DateOfSampleCollection']] [con],
+      y = summaryDataRoots [['meanStarch']] [con], 
       typ = 'l', xlab = '', ylab = 'Root starch concentration (% dry weight)', las = 1,
-      ylim = c (0, 0.5), col = 'white', axes = FALSE)
+      xlim = c (as_datetime ('2018-05-01'), as_datetime ('2018-12-01')), ylim = c (0, 0.5), 
+      col = 'white', axes = FALSE)
 
 # plot mean and standard error of soluble starch concentrations for control trees
-con <- summaryDataStem [['treatment']] == 1
-polygon (x = c (summaryDataStem [['DateOfSampleCollection']] [con], 
-                rev (summaryDataStem [['DateOfSampleCollection']] [con])),
-         y = c (summaryDataStem [['meanStarch']] [con] - summaryDataStem [['seStarch']] [con],  
-                rev (summaryDataStem [['meanStarch']] [con] + summaryDataStem [['seStarch']] [con])),
+con <- summaryDataRoots [['treatment']] == 1
+polygon (x = c (summaryDataRoots [['DateOfSampleCollection']] [con], 
+                rev (summaryDataRoots [['DateOfSampleCollection']] [con])),
+         y = c (summaryDataRoots [['meanStarch']] [con] - summaryDataRoots [['seStarch']] [con],  
+                rev (summaryDataRoots [['meanStarch']] [con] + summaryDataRoots [['seStarch']] [con])),
          col = addOpacity (tColours [['colour']] [1], 0.3), lty = 0)
-lines (x = summaryDataStem [['DateOfSampleCollection']] [con],
-       y = summaryDataStem [['meanStarch']] [con], lty = 1, 
+lines (x = summaryDataRoots [['DateOfSampleCollection']] [con],
+       y = summaryDataRoots [['meanStarch']] [con], lty = 1, 
        lwd = 2, col = tColours [['colour']] [1])
 
 # plot mean and standard error of soluble starch concentrations for chilled trees
-con <- summaryDataStem [['treatment']] == 5
-polygon (x = c (summaryDataStem [['DateOfSampleCollection']] [con], 
-                rev (summaryDataStem [['DateOfSampleCollection']] [con])),
-         y = c (summaryDataStem [['meanStarch']] [con] - summaryDataStem [['seStarch']] [con],  
-                rev (summaryDataStem [['meanStarch']] [con] + summaryDataStem [['seStarch']] [con])),
+con <- summaryDataRoots [['treatment']] == 5
+polygon (x = c (summaryDataRoots [['DateOfSampleCollection']] [con], 
+                rev (summaryDataRoots [['DateOfSampleCollection']] [con])),
+         y = c (summaryDataRoots [['meanStarch']] [con] - summaryDataRoots [['seStarch']] [con],  
+                rev (summaryDataRoots [['meanStarch']] [con] + summaryDataRoots [['seStarch']] [con])),
          col = addOpacity (tColours [['colour']] [5], 0.3), lty = 0)
-lines (x = summaryDataStem [['DateOfSampleCollection']] [con],
-       y = summaryDataStem [['meanStarch']] [con], lty = 2, 
+lines (x = summaryDataRoots [['DateOfSampleCollection']] [con],
+       y = summaryDataRoots [['meanStarch']] [con], lty = 2, 
        lwd = 2, col = tColours [['colour']] [5])
 
 # adda axes
 #--------------------------------------------------------------------------------------
-axis (side = 1, labels = c ('May','Jun','Jul','Aug','Sep','Oct','Nov'),
+axis (side = 1, labels = c ('May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'),
       at = c (as_datetime ('2018-05-01'), as_datetime ('2018-06-01'), as_datetime ('2018-07-01'), 
               as_datetime ('2018-08-01'), as_datetime ('2018-09-01'), as_datetime ('2018-10-01'), 
-              as_datetime ('2018-11-01')))
+              as_datetime ('2018-11-01'), as_datetime ('2018-12-01')))
 axis (side = 2, las = 1, at = seq (0, 0.5, 0.1))
 
 # add critical dates
@@ -507,7 +515,7 @@ criticalDates (group = 5, asDate = FALSE)
 
 # add legend
 #--------------------------------------------------------------------------------------
-legend (x = as_datetime ('2018-05-01'), y = 0.2, box.lty = 0, bg = 'transparent', 
+legend (x = as_datetime ('2018-05-01'), y = 0.45, box.lty = 0, bg = 'transparent', 
         legend = c ('control', 'chilled'), lty = 1:2, lwd = 2, 
         col = tColours [['colour']] [c (1, 5)])
 dev.off ()
