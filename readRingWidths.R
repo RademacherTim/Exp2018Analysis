@@ -251,7 +251,7 @@ summaryData <- ringWidths %>% group_by (treatment, sampleDate, sampleHeight) %>%
              meanRWI2017_15 = mean (RWI2017_15, na.rm = TRUE),
              seRWI2017_15   = se (RWI2017_15),
              meanRWI2016_15 = mean (RWI2016_15, na.rm = TRUE),
-             seRWI2016_15   = se (RWI2016_15)) 
+             seRWI2016_15   = se (RWI2016_15), .groups = 'keep') 
 
 # Plot relative ring width for a tree over time 
 #----------------------------------------------------------------------------------------

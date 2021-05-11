@@ -17,7 +17,7 @@ if (!existsFunction ('%>%')) library ('tidyverse')
 
 # source anatomical data
 #----------------------------------------------------------------------------------------
-if (!exists (anatomicalData)) source ('processAnatomicalData.R')
+if (!exists ('anatomicalData')) source ('processAnatomicalData.R')
 
 # Did one treatment cause an increases or decrease in ring width compared with a 2017 baseline?
 #----------------------------------------------------------------------------------------
