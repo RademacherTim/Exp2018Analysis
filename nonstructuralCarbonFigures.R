@@ -13,12 +13,12 @@ source ('./readNonstructuralCarbonData.R')
 
 # sort the stemData2018 and rootData2018 tibbles to makes lines in graphs look decent
 #----------------------------------------------------------------------------------------
-stemData2018 <- stemData2018 %>% 
-  group_by (treeID, sampleHeight) %>% 
-  arrange (DateOfSampleCollection)
-rootData2018 <- rootData2018 %>% 
-  group_by (treeID, sampleHeight) %>% 
-  arrange (DateOfSampleCollection)
+stemData <- stemData %>% 
+  group_by (tree, sampleHeight) %>% 
+  arrange (date)
+rootData <- rootData %>% 
+  group_by (tree) %>% 
+  arrange (date)
 
 # plot the 2018 stem sugar concentration data by tree
 #----------------------------------------------------------------------------------------
@@ -26,32 +26,32 @@ layout (matrix (1:15, nrow = 3, byrow = TRUE))
 for (t in 1:15) {
   # plot below treatment
   #--------------------------------------------------------------------------------------
-  con <- stemData2018 [['treeID']] == t & stemData2018 [['sampleHeight']] == 1
-  plot (x = stemData2018 [['DateOfSampleCollection']] [con],
-        y = stemData2018 [['ConcentrationSugarPerDW']] [con], typ = 'l',
+  con <- stemData [['tree']] == t & stemData [['sampleHeight']] == 1
+  plot (x = stemData [['date']] [con],
+        y = stemData [['sugar']] [con], typ = 'l',
         xlab = 'date', ylab = 'sugar concentration (%DW)', las = 1,
         ylim = c (0, 1.75), lty = 3, lwd = 2,
-        col = tColours [['colour']] [unique (stemData2018 [['treatment']] [con])])
+        col = tColours [['colour']] [unique (stemData [['treatment']] [con])])
   # add in between the treatments
   #--------------------------------------------------------------------------------------
-  con <- stemData2018 [['treeID']] == t & stemData2018 [['sampleHeight']] == 2
-  lines (x = stemData2018 [['DateOfSampleCollection']] [con],
-         y = stemData2018 [['ConcentrationSugarPerDW']] [con], lty = 2, lwd = 2,
-         col = tColours [['colour']] [unique (stemData2018 [['treatment']] [con])])
+  con <- stemData [['tree']] == t & stemData [['sampleHeight']] == 2
+  lines (x = stemData [['date']] [con],
+         y = stemData [['sugar']] [con], lty = 2, lwd = 2,
+         col = tColours [['colour']] [unique (stemData [['treatment']] [con])])
   # add in above the treatments
   #--------------------------------------------------------------------------------------
-  con <- stemData2018 [['treeID']] == t & stemData2018 [['sampleHeight']] == 3
-  lines (x = stemData2018 [['DateOfSampleCollection']] [con],
-         y = stemData2018 [['ConcentrationSugarPerDW']] [con], lty = 1, lwd = 2,
-         col = tColours [['colour']] [unique (stemData2018 [['treatment']] [con])])
+  con <- stemData [['tree']] == t & stemData [['sampleHeight']] == 3
+  lines (x = stemData [['date']] [con],
+         y = stemData [['sugar']] [con], lty = 1, lwd = 2,
+         col = tColours [['colour']] [unique (stemData [['treatment']] [con])])
   
   # add a tree panel identifier
   #--------------------------------------------------------------------------------------
-  text (x = as_datetime ('2018-05-25'), y = 1.55, labels = t, cex = 2)
+  text (x = as_date ('2018-05-25'), y = 1.55, labels = t, cex = 2)
   
   # add critical dates
   #--------------------------------------------------------------------------------------
-  criticalDates (group = unique (stemData2018 [['treatment']] [con]), asDate = FALSE)
+  criticalDates (group = unique (stemData [['treatment']] [con]), asDate = FALSE)
   
   # add legend
   #--------------------------------------------------------------------------------------
@@ -65,35 +65,35 @@ for (t in 1:15) {
 layout (matrix (1:15, nrow = 3, byrow = TRUE))
 for (t in 1:15) {
   # plot below treatment
-  con <- stemData2018 [['treeID']] == t & stemData2018 [['sampleHeight']] == 1
+  con <- stemData [['tree']] == t & stemData [['sampleHeight']] == 1
   #--------------------------------------------------------------------------------------
-  plot (x = stemData2018 [['DateOfSampleCollection']] [con],
-        y = stemData2018 [['ConcentrationStarchPerDW']] [con], typ = 'l',
+  plot (x = stemData [['date']] [con],
+        y = stemData [['starch']] [con], typ = 'l',
         xlab = 'date', ylab = 'starch concentration (%DW)', las = 1,
         ylim = c (0, 0.8), lty = 3, lwd = 2,
-        col = tColours [['colour']] [unique (stemData2018 [['treatment']] [con])])
+        col = tColours [['colour']] [unique (stemData [['treatment']] [con])])
   
   # add in between the treatments
   #--------------------------------------------------------------------------------------
-  con <- stemData2018 [['treeID']] == t & stemData2018 [['sampleHeight']] == 2
-  lines (x = stemData2018 [['DateOfSampleCollection']] [con],
-         y = stemData2018 [['ConcentrationStarchPerDW']] [con], lty = 2, lwd = 2,
-         col = tColours [['colour']] [unique (stemData2018 [['treatment']] [con])])
+  con <- stemData [['tree']] == t & stemData [['sampleHeight']] == 2
+  lines (x = stemData [['date']] [con],
+         y = stemData [['starch']] [con], lty = 2, lwd = 2,
+         col = tColours [['colour']] [unique (stemData [['treatment']] [con])])
   
   # add in above the treatments
   #--------------------------------------------------------------------------------------
-  con <- stemData2018 [['treeID']] == t & stemData2018 [['sampleHeight']] == 3
-  lines (x = stemData2018 [['DateOfSampleCollection']] [con],
-         y = stemData2018 [['ConcentrationStarchPerDW']] [con], lty = 1, lwd = 2,
-         col = tColours [['colour']] [unique (stemData2018 [['treatment']] [con])])
+  con <- stemData [['tree']] == t & stemData [['sampleHeight']] == 3
+  lines (x = stemData [['date']] [con],
+         y = stemData [['starch']] [con], lty = 1, lwd = 2,
+         col = tColours [['colour']] [unique (stemData [['treatment']] [con])])
   
   # add a tree panel identifier
   #--------------------------------------------------------------------------------------
-  text (x = as_datetime ('2018-05-25'), y = 0.75, labels = t, cex = 2)
+  text (x = as_date ('2018-05-25'), y = 0.75, labels = t, cex = 2)
   
   # add critical dates
   #--------------------------------------------------------------------------------------
-  criticalDates (group = unique (stemData2018 [['treatment']] [con]), asDate = FALSE)
+  criticalDates (group = unique (stemData [['treatment']] [con]), asDate = FALSE)
   
   # Add legend
   #--------------------------------------------------------------------------------------
@@ -108,20 +108,20 @@ layout (matrix (1:15, nrow = 3, byrow = TRUE))
 for (t in 1:15) {
   # plot root sugar concentation
   #--------------------------------------------------------------------------------------
-  con <- rootData2018 [['treeID']] == t
-  plot (x = rootData2018 [['DateOfSampleCollection']] [con],
-        y = rootData2018 [['ConcentrationSugarPerDW']] [con], typ = 'l',
+  con <- rootData [['tree']] == t
+  plot (x = rootData [['date']] [con],
+        y = rootData [['sugar']] [con], typ = 'l',
         xlab = 'date', ylab = 'sugar concentration (%DW)', las = 1,
         ylim = c (0, 1.75), lwd = 2,
-        col = tColours [['colour']] [unique (rootData2018 [['treatment']] [con])])
+        col = tColours [['colour']] [unique (rootData [['treatment']] [con])])
 
   # add a tree panel identifier
   #--------------------------------------------------------------------------------------
-  text (x = as_datetime ('2018-05-25'), y = 1.55, labels = t, cex = 2)
+  text (x = as_date ('2018-05-25'), y = 1.55, labels = t, cex = 2)
   
   # add critical dates
   #--------------------------------------------------------------------------------------
-  criticalDates (group = unique (rootData2018 [['treatment']] [con]), asDate = FALSE)
+  criticalDates (group = unique (rootData [['treatment']] [con]), asDate = FALSE)
   
 }
 
@@ -131,33 +131,33 @@ layout (matrix (1:15, nrow = 3, byrow = TRUE))
 for (t in 1:15) {
   # plot root sugar concentation
   #--------------------------------------------------------------------------------------
-  con <- rootData2018 [['treeID']] == t
-  plot (x = rootData2018 [['DateOfSampleCollection']] [con],
-        y = rootData2018 [['ConcentrationStarchPerDW']] [con], typ = 'l',
+  con <- rootData [['tree']] == t
+  plot (x = rootData [['date']] [con],
+        y = rootData [['starch']] [con], typ = 'l',
         xlab = 'date', ylab = 'starch concentration (%DW)', las = 1,
         ylim = c (0, 0.8), lwd = 2,
-        col = tColours [['colour']] [unique (rootData2018 [['treatment']] [con])])
+        col = tColours [['colour']] [unique (rootData [['treatment']] [con])])
   
   # add a tree panel identifier
   #--------------------------------------------------------------------------------------
-  text (x = as_datetime ('2018-05-25'), y = 1.55, labels = t, cex = 2)
+  text (x = as_date ('2018-05-25'), y = 1.55, labels = t, cex = 2)
   
   # add critical dates
   #--------------------------------------------------------------------------------------
-  criticalDates (group = unique (rootData2018 [['treatment']] [con]), asDate = FALSE)
+  criticalDates (group = unique (rootData [['treatment']] [con]), asDate = FALSE)
   
 }
 
 # summarise the stem data by treatment and sampling height
 #----------------------------------------------------------------------------------------
-summaryDataStem <- stemData2018 %>% 
-  group_by (DateOfSampleCollection, treatment, sampleHeight) %>% 
-  summarise (meanSugar = mean (ConcentrationSugarPerDW), 
-             sdSugar   = sd (ConcentrationSugarPerDW), 
-             seSugar   = se (ConcentrationSugarPerDW),
-             meanStarch = mean (ConcentrationStarchPerDW), 
-             sdStarch   = sd (ConcentrationStarchPerDW), 
-             seStarch   = se (ConcentrationStarchPerDW),
+summaryDataStem <- stemData %>% 
+  group_by (date, treatment, sampleHeight) %>% 
+  summarise (meanSugar = mean (sugar), 
+             sdSugar   = sd (sugar), 
+             seSugar   = se (sugar),
+             meanStarch = mean (starch), 
+             sdStarch   = sd (starch), 
+             seStarch   = se (starch),
              .groups = 'keep')
 
 # plot the 2018 stem sugar concentration data by treatment
@@ -168,7 +168,7 @@ for (t in c (1, 4, 5)) {
   con <- summaryDataStem [['treatment']] == 1 &
     summaryDataStem [['sampleHeight']] == 1 &
     !is.na (summaryDataStem [['meanSugar']])
-  plot (x = summaryDataStem [['DateOfSampleCollection']] [con],
+  plot (x = summaryDataStem [['date']] [con],
         y = summaryDataStem [['meanSugar']] [con], 
         typ = 'l', xlab = 'date', ylab = 'wood sugar concentration (% dry weight)', las = 1,
         ylim = c (0, 1.5), col = 'white')
@@ -177,12 +177,12 @@ for (t in c (1, 4, 5)) {
     con <- summaryDataStem [['treatment']] == t &
       summaryDataStem [['sampleHeight']] == h &
       !is.na (summaryDataStem [['meanSugar']])
-    polygon (x = c (summaryDataStem [['DateOfSampleCollection']] [con], 
-                    rev (summaryDataStem [['DateOfSampleCollection']] [con])),
+    polygon (x = c (summaryDataStem [['date']] [con], 
+                    rev (summaryDataStem [['date']] [con])),
              y = c (summaryDataStem [['meanSugar']] [con] - summaryDataStem [['seSugar']] [con], 
                     rev (summaryDataStem [['meanSugar']] [con] + summaryDataStem [['seSugar']] [con])),
              col = addOpacity (tColours [['colour']] [t], 0.3), lty = 0)
-    lines (x = summaryDataStem [['DateOfSampleCollection']] [con],
+    lines (x = summaryDataStem [['date']] [con],
            y = summaryDataStem [['meanSugar']] [con], lty = ifelse (h == 1, 3, ifelse (h == 2, 2, 1)), 
            lwd = 2, col = tColours [['colour']] [t])
   }
@@ -213,7 +213,7 @@ for (t in c (1, 4, 5)) {
   con <- summaryDataStem [['treatment']] == 1 &
     summaryDataStem [['sampleHeight']] == 1 &
     !is.na (summaryDataStem [['meanStarch']])
-  plot (x = summaryDataStem [['DateOfSampleCollection']] [con],
+  plot (x = summaryDataStem [['date']] [con],
         y = summaryDataStem [['meanStarch']] [con], 
         typ = 'l', xlab = 'date', ylab = 'wood starch concentration (% dry weight)', las = 1,
         ylim = c (0, 0.6), col = 'white')
@@ -222,12 +222,12 @@ for (t in c (1, 4, 5)) {
     con <- summaryDataStem [['treatment']] == t &
       summaryDataStem [['sampleHeight']] == h &
       !is.na (summaryDataStem [['meanStarch']])
-    polygon (x = c (summaryDataStem [['DateOfSampleCollection']] [con], 
-                    rev (summaryDataStem [['DateOfSampleCollection']] [con])),
+    polygon (x = c (summaryDataStem [['date']] [con], 
+                    rev (summaryDataStem [['date']] [con])),
              y = c (summaryDataStem [['meanStarch']] [con] - summaryDataStem [['seStarch']] [con], 
                     rev (summaryDataStem [['meanStarch']] [con] + summaryDataStem [['seStarch']] [con])),
              col = addOpacity (tColours [['colour']] [t], 0.3), lty = 0)
-    lines (x = summaryDataStem [['DateOfSampleCollection']] [con],
+    lines (x = summaryDataStem [['date']] [con],
            y = summaryDataStem [['meanStarch']] [con], lty = ifelse (h == 1, 3, ifelse (h == 2, 2, 1)), 
            lwd = 2, col = tColours [['colour']] [t])
   }
@@ -264,7 +264,7 @@ for (h in 3:1) {
   con <- summaryDataStem [['treatment']] == 1 &
     summaryDataStem [['sampleHeight']] == h &
     !is.na (summaryDataStem [['meanSugar']])
-  plot (x = summaryDataStem [['DateOfSampleCollection']] [con],
+  plot (x = summaryDataStem [['date']] [con],
         y = summaryDataStem [['meanSugar']] [con], 
         typ = 'l', xlab = '', ylab = 'Wood sugar concentration (% dry weight)', las = 1,
         ylim = c (0, 1.5), col = 'white', axes = FALSE)
@@ -273,12 +273,12 @@ for (h in 3:1) {
   con <- summaryDataStem [['treatment']] == 1 &
       summaryDataStem [['sampleHeight']] == h &
       !is.na (summaryDataStem [['meanSugar']])
-  polygon (x = c (summaryDataStem [['DateOfSampleCollection']] [con], 
-                  rev (summaryDataStem [['DateOfSampleCollection']] [con])),
+  polygon (x = c (summaryDataStem [['date']] [con], 
+                  rev (summaryDataStem [['date']] [con])),
            y = c (summaryDataStem [['meanSugar']] [con] - summaryDataStem [['seSugar']] [con],  
                   rev (summaryDataStem [['meanSugar']] [con] + summaryDataStem [['seSugar']] [con])),
            col = addOpacity (tColours [['colour']] [1], 0.3), lty = 0)
-  lines (x = summaryDataStem [['DateOfSampleCollection']] [con],
+  lines (x = summaryDataStem [['date']] [con],
          y = summaryDataStem [['meanSugar']] [con], lty = 1, 
          lwd = 2, col = tColours [['colour']] [1])
   
@@ -287,12 +287,12 @@ for (h in 3:1) {
   con <- summaryDataStem [['treatment']] == 5 &
     summaryDataStem [['sampleHeight']] == h &
     !is.na (summaryDataStem [['meanSugar']])
-  polygon (x = c (summaryDataStem [['DateOfSampleCollection']] [con], 
-                  rev (summaryDataStem [['DateOfSampleCollection']] [con])),
+  polygon (x = c (summaryDataStem [['date']] [con], 
+                  rev (summaryDataStem [['date']] [con])),
            y = c (summaryDataStem [['meanSugar']] [con] - summaryDataStem [['seSugar']] [con],  
                   rev (summaryDataStem [['meanSugar']] [con] + summaryDataStem [['seSugar']] [con])),
            col = addOpacity (tColours [['colour']] [5], 0.3), lty = 0)
-  lines (x = summaryDataStem [['DateOfSampleCollection']] [con],
+  lines (x = summaryDataStem [['date']] [con],
          y = summaryDataStem [['meanSugar']] [con], lty = 2, 
          lwd = 2, col = tColours [['colour']] [5])
   
@@ -300,14 +300,14 @@ for (h in 3:1) {
   #--------------------------------------------------------------------------------------
   if (h == 1) {
     axis (side = 1, labels = c ('May','Jun','Jul','Aug','Sep','Oct','Nov'),
-          at = c (as_datetime ('2018-05-01'), as_datetime ('2018-06-01'), as_datetime ('2018-07-01'), 
-                  as_datetime ('2018-08-01'), as_datetime ('2018-09-01'), as_datetime ('2018-10-01'), 
-                  as_datetime ('2018-11-01')))
+          at = c (as_date ('2018-05-01'), as_date ('2018-06-01'), as_date ('2018-07-01'), 
+                  as_date ('2018-08-01'), as_date ('2018-09-01'), as_date ('2018-10-01'), 
+                  as_date ('2018-11-01')))
   } else {
     axis (side = 1, labels = rep ('', 7),
-          at = c (as_datetime ('2018-05-01'), as_datetime ('2018-06-01'), as_datetime ('2018-07-01'), 
-                  as_datetime ('2018-08-01'), as_datetime ('2018-09-01'), as_datetime ('2018-10-01'), 
-                  as_datetime ('2018-11-01')))
+          at = c (as_date ('2018-05-01'), as_date ('2018-06-01'), as_date ('2018-07-01'), 
+                  as_date ('2018-08-01'), as_date ('2018-09-01'), as_date ('2018-10-01'), 
+                  as_date ('2018-11-01')))
   }
   axis (side = 2, las = 1, at = seq (0, 1.5, 0.4))
   
@@ -318,7 +318,7 @@ for (h in 3:1) {
   # add legend
   #--------------------------------------------------------------------------------------
   if (h == 1) {
-    legend (x = as_datetime ('2018-05-01'), y = 1.2, box.lty = 0, bg = 'transparent', 
+    legend (x = as_date ('2018-05-01'), y = 1.2, box.lty = 0, bg = 'transparent', 
             legend = c ('control', 'chilled'), lty = 1:2, lwd = 2, 
             col = tColours [['colour']] [c (1, 5)])
   }
@@ -340,7 +340,7 @@ for (h in 3:1) {
   con <- summaryDataStem [['treatment']] == 1 &
     summaryDataStem [['sampleHeight']] == h &
     !is.na (summaryDataStem [['meanStarch']])
-  plot (x = summaryDataStem [['DateOfSampleCollection']] [con],
+  plot (x = summaryDataStem [['date']] [con],
         y = summaryDataStem [['meanStarch']] [con], 
         typ = 'l', xlab = '', ylab = 'Wood starch concentration (% dry weight)', las = 1,
         ylim = c (0, 0.5), col = 'white', axes = FALSE)
@@ -349,12 +349,12 @@ for (h in 3:1) {
   con <- summaryDataStem [['treatment']] == 1 &
     summaryDataStem [['sampleHeight']] == h &
     !is.na (summaryDataStem [['meanStarch']])
-  polygon (x = c (summaryDataStem [['DateOfSampleCollection']] [con], 
-                  rev (summaryDataStem [['DateOfSampleCollection']] [con])),
+  polygon (x = c (summaryDataStem [['date']] [con], 
+                  rev (summaryDataStem [['date']] [con])),
            y = c (summaryDataStem [['meanStarch']] [con] - summaryDataStem [['seStarch']] [con],  
                   rev (summaryDataStem [['meanStarch']] [con] + summaryDataStem [['seStarch']] [con])),
            col = addOpacity (tColours [['colour']] [1], 0.3), lty = 0)
-  lines (x = summaryDataStem [['DateOfSampleCollection']] [con],
+  lines (x = summaryDataStem [['date']] [con],
          y = summaryDataStem [['meanStarch']] [con], lty = 1, 
          lwd = 2, col = tColours [['colour']] [1])
   
@@ -363,12 +363,12 @@ for (h in 3:1) {
   con <- summaryDataStem [['treatment']] == 5 &
     summaryDataStem [['sampleHeight']] == h &
     !is.na (summaryDataStem [['meanStarch']])
-  polygon (x = c (summaryDataStem [['DateOfSampleCollection']] [con], 
-                  rev (summaryDataStem [['DateOfSampleCollection']] [con])),
+  polygon (x = c (summaryDataStem [['date']] [con], 
+                  rev (summaryDataStem [['date']] [con])),
            y = c (summaryDataStem [['meanStarch']] [con] - summaryDataStem [['seStarch']] [con],  
                   rev (summaryDataStem [['meanStarch']] [con] + summaryDataStem [['seStarch']] [con])),
            col = addOpacity (tColours [['colour']] [5], 0.3), lty = 0)
-  lines (x = summaryDataStem [['DateOfSampleCollection']] [con],
+  lines (x = summaryDataStem [['date']] [con],
          y = summaryDataStem [['meanStarch']] [con], lty = 2, 
          lwd = 2, col = tColours [['colour']] [5])
   
@@ -376,14 +376,14 @@ for (h in 3:1) {
   #--------------------------------------------------------------------------------------
   if (h == 1) {
     axis (side = 1, labels = c ('May','Jun','Jul','Aug','Sep','Oct','Nov'),
-          at = c (as_datetime ('2018-05-01'), as_datetime ('2018-06-01'), as_datetime ('2018-07-01'), 
-                  as_datetime ('2018-08-01'), as_datetime ('2018-09-01'), as_datetime ('2018-10-01'), 
-                  as_datetime ('2018-11-01')))
+          at = c (as_date ('2018-05-01'), as_date ('2018-06-01'), as_date ('2018-07-01'), 
+                  as_date ('2018-08-01'), as_date ('2018-09-01'), as_date ('2018-10-01'), 
+                  as_date ('2018-11-01')))
   } else {
     axis (side = 1, labels = rep ('', 7),
-          at = c (as_datetime ('2018-05-01'), as_datetime ('2018-06-01'), as_datetime ('2018-07-01'), 
-                  as_datetime ('2018-08-01'), as_datetime ('2018-09-01'), as_datetime ('2018-10-01'), 
-                  as_datetime ('2018-11-01')))
+          at = c (as_date ('2018-05-01'), as_date ('2018-06-01'), as_date ('2018-07-01'), 
+                  as_date ('2018-08-01'), as_date ('2018-09-01'), as_date ('2018-10-01'), 
+                  as_date ('2018-11-01')))
   }
   axis (side = 2, las = 1, at = seq (0, 0.5, 0.1))
   
@@ -394,7 +394,7 @@ for (h in 3:1) {
   # add legend
   #--------------------------------------------------------------------------------------
   if (h == 1) {
-    legend (x = as_datetime ('2018-05-01'), y = 0.2, box.lty = 0, bg = 'transparent', 
+    legend (x = as_date ('2018-05-01'), y = 0.2, box.lty = 0, bg = 'transparent', 
             legend = c ('control', 'chilled'), lty = 1:2, lwd = 2, 
             col = tColours [['colour']] [c (1, 5)])
   }
@@ -403,14 +403,14 @@ dev.off ()
 
 # summarise the root data by treatment 
 #----------------------------------------------------------------------------------------
-summaryDataRoots <- rootData2018 %>% 
-  group_by (DateOfSampleCollection, treatment) %>% 
-  summarise (meanSugar = mean (ConcentrationSugarPerDW), 
-             sdSugar   = sd (ConcentrationSugarPerDW), 
-             seSugar   = se (ConcentrationSugarPerDW),
-             meanStarch = mean (ConcentrationStarchPerDW), 
-             sdStarch   = sd (ConcentrationStarchPerDW), 
-             seStarch   = se (ConcentrationStarchPerDW),
+summaryDataRoots <- rootData %>% 
+  group_by (date, treatment) %>% 
+  summarise (meanSugar = mean (sugar), 
+             sdSugar   = sd (sugar), 
+             seSugar   = se (sugar),
+             meanStarch = mean (starch), 
+             sdStarch   = sd (starch), 
+             seStarch   = se (starch),
              .groups = 'keep')
 
 # plot root starch concentration by treatment
@@ -420,40 +420,40 @@ png (filename = './fig/Exp2018ChillingSolubleSugarConcentrationsRoots.png',
 par (mfrow = c (1, 1))
 par (mar = c (5, 5, 1, 1))
 con <- summaryDataRoots [['treatment']] == 1
-plot (x = summaryDataRoots [['DateOfSampleCollection']] [con],
+plot (x = summaryDataRoots [['date']] [con],
       y = summaryDataRoots [['meanSugar']] [con], 
       typ = 'l', xlab = '', ylab = 'Root soluble sugar concentration (% dry weight)', las = 1,
-      xlim = c (as_datetime ('2018-05-01'), as_datetime ('2018-12-01')), ylim = c (0, 1.2), 
+      xlim = c (as_date ('2018-05-01'), as_date ('2018-12-01')), ylim = c (0, 1.2), 
       col = 'white', axes = FALSE)
 
 # plot mean and standard error of soluble starch concentrations for control trees
 con <- summaryDataRoots [['treatment']] == 1
-polygon (x = c (summaryDataRoots [['DateOfSampleCollection']] [con], 
-                rev (summaryDataRoots [['DateOfSampleCollection']] [con])),
+polygon (x = c (summaryDataRoots [['date']] [con], 
+                rev (summaryDataRoots [['date']] [con])),
          y = c (summaryDataRoots [['meanSugar']] [con] - summaryDataRoots [['seSugar']] [con],  
                 rev (summaryDataRoots [['meanSugar']] [con] + summaryDataRoots [['seSugar']] [con])),
          col = addOpacity (tColours [['colour']] [1], 0.3), lty = 0)
-lines (x = summaryDataRoots [['DateOfSampleCollection']] [con],
+lines (x = summaryDataRoots [['date']] [con],
        y = summaryDataRoots [['meanSugar']] [con], lty = 1, 
        lwd = 2, col = tColours [['colour']] [1])
 
 # plot mean and standard error of soluble starch concentrations for chilled trees
 con <- summaryDataRoots [['treatment']] == 5
-polygon (x = c (summaryDataRoots [['DateOfSampleCollection']] [con], 
-                rev (summaryDataRoots [['DateOfSampleCollection']] [con])),
+polygon (x = c (summaryDataRoots [['date']] [con], 
+                rev (summaryDataRoots [['date']] [con])),
          y = c (summaryDataRoots [['meanSugar']] [con] - summaryDataRoots [['seSugar']] [con],  
                 rev (summaryDataRoots [['meanSugar']] [con] + summaryDataRoots [['seSugar']] [con])),
          col = addOpacity (tColours [['colour']] [5], 0.3), lty = 0)
-lines (x = summaryDataRoots [['DateOfSampleCollection']] [con],
+lines (x = summaryDataRoots [['date']] [con],
        y = summaryDataRoots [['meanSugar']] [con], lty = 2, 
        lwd = 2, col = tColours [['colour']] [5])
 
 # adda axes
 #--------------------------------------------------------------------------------------
 axis (side = 1, labels = c ('May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'),
-      at = c (as_datetime ('2018-05-01'), as_datetime ('2018-06-01'), as_datetime ('2018-07-01'), 
-              as_datetime ('2018-08-01'), as_datetime ('2018-09-01'), as_datetime ('2018-10-01'), 
-              as_datetime ('2018-11-01'), as_datetime ('2018-12-01')))
+      at = c (as_date ('2018-05-01'), as_date ('2018-06-01'), as_date ('2018-07-01'), 
+              as_date ('2018-08-01'), as_date ('2018-09-01'), as_date ('2018-10-01'), 
+              as_date ('2018-11-01'), as_date ('2018-12-01')))
 axis (side = 2, las = 1, at = seq (0, 1.2, 0.4))
 
 # add critical dates
@@ -462,7 +462,7 @@ criticalDates (group = 5, asDate = FALSE)
 
 # add legend
 #--------------------------------------------------------------------------------------
-legend (x = as_datetime ('2018-05-01'), y = 1.2, box.lty = 0, bg = 'transparent', 
+legend (x = as_date ('2018-05-01'), y = 1.2, box.lty = 0, bg = 'transparent', 
         legend = c ('control', 'chilled'), lty = 1:2, lwd = 2, 
         col = tColours [['colour']] [c (1, 5)])
 dev.off ()
@@ -473,40 +473,40 @@ png (filename = './fig/Exp2018ChillingStarchConcentrationsRoots.png',
      width = 500, height = 300)
 par (mar = c (5, 5, 1, 1))
 con <- summaryDataRoots [['treatment']] == 1
-plot (x = summaryDataRoots [['DateOfSampleCollection']] [con],
+plot (x = summaryDataRoots [['date']] [con],
       y = summaryDataRoots [['meanStarch']] [con], 
       typ = 'l', xlab = '', ylab = 'Root starch concentration (% dry weight)', las = 1,
-      xlim = c (as_datetime ('2018-05-01'), as_datetime ('2018-12-01')), ylim = c (0, 0.5), 
+      xlim = c (as_date ('2018-05-01'), as_date ('2018-12-01')), ylim = c (0, 0.5), 
       col = 'white', axes = FALSE)
 
 # plot mean and standard error of soluble starch concentrations for control trees
 con <- summaryDataRoots [['treatment']] == 1
-polygon (x = c (summaryDataRoots [['DateOfSampleCollection']] [con], 
-                rev (summaryDataRoots [['DateOfSampleCollection']] [con])),
+polygon (x = c (summaryDataRoots [['date']] [con], 
+                rev (summaryDataRoots [['date']] [con])),
          y = c (summaryDataRoots [['meanStarch']] [con] - summaryDataRoots [['seStarch']] [con],  
                 rev (summaryDataRoots [['meanStarch']] [con] + summaryDataRoots [['seStarch']] [con])),
          col = addOpacity (tColours [['colour']] [1], 0.3), lty = 0)
-lines (x = summaryDataRoots [['DateOfSampleCollection']] [con],
+lines (x = summaryDataRoots [['date']] [con],
        y = summaryDataRoots [['meanStarch']] [con], lty = 1, 
        lwd = 2, col = tColours [['colour']] [1])
 
 # plot mean and standard error of soluble starch concentrations for chilled trees
 con <- summaryDataRoots [['treatment']] == 5
-polygon (x = c (summaryDataRoots [['DateOfSampleCollection']] [con], 
-                rev (summaryDataRoots [['DateOfSampleCollection']] [con])),
+polygon (x = c (summaryDataRoots [['date']] [con], 
+                rev (summaryDataRoots [['date']] [con])),
          y = c (summaryDataRoots [['meanStarch']] [con] - summaryDataRoots [['seStarch']] [con],  
                 rev (summaryDataRoots [['meanStarch']] [con] + summaryDataRoots [['seStarch']] [con])),
          col = addOpacity (tColours [['colour']] [5], 0.3), lty = 0)
-lines (x = summaryDataRoots [['DateOfSampleCollection']] [con],
+lines (x = summaryDataRoots [['date']] [con],
        y = summaryDataRoots [['meanStarch']] [con], lty = 2, 
        lwd = 2, col = tColours [['colour']] [5])
 
 # adda axes
 #--------------------------------------------------------------------------------------
 axis (side = 1, labels = c ('May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'),
-      at = c (as_datetime ('2018-05-01'), as_datetime ('2018-06-01'), as_datetime ('2018-07-01'), 
-              as_datetime ('2018-08-01'), as_datetime ('2018-09-01'), as_datetime ('2018-10-01'), 
-              as_datetime ('2018-11-01'), as_datetime ('2018-12-01')))
+      at = c (as_date ('2018-05-01'), as_date ('2018-06-01'), as_date ('2018-07-01'), 
+              as_date ('2018-08-01'), as_date ('2018-09-01'), as_date ('2018-10-01'), 
+              as_date ('2018-11-01'), as_date ('2018-12-01')))
 axis (side = 2, las = 1, at = seq (0, 0.5, 0.1))
 
 # add critical dates
@@ -515,9 +515,10 @@ criticalDates (group = 5, asDate = FALSE)
 
 # add legend
 #--------------------------------------------------------------------------------------
-legend (x = as_datetime ('2018-05-01'), y = 0.45, box.lty = 0, bg = 'transparent', 
+legend (x = as_date ('2018-05-01'), y = 0.45, box.lty = 0, bg = 'transparent', 
         legend = c ('control', 'chilled'), lty = 1:2, lwd = 2, 
         col = tColours [['colour']] [c (1, 5)])
 dev.off ()
 
 #========================================================================================
+

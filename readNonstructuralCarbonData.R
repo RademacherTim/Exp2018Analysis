@@ -132,10 +132,10 @@ rawDataWood2018  <- readRawNSCData (fileDir = getwd (),
                                     fileName = './data/nonstructuralCarbonData_wood_HF_Exp2018.xlsx',
                                     workSheet = 'Sheet 1',
                                     IDs = c ('RCLabNumber', 'SampleID', 'Tissue', 'BatchID'))
-  rawDataRoots2018  <- readRawNSCData (fileDir = getwd (),
-                                       fileName = './data/nonstructuralCarbonData_roots_HF_Exp2018.xlsx',
-                                       workSheet = 'Sheet 1',
-                                       IDs = c ('RCLabNumber', 'SampleID', 'Tissue', 'BatchID'))
+rawDataRoots2018  <- readRawNSCData (fileDir = getwd (),
+                                     fileName = './data/nonstructuralCarbonData_roots_HF_Exp2018.xlsx',
+                                     workSheet = 'Sheet 1',
+                                     IDs = c ('RCLabNumber', 'SampleID', 'Tissue', 'BatchID'))
 
 #----------------------------------------------------------------------------------------
 # process the raw data taking into account different calibration curve for the wood 
@@ -182,7 +182,7 @@ rm (rawDataWood2018, rawDataWoodLCS2018)
 
 # process root data
 #----------------------------------------------------------------------------------------
-processedDataRoots2018_1 <- processNSCs (rawData = rawDataRoots2018,
+processedDataRoots2018 <- processNSCs (rawData = rawDataRoots2018,
                                        cvLimitSample = 0.25,
                                        cvLimitTube = 0.25,
                                        LCS = 'Oak')
@@ -207,7 +207,7 @@ rm (PLOTCAL)
 dataExp2018 <- rbind (processedDataWood2018, 
                       select (processedDataWoodLCS2018, -SRFHigh, -LCSOakDeviation),
                       select (processedDataRoots2018, -SRFHigh, -LCSOakDeviation))
-rm (processedDataWood2018, processedDataWoodLCS2018)
+rm (processedDataWood2018, processedDataWoodLCS2018, processedDataRoots2018)
 
 # add and fill a column for sample height for stem tissue samples
 #----------------------------------------------------------------------------------------
@@ -231,6 +231,46 @@ dataExp2018 [['treatment']] [dataExp2018 [['treatment']] >= 11 &
 #----------------------------------------------------------------------------------------
 stemData2018 <- dataExp2018 [substr (dataExp2018 [['Tissue']], 1, 4) == 'Stem', ]
 rootData2018 <- dataExp2018 [substr (dataExp2018 [['Tissue']], 1, 4) == 'Root', ]
+
+# reduce to only relevant variable
+#--------------------------------------------------------------------------------------
+stemData <- stemData2018 %>% 
+  select (treeID, treatment, sampleHeight, DateOfSampleCollection, 
+          ConcentrationSugarPerDW, ConcentrationStarchPerDW) %>%
+  rename (tree = treeID, 
+          sugar = ConcentrationSugarPerDW, 
+          starch = ConcentrationStarchPerDW,
+          date = DateOfSampleCollection) %>% 
+  mutate (date =  as_date (date))
+rootData <- rootData2018 %>% 
+  select (treeID, treatment, DateOfSampleCollection, ConcentrationSugarPerDW, 
+          ConcentrationStarchPerDW) %>%
+  rename (tree = treeID, 
+          sugar = ConcentrationSugarPerDW, 
+          starch = ConcentrationStarchPerDW,
+          date = DateOfSampleCollection) %>%
+  mutate (date = as_date (date))
+
+# average across root samples with repeats
+#--------------------------------------------------------------------------------------
+tempData1 <- rootData %>% filter ((tree == 1  & date == as_date ('2018-06-13')) |
+                                 (tree == 5  & date == as_date ('2018-07-05')) |
+                                 (tree == 9  & date == as_date ('2018-08-02')) |
+                                 (tree == 11 & date == as_date ('2018-08-29')) |
+                                 (tree == 15 & date == as_date ('2018-09-27'))) %>%
+  group_by (tree, date) %>%
+  summarise (tree = mean (tree),
+             treatment = mean (treatment),
+             date = mean (date),
+             sugar = mean (sugar),
+             starch = mean (starch),
+             .groups = 'drop')
+tempData2 <- rootData %>% filter (!(tree == 1  & date == as_date ('2018-06-13')) &
+                     !(tree == 5  & date == as_date ('2018-07-05')) &
+                     !(tree == 9  & date == as_date ('2018-08-02')) &
+                     !(tree == 11 & date == as_date ('2018-08-29')) &
+                     !(tree == 15 & date == as_date ('2018-09-27')))
+rootData <- rbind (tempData1, tempData2)
 
 # get the coefficient of variation for lab controls 
 #--------------------------------------------------------------------------------------
@@ -273,7 +313,7 @@ setwd (originalDir)
 
 # clean up
 #----------------------------------------------------------------------------------------
-rm (i, temp, COV, originalDir, temp1, temp2, packageDir)
+rm (i, temp, tempData1, tempData2, COV, originalDir, temp1, temp2, packageDir)
 rm (extractionsStarch, batch, batches, condition, dates, prescribedStarch)
 if (exists ('dataExp2018')) rm (dataExp2018)
 if (exists ('res')) rm (res)
