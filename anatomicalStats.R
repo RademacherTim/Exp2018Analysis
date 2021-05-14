@@ -19,33 +19,54 @@ if (!existsFunction ('%>%')) library ('tidyverse')
 #----------------------------------------------------------------------------------------
 if (!exists ('anatomicalData')) source ('processAnatomicalData.R')
 
-# Did one treatment cause an increases or decrease in ring width compared with a 2017 baseline?
+# Did one treatment cause an increases or decrease in ring width taking into account 
+# inter-annual variation between the treatment groups?
 #----------------------------------------------------------------------------------------
 tmpData <- anatomicalData %>% 
   filter (PLOT %in% c (1, 5)) %>%
   group_by (YEAR, PLOT, TREE, sampleHeight, sampleDate) %>%  
-  summarise (maxRW = max (MRW)) %>%
+  summarise (maxRW = max (MRW), .groups = 'keep') %>%
   mutate (year = factor (YEAR, levels = c (2018:1989)),
-          treatment = factor (PLOT, levels = c (5, 1)),
+          treatment = factor (PLOT, levels = c (1, 5)),
           treeId = factor (TREE),
-          sampleHeight = factor (sampleHeight, levels = c (0.5, 1.0, 1.5, 2.0, 2.5, 4.0)),
+          sampleHeight = factor (sampleHeight, levels = c (4.0, 2.5, 2.0, 1.5, 1.0, 0.5)),
           sampleDate = factor (sampleDate))
 mod <- lmer (maxRW ~ (1 | treeId) + (1 | sampleDate) + year + treatment + treatment:sampleHeight, 
              data = tmpData, 
              REML = TRUE)
-summary (mod); rm (tempData)
+summary (mod); rm (tmpData)
 
-# Did one treatment cause an increases or decrease in the number of cells formed?
+# Did one treatment cause a change in ring width if we assume that chilling had no overall 
+# effect on growth?
+#----------------------------------------------------------------------------------------
+mod <- lmer (maxRW ~ (1 | treeId) + (1 | sampleDate) + year  + treatment:sampleHeight, 
+             data = tmpData, 
+             REML = TRUE)
+summary (mod)
+
+# Did one treatment cause a change in ring width at various sampling height if we only 
+# compare growth to the previous year?
+#----------------------------------------------------------------------------------------
+tmpData <- tmpData %>% filter (YEAR %in% 2017:2018)
+mod <- lmer (maxRW ~ (1 | treeId) + (1 | sampleDate) + year + treatment:sampleHeight, 
+             data = tmpData, 
+             REML = TRUE)
+summary (mod); rm (tmpData)
+
+# TR- N.B.: Something does not make sense with 2017 having varying cell number data 
+# Did one treatment cause an increases or decrease in the number of cells formed taking 
+# into account pre-existing differences in cell numbers from 2017?
 #----------------------------------------------------------------------------------------
 tempData <- anatomicalData %>% 
-  filter (YEAR == 2018, PLOT %in% c (1, 5)) %>%
-  group_by (PLOT, TREE, sampleHeight, sampleDate) %>% 
-  summarise (maxNCells = max (cumNCells)) %>%
-  mutate (treatment = factor (PLOT, levels = c (5, 1)),
+  filter (YEAR %in% 2017:2018, PLOT %in% c (1, 5)) %>%
+  group_by (YEAR, PLOT, TREE, sampleHeight, sampleDate) %>% 
+  summarise (maxNCells = max (cumNCells), .groups = 'drop') %>%
+  mutate (year = factor (YEAR, levels = c (2018:2017)),
+          treatment = factor (PLOT, levels = c (1, 5)),
           treeId = factor (TREE),
-          sampleHeight = factor (sampleHeight),
+          sampleHeight = factor (sampleHeight, levels = c (4.0, 2.5, 2.0, 1.5, 1.0, 0.5)),
           sampleDate = factor (sampleDate))
-mod <- lmer (maxNCells ~ (1|treeId) + (1|sampleDate) + treatment:sampleHeight, 
+mod <- lmer (maxNCells ~ (1 | treeId) + (1 | sampleDate) + year + treatment:sampleHeight, 
              data = tempData, REML = TRUE)
 summary (mod); rm (tempData)
 

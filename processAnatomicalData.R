@@ -155,44 +155,72 @@ anatomicalData <- anatomicalData %>% add_column (cumNCells = NA, cumCWA = NA)
 FIRSTCWA    <- TRUE
 FIRSTNCELLS <- TRUE
 for (r in 1:dim (anatomicalData) [1]) {
+  
+  # If year is not equal to 2018 skip to next iteration
+  if (anatomicalData [['YEAR']] [r] != 2018) next
+  
+  # For the first sector in a ring
   if (r == 1 | FIRSTCWA) { 
     if (!is.na (anatomicalData [['CWA']] [r])) {
-      anatomicalData [['cumCWA']] [r] <- anatomicalData [['CWA']] [r] * anatomicalData [['nCells']]
+      # Just use the mean cell-wall area per cell and the number of cells in the sector
+      anatomicalData [['cumCWA']] [r] <- anatomicalData [['CWA']] [r] * anatomicalData [['nCells']] [r] 
       
       # Switch FIRST off to move on once a non-NA value was entered 
       FIRSTCWA <- FALSE
     } else {
       FIRSTCWA <- TRUE
     }
+  # for any sector following the first sector  
   } else {
-    # Is this a different profile from the previous row?
+    # Check whether this is a different radial profile from the previous row?
     differentProfile <- 
       anatomicalData [['YEAR']]         [r] != anatomicalData [['YEAR']]         [r-1] |
       anatomicalData [['TREE']]         [r] != anatomicalData [['TREE']]         [r-1] |
       anatomicalData [['sampleHeight']] [r] != anatomicalData [['sampleHeight']] [r-1] |
       anatomicalData [['sampleDate']]   [r] != anatomicalData [['sampleDate']]   [r-1]
+    # If it is a different radial profile 
     if (differentProfile) {
+      # and if the mean cell-wall area is not NA
       if (!is.na (anatomicalData [['CWA']] [r])) {
+        # determine cumulative cell-wall area by multiplying mean cell-wall area per cell times 
+        # number of cells
         anatomicalData [['cumCWA']] [r] <- anatomicalData [['CWA']] [r] * anatomicalData [['nCells']] [r]
+      # else make sure that the next row is treated as first sector 
       } else {
         FIRSTCWA <- TRUE
       }
+    # if it is the same radial profile as the previous row
     } else {
+      
+      # and if the cell-wall area per cell is not NA
       if (!is.na (anatomicalData [['CWA']] [r])) {
+        
+        # determine add the cumulative cell-wall area increment for this sector 
+        # to the cumulative cell-wall area of the previous sector
         anatomicalData [['cumCWA']] [r] <- anatomicalData [['CWA']] [r] * 
           anatomicalData [['nCells']] [r] + anatomicalData [['cumCWA']] [r-1]
+      # if this sector has not cell-wall area just use the previouses sector's 
+      # cumulative cell-wall area
       } else {
         anatomicalData [['cumCWA']] [r] <- anatomicalData [['cumCWA']] [r-1]
       }
     }
   }
+  
+  # Is this the first sector of the radial profile?
   if (r == 1 | FIRSTNCELLS) { 
+    
+    # Is the number of cells in the sector not NA
     if (!is.na (anatomicalData [['nCells']] [r])) {
+      
+      # for first sectors of each radial profile, the cumulative number of cells 
+      # is the number of cells in this sector
       anatomicalData [['cumNCells']] [r] <- anatomicalData [['nCells']] [r]
       
       # Switch FIRST off to move on once a non-NA value was entered 
       FIRSTNCELLS <- FALSE
     } else {
+      # Leave FIRSTCELLS on, so assure that starting counts only once there are numbers to be counted
       FIRSTNCELLS <- TRUE
     }
   } else {
