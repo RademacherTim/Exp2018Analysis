@@ -251,7 +251,8 @@ for (t in c (1, 4, 5)) {
 
 # plot stem xylem soluble sugar concentration by treatment and sampling height
 #----------------------------------------------------------------------------------------
-png (filename = './fig/Exp2018ChillingSolubleSugarConcentrationsWood.png', width = 400, height = 600)
+png (filename = './fig/Exp2018ChillingSolubleSugarConcentrationsWood.png', width = 400, 
+     height = 640)
 layout (matrix (1:3, nrow = 3, byrow = TRUE), height = c (1, 1, 1.2))
 for (h in 3:1) {
   
@@ -267,7 +268,8 @@ for (h in 3:1) {
   plot (x = summaryDataStem [['date']] [con],
         y = summaryDataStem [['meanSugar']] [con], 
         typ = 'l', xlab = '', ylab = 'Wood sugar concentration (% dry weight)', las = 1,
-        ylim = c (0, 1.5), col = 'white', axes = FALSE)
+        xlim = c (as_date ('2018-05-01'), as_date ('2018-11-15')), ylim = c (0, 1.5), 
+        col = 'white', axes = FALSE)
   
   # plot mean and standard error of soluble sugar concentrations for control trees
   con <- summaryDataStem [['treatment']] == 1 &
@@ -313,7 +315,7 @@ for (h in 3:1) {
   
   # add critical dates
   #--------------------------------------------------------------------------------------
-  criticalDates (group = t, asDate = FALSE)
+  criticalDates (group = t, asDate = TRUE)
   
   # add legend
   #--------------------------------------------------------------------------------------
@@ -327,7 +329,7 @@ dev.off ()
 
 # plot stem xylem starch concentration by treatment and sampling height
 #----------------------------------------------------------------------------------------
-png (filename = './fig/Exp2018ChillingStarchConcentrationsWood.png', width = 400, height = 600)
+png (filename = './fig/Exp2018ChillingStarchConcentrationsWood.png', width = 400, height = 640)
 layout (matrix (1:3, nrow = 3, byrow = TRUE), height = c (1, 1, 1.2))
 for (h in 3:1) {
   
@@ -343,7 +345,8 @@ for (h in 3:1) {
   plot (x = summaryDataStem [['date']] [con],
         y = summaryDataStem [['meanStarch']] [con], 
         typ = 'l', xlab = '', ylab = 'Wood starch concentration (% dry weight)', las = 1,
-        ylim = c (0, 0.5), col = 'white', axes = FALSE)
+        xlim = c (as_date ('2018-05-01'), as_date ('2018-11-15')), ylim = c (0, 0.5),
+        col = 'white', axes = FALSE)
   
   # plot mean and standard error of soluble starch concentrations for control trees
   con <- summaryDataStem [['treatment']] == 1 &
@@ -389,7 +392,7 @@ for (h in 3:1) {
   
   # add critical dates
   #--------------------------------------------------------------------------------------
-  criticalDates (group = 5, asDate = FALSE)
+  criticalDates (group = 5, asDate = TRUE)
   
   # add legend
   #--------------------------------------------------------------------------------------
@@ -416,14 +419,14 @@ summaryDataRoots <- rootData %>%
 # plot root starch concentration by treatment
 #----------------------------------------------------------------------------------------
 png (filename = './fig/Exp2018ChillingSolubleSugarConcentrationsRoots.png', 
-     width = 500, height = 300)
+     width = 400, height = 240)
 par (mfrow = c (1, 1))
 par (mar = c (5, 5, 1, 1))
 con <- summaryDataRoots [['treatment']] == 1
 plot (x = summaryDataRoots [['date']] [con],
       y = summaryDataRoots [['meanSugar']] [con], 
       typ = 'l', xlab = '', ylab = 'Root soluble sugar concentration (% dry weight)', las = 1,
-      xlim = c (as_date ('2018-05-01'), as_date ('2018-12-01')), ylim = c (0, 1.2), 
+      xlim = c (as_date ('2018-05-01'), as_date ('2018-11-15')), ylim = c (0, 1.2), 
       col = 'white', axes = FALSE)
 
 # plot mean and standard error of soluble starch concentrations for control trees
@@ -450,15 +453,15 @@ lines (x = summaryDataRoots [['date']] [con],
 
 # adda axes
 #--------------------------------------------------------------------------------------
-axis (side = 1, labels = c ('May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'),
+axis (side = 1, labels = c ('May','Jun','Jul','Aug','Sep','Oct','Nov'),
       at = c (as_date ('2018-05-01'), as_date ('2018-06-01'), as_date ('2018-07-01'), 
               as_date ('2018-08-01'), as_date ('2018-09-01'), as_date ('2018-10-01'), 
-              as_date ('2018-11-01'), as_date ('2018-12-01')))
+              as_date ('2018-11-01')))
 axis (side = 2, las = 1, at = seq (0, 1.2, 0.4))
 
 # add critical dates
 #--------------------------------------------------------------------------------------
-criticalDates (group = 5, asDate = FALSE)
+criticalDates (group = 5, asDate = TRUE)
 
 # add legend
 #--------------------------------------------------------------------------------------
@@ -470,13 +473,13 @@ dev.off ()
 # plot root starch concentration by treatment
 #----------------------------------------------------------------------------------------
 png (filename = './fig/Exp2018ChillingStarchConcentrationsRoots.png', 
-     width = 500, height = 300)
+     width = 400, height = 240)
 par (mar = c (5, 5, 1, 1))
 con <- summaryDataRoots [['treatment']] == 1
 plot (x = summaryDataRoots [['date']] [con],
       y = summaryDataRoots [['meanStarch']] [con], 
       typ = 'l', xlab = '', ylab = 'Root starch concentration (% dry weight)', las = 1,
-      xlim = c (as_date ('2018-05-01'), as_date ('2018-12-01')), ylim = c (0, 0.5), 
+      xlim = c (as_date ('2018-05-01'), as_date ('2018-11-15')), ylim = c (0, 0.5), 
       col = 'white', axes = FALSE)
 
 # plot mean and standard error of soluble starch concentrations for control trees
@@ -503,15 +506,15 @@ lines (x = summaryDataRoots [['date']] [con],
 
 # adda axes
 #--------------------------------------------------------------------------------------
-axis (side = 1, labels = c ('May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'),
+axis (side = 1, labels = c ('May','Jun','Jul','Aug','Sep','Oct','Nov'),
       at = c (as_date ('2018-05-01'), as_date ('2018-06-01'), as_date ('2018-07-01'), 
               as_date ('2018-08-01'), as_date ('2018-09-01'), as_date ('2018-10-01'), 
-              as_date ('2018-11-01'), as_date ('2018-12-01')))
+              as_date ('2018-11-01')))
 axis (side = 2, las = 1, at = seq (0, 0.5, 0.1))
 
 # add critical dates
 #--------------------------------------------------------------------------------------
-criticalDates (group = 5, asDate = FALSE)
+criticalDates (group = 5, asDate = TRUE)
 
 # add legend
 #--------------------------------------------------------------------------------------
