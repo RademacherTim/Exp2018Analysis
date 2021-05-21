@@ -14,6 +14,7 @@
 #----------------------------------------------------------------------------------------
 if (!existsFunction ('lmer')) library ('lme4')
 if (!existsFunction ('%>%')) library ('tidyverse')
+if (!existsFunction ('as_date')) library ('lubridate')
 
 # source anatomical data
 #----------------------------------------------------------------------------------------
@@ -61,7 +62,7 @@ tempData <- anatomicalData %>%
   group_by (YEAR, PLOT, TREE, sampleHeight, sampleDate) %>% 
   summarise (maxNCells = max (cumNCells), .groups = 'drop') %>%
   mutate (year = factor (YEAR, levels = c (2018:2017)),
-          treatment = factor (PLOT, levels = c (1, 5)),
+          treatment = factor (PLOT, levels = c (5, 1)),
           treeId = factor (TREE),
           sampleHeight = factor (sampleHeight, levels = c (4.0, 2.5, 2.0, 1.5, 1.0, 0.5)),
           sampleDate = factor (sampleDate))

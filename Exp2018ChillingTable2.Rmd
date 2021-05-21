@@ -15,9 +15,6 @@ options (warn = -1)
 
 
 ```{r readTable, echo = FALSE}
-# To-do
-#----------------------------------------------------------------------------------------
-# - investigate inconsistency of cell numbers, for example the chilled tree average in the after period increases by 11.2 cells but the increment is only 8.7
 
 # Read anatomical data
 #----------------------------------------------------------------------------------------
