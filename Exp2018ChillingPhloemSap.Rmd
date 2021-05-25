@@ -1,0 +1,199 @@
+---
+title: |
+  | Supplementary Materials 1:
+  | Estimating the impact of reduced temperature on phloem sap
+author: Tim Rademacher
+date: "2021/05/21"
+output: 
+  bookdown::pdf_document2: default
+bibliography: "../bib/Exp2018Chilling.bib"
+csl: "../bib/harvard.csl"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set (echo = TRUE)
+```
+
+\begin {center}
+\textit {This pdf was generated from an Rmarkdown file, which includes all R code necessary to reproduce the estimations. The Rmarkdown file is available on github  (https://github.com/TTRademacher/Exp2018Analysis) and is permanently and publicly archived on the Harvard Forest Data Archive as part of the data set \href {link to data archive}{HF???}.}
+\end {center}
+
+# Basics of phloem transport
+
+Phloem flow is thought to be driven by hydrostatis forces resulting from osmotic gradients mainly caused by differences in soluble sugar cocentrations (primarily succrose) along the phloem transport pathway. This pressure flow hypothesis was first postulated by Münch [-@munch_versuche_1927] and still describes phloem flow well given more recent evidence [@de_schepper_phloem_2013]. However, trees with long distance phloem transport pathways could not be easily reconciled with the proposed theory due to the seemingly insufficient pressure gradients for long-distances transport in trees. Recent work has shown that gradual changes in phloem sieve tube anatomy along the stem can reduce pathway resistance and reconcile phloem transport in trees with Munch's hypothesis [@savage_maintenance_2017]. 
+
+A few experiments [@de_schepper_localized_2011;@johnsen_physiological_2007;@schaberg_experimental_2017;@peuke_effects_2006] have made use of the fact that phloem transport is temperature dependend and can be temporarily halted by chilling the phloem [@gould_direct_2004]. In the following, we explain the temperature dependence of phloem flow to roughly estimate the effects of phloem chilling on phloem transport.
+
+# Dependence of phloem sap viscosity on temperature
+
+To quantify the effect of chilling on dynamic viscosity of phloem sap and thus resistance to phloem transport, we estimate the effect of temperature ($T_{phl}$) on the viscosity of water ($\eta_w$) using the Vogel-Fulcher-Tamman equation: 
+
+\begin {equation} \label {equ:VogelFulcherTamman}
+\eta_w = \eta_0 e^{\frac {B}{(T_{phl} - T_{VF})}}
+\end {equation}
+,  where $\eta_0$, $T_{VF}$ and $B$ are empirical constants. In addition to water, phloem sap contains sugar. The sugar concentration ($c$ in \%\textit {weight/weight}) also affects phloem sap viscosity. According to Jensen et al. [-@jensen_optimal_2013], phloem sap viscosity ($\eta_s$) and density ($\rho_s$)can be estimated from sap sugar concentration as follows:
+
+\begin{equation} \label{equ:viscosityOfSap}
+\eta_{s} = \eta_{w} e^{(Ac-(Bc)^2+(Cc)^3)}
+\end{equation}
+
+\begin{equation} \label{equ:densityOfSap}
+\rho_{s} = \rho_{w} (1 + Ac + (Bc)^2 +(Cc)^3)
+\end{equation}
+
+, where A, B, and C are empirical constant, which we set to 0.032, 0.012, and 0.023 for viscosity and 0.0038, 0.0037 and 0.0033 for density according to Jensen et al. [-@jensen_optimal_2013]. Combining the temperature and succrose dependencies of phloem sap, we obtain the response surface displayed in figure \@ref(fig:viscosity-surface-plot). 
+
+``` {r sapViscosityFunction, echo = F}
+# Create viscosity function based on effects of succrose concentration as per Jensen et al. (2012) and temperature effects from Vogel equation
+visSap <- function (c,            # succrose concentration by weight 
+                 Tphl = 293.15, # phloem temperature [K]
+                 A = -3.7188,  # parameters from Huber et al. (2009)
+                 B = 578.919,  # parameters from Huber et al. (2009)
+                 C = -137.546, # parameters from Huber et al. (2009)
+                 alpha = 0.032, # parameter as per Jensen et al. (2012)
+                 beta  = 0.012, # parameter as per Jensen et al. (2012)
+                 gamma = 0.023  # parameter as per Jensen et al. (2012)
+                 ){
+  etaW <- exp (A + (B /(C + Tphl))) / 1e6 # water viscosity [Pa s]
+  etaS <- etaW * exp (alpha * c - (beta * c)^2.0 + (gamma * c)^3.0) # sap viscosity [Pa s]
+  return (etaS)
+}
+
+# Create surfaces for plotting
+x <- seq (0, 40, by = 0.5) + 273.15 # temperature vector [K]
+y <- seq (5, 30, length = 80) # percent sugar concentration by weight or volume 
+zVis <- matrix (data = NA, length (x), length (y))
+for (i in 1:length (x)) {
+  for (j in 1:length (y)) {
+    zVis [i, j] <- visSap (Tphl = x [i], c = y [j])
+  }
+}
+```
+
+``` {r viscosity-surface-plot, fig.cap = "Surfaces of phloem sap viscosity against temperature and succrose concentration.", echo = F}
+# plot the viscosity and density surfaces
+par (mar = c (4, 4, 2, 2))
+persp (x -273.15, y, zVis / 1e-6, phi = 5, theta = 30,
+       xlab = 'Temperature (degree C)',
+       ylab = 'Succrose concentration (% wt/wt)',
+       zlab = 'Dynamic viscosity of sap (mPa s)',
+       col = '#8dd3c766', ticktype = 'detailed')
+```
+
+Knowing the sugar concentration and temperature, hence the viscosity of the phloem sap we can then estimate the resistance to flow in the lumen of sieve tubes ($R_{l}$) according to the re-arranged Hagen-Poiseuille equation. 
+
+\begin {equation} \label {equ:HagenPoiseuilleRe-arranged}
+\Delta P = \frac {8 \eta_{s} l_{l} Q} {\pi r^4_{l}}
+\end {equation}
+
+, where $r_l$ is the lumen radius of the sieve tube, $Q$ is the volumetric flow rate, $\eta_s$ is the dynamic viscosity of phloem sap, $l_l$ is the length of the sieve tube, and $\Delta P$ is the resulting pressure difference. Finally, we can approximate flow ($Q$) through the sieve tube (Jensen et al., 2013) as a function of its resistance ($R_f$) and the difference in pressure ($\Delta P$):
+
+\begin {equation} \label {equ:flow}
+Q = \frac {\Delta P} {R_l}
+\end {equation}
+
+This allows us to estimate temperature effects on viscosity and in turn phloem resistance and flow. Explicitly, resistance to flow in the lumen can be estimated as:
+
+\begin {equation} \label {equ:lumenResistance}
+R_l = \frac {8 \eta_{s} l_{l}} {\pi r^4_{l}}
+\end {equation}
+
+This does not include the additional plate resistance in sieve tubes, but according to @jensen_modeling_2012, the plate resistance in sieves tubes is roughly equal to the lumen resistance, thus the total phloem resistance to flow ($R_p$) can be simply approximated as:
+
+\begin {equation} \label {equ:phloemResistance}
+R_p \approx 2 R_l
+\end {equation}
+
+# Effects of phloem chilling on local phloem resistance to flow
+
+``` {r readTemperature, include = F}
+source ('readTemperatureData.R', local = knitr::knit_global ())
+
+# deselect irrelevant variables
+#----------------------------------------------------------------------------------------
+tempData <- tempData %>% 
+  select (-u.battery, -t.panel, -t.end.of.line.01, -t.end.of.line.03, -t.line.backflow, 
+          -t.line.outflow)
+
+# pivot temperature data into long format
+#----------------------------------------------------------------------------------------
+tempe <- tempData %>%
+  pivot_longer (cols = !datetime, names_to =  c ('tree','height'), 
+  names_prefix = 't.', 
+  names_pattern = '(.*)\\.(.*)', 
+  values_to = 'temp') 
+
+# add a treatment group
+#----------------------------------------------------------------------------------------
+treatment <-  ifelse (tempe [['tree']] %in% c ('01','02','03','04','05'), 'chilled', 
+                      ifelse (tempe [['tree']] %in% c ('06','07','08','10'), 'phloem',
+                              'air'))
+tempe <- mutate (tempe, treatment)
+
+
+# drop rows with no temperature reading
+#----------------------------------------------------------------------------------------
+tempe <- tempe %>% filter (!is.nan (temp), !is.na (temp))
+
+
+# get start and end dates for each treatment
+#----------------------------------------------------------------------------------------
+startDate <- as_datetime ('2018-06-26 13:00:00') 
+endDate   <- as_datetime ('2018-09-03 13:00:00')
+
+# calculate the average temperature of chilled and control trees at 1.0, 1.5 and 2.0m during the chilling
+#----------------------------------------------------------------------------------------
+meanTemperatures <- tempe %>% 
+  filter (datetime > startDate & datetime < endDate) %>% 
+  group_by (treatment, height) %>% 
+  summarise (meanTemp = mean (temp, na.rm  = TRUE),
+             sdTemp = sd (temp, na.rm = TRUE),
+             .groups = 'drop')
+```
+
+During the chilling period we measured average phloem temperature in chilled trees of `r meanTemperatures %>% filter (treatment == 'chilled', height == '1p0m') %>% select (meanTemp) %>% unlist () %>% round (digits = 1)` $\pm$ `r meanTemperatures %>% filter (treatment == 'chilled', height == '1p0m') %>% select (sdTemp) %>% unlist () %>% round (digits = 1)` at 1.0 m and of  `r meanTemperatures %>% filter (treatment == 'chilled', height == '2p0m') %>% select (meanTemp)%>% unlist () %>% round (digits = 1)` $\pm$ `r meanTemperatures %>% filter (treatment == 'chilled', height == '2p0m') %>% select (sdTemp) %>% unlist () %>% round (digits = 1)` at 2.0 m compared to  `r meanTemperatures %>% filter (treatment == 'phloem', height == '1p5m') %>% select (meanTemp) %>% unlist () %>% round (digits = 1)` $\pm$ `r meanTemperatures %>% filter (treatment == 'phloem', height == '1p5m') %>% select (sdTemp) %>% unlist () %>% round (digits = 1)` at 1.5 m in control trees assuming a succrose concentration of 15.4%. This temperature difference causes an mean increase phloem sap viscosity from `r visSap (c = 15.4, Tphl = meanTemperatures %>% filter (treatment == 'phloem', height == '1p5m') %>% select (meanTemp) %>% unlist () %>% round (digits = 1))` $Pa \, s$ for control trees to `r visSap (c = 15.4, Tphl = meanTemperatures %>% filter (treatment == 'chilled', height == '1p0m') %>% select (meanTemp) %>% unlist () %>% round (digits = 1))` $Pa \, s$ at 1.0 m and `r visSap (c = 15.4, Tphl = meanTemperatures %>% filter (treatment == 'chilled', height == '2p0m') %>% select (meanTemp) %>% unlist () %>% round (digits = 1))` $Pa \, s$ at 2.0 m in chilled trees, which constitutes an 
+`r ((visSap (c = 15.4, Tphl = meanTemperatures %>% filter (treatment == 'chilled', height == '1p0m') %>% select (meanTemp) %>% unlist () %>% round (digits = 1)) / visSap (c = 15.4, Tphl = meanTemperatures %>% filter (treatment == 'phloem', height == '1p5m') %>% select (meanTemp) %>% unlist () %>% round (digits = 1)) - 1.0) * 100) %>% round ()` and `r ((visSap (c = 15.4, Tphl = meanTemperatures %>% filter (treatment == 'chilled', height == '2p0m') %>% select (meanTemp) %>% unlist () %>% round (digits = 1)) / visSap (c = 15.4, Tphl = meanTemperatures %>% filter (treatment == 'phloem', height == '1p5m') %>% select (meanTemp) %>% unlist () %>% round (digits = 1)) - 1.0) * 100) %>% round ()`% increase, respectively. Given that the lumen resistance is proportional to the viscosity (Equ. \ref {equ:lumenResistance}) and that total phloem resistance is roughly twice the lumen resistance (Equ. \ref {equ:phloemResistance}), this translates to a proportional increase in total phloem resistance. All else being equal the increased resistance would reduce phloem flow. However, any reduced flow could eventually be overcome by higher osmotic gradient across the chilling zone due to progressive difference in succrose concentrations above versus below the chilled zone.
+
+# Dependence of phloem sap density on temperature
+
+Temperature does not only affect phloem sap viscosity but also its density, further augmenting the resistance to flow at temperatures decreasing towards the freezing point of water.
+
+``` {r sapDensityFunction, echo = F}
+# Create density function based on effects of succrose concentration as per Jensen et al. (2012)
+denSap <- function (c, # succrose concentration by weight 
+                 Tphl = 293.15, # phloem temperature [K]
+                 A = 0.14395, # parameter as per Jensen et al. (2012)
+                 B = 0.0112,  # parameter as per Jensen et al. (2012)
+                 C = 649.727, # parameter as per Jensen et al. (2012)
+                 D = 0.05107, # parameter as per Jensen et al. (2012)
+                 alpha = 0.0038, # parameter as per Jensen et al. (2012)
+                 beta  = 0.0037, # parameter as per Jensen et al. (2012)
+                 gamma = 0.0033 # parameter as per Jensen et al. (2012)
+                 ) {
+  rhoW <- A / (B^(1.0 + (1.0 - (Tphl / C))^D)) # density of pure water [kg m-3]
+  rhoS <- rhoW * (1.0 + alpha * c + (beta * c)^2.0 + (gamma)^3.0) # density of sap [kg m-3]
+  return (rhoS)
+}
+
+# Create surfaces for plotting
+zDen <- zVis
+for (i in 1:length (x)) {
+  for (j in 1:length (y)) {
+    zDen [i, j] <- denSap (Tphl = x [i], c = y [j]) 
+  }
+}
+```
+
+``` {r density-surface-plot, fig.cap = "Surfaces of phloem sap density versus temperature and succrose concentration.", echo = F}
+# plot the viscosity and density surfaces
+par (mar = c (4, 4, 2, 2))
+persp (x -273.15, y, zDen, phi = 5, theta = 30,
+       xlab = 'Temperature (degree C)',
+       ylab = 'Succrose concentration (% wt/wt)',
+       zlab = 'Density of sap (kg m-3)',
+       col = '#8dd3c766', ticktype = 'detailed')
+```
+
+As is immediately obvious from figure \@ref(fig:density-surface-plot), the difference in the density due to realistic variations in temperature are substantially smaller than differences in viscosity (Fig. \@ref(fig:viscosity-surface-plot)). In fact, temperture-induced density changes as a result of temperature changes are more than an order of magnitude smaller than viscosity changes and density is actually mostly affected by succrose concentration. Additionally, density does not directly affect the resistance, but rather affects the gravitational potential ($\Psi_g$), thus the overall pressure gradient ($\Delta P$), which is the sum of the osmotic potential ($\Psi_c$)), water potential ($\Psi_w$) and the gravitional potential and drive phloem flow. At low Reynolds numbers, viscous forces dominate laminar flow, such as phloem flow through sieve tubes [@jensen_modeling_2012]. While changes in temperature do affect sap density, the effects of density on flow are comparatively negligible with about 10% variation for realistic temperatures and succrose concentrations compared to up to 500% for viscosity (see figures \@ref(fig:viscosity-surface-plot) & \@ref(fig:density-surface-plot)). 
+
+# References
