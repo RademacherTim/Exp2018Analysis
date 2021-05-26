@@ -1,13 +1,16 @@
+#========================================================================================
 # script to fit general additive model to ring width data from the 2018 experiment
+#----------------------------------------------------------------------------------------
 
 # start from clean slate
+#----------------------------------------------------------------------------------------
 #rm (list = ls ())
 
 # load dependencies
-#if (!existsFunction ('')) library ('mgcv')
-#library ('easynls')
+#----------------------------------------------------------------------------------------
 if (!exists ('ringWidths')) source ('readRingWidths.R')
-if (!existsFunction ('scam')) library ('scam')
+if (!existsFunction ('scam'))    library ('scam')
+if (!existsFunction ('as_date')) library ('lubridate')
 
 # create tibble for start and end of growing season dates
 #----------------------------------------------------------------------------------------
@@ -24,7 +27,7 @@ threshold <- 0.05
 
 # determine growing season dates and plot growth over time for chilled trees
 #----------------------------------------------------------------------------------------
-PLOT <- TRUE 
+PLOT <- FALSE 
 if (PLOT) {
   png (file = './fig/woodGrowthOverTimeChilledTrees.png', width = 1255, height = 622)
   layout (matrix (1:20, nrow = 4, byrow = TRUE), widths = c (1.2, 1, 1, 1, 1, 1), 
@@ -161,13 +164,13 @@ if (PLOT) dev.off ()
 
 # determine growing season dates and plot growth over time for compressed trees
 #----------------------------------------------------------------------------------------
-#if (PLOT) {
+if (PLOT) {
   png (file = './fig/woodGrowthOverTimeCompressedTrees.png', width = 1255, height = 622)
   layout (matrix (1:20, nrow = 4, byrow = TRUE), widths = c (1.2, 1, 1, 1, 1, 1), 
           heights = c (1, 1, 1, 1.3))
 }
 # Loop over heights
-#for (h in c (4.0, 2.5, 1.5, 0.5)) {
+for (h in c (4.0, 2.5, 1.5, 0.5)) {
   # Loop over trees
   for (i in 6:10) 
   {
@@ -293,7 +296,7 @@ if (PLOT) dev.off ()
     if (PLOT) points (x = iDoy, y = 2.25, pch = 5)
   }
 }
-#if (PLOT) dev.off ()
+if (PLOT) dev.off ()
 
 # determine growing season dates and plot growth over time for control trees
 #----------------------------------------------------------------------------------------

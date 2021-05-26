@@ -272,8 +272,8 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
     # add confidence interval for the model
     m <- predict (fit.gam, newdata = data.frame (doy = 1:365), type = 'link', se.fit = TRUE) 
     polygon (x = c (160:365, 365:160), 
-             y = exp (c (m$fit [160:365] + 2 * m$se.fit [160:365], 
-                         rev (m$fit [160:365] - 2 * m$se.fit [160:365]))), 
+             y = exp (c (m$fit [160:365] + m$se.fit [160:365], 
+                         rev (m$fit [160:365] - m$se.fit [160:365]))), 
              lty = 0,
              col = addOpacity (tColours [['colour']] [t], 0.3))
     
