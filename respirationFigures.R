@@ -5,15 +5,15 @@
 
 # load dependencies
 #----------------------------------------------------------------------------------------
-library ('lubridate')
+if (!existsFunction ('as_date')) library ('lubridate')
 
 # source ploting functions for treatment colours 
 #----------------------------------------------------------------------------------------
-source ('./plotingFunctions.R')
+if (!exists ('tColours')) source ('./plotingFunctions.R')
 
 # read processed respiration data
 #----------------------------------------------------------------------------------------
-source ('./readProcessedRespData.R')
+if (!exists ('respData2018')) source ('./readProcessedRespData.R')
 
 # source function to convert units from RespChamberFlux package
 #----------------------------------------------------------------------------------------
@@ -253,17 +253,22 @@ for (h in 3:1) {
   # add axes
   #--------------------------------------------------------------------------------------
   if (h == 1) {
-    axis (side = 1, labels = c ('May','Jun','Jul','Aug','Sep','Oct','Nov'),
-          at = c (as_date ('2018-05-01'), as_date ('2018-06-01'), as_date ('2018-07-01'), 
-                  as_date ('2018-08-01'), as_date ('2018-09-01'), as_date ('2018-10-01'), 
-                  as_date ('2018-11-01')))
+    axis (side = 1, labels = c ('Apr','May','Jun','Jul','Aug','Sep','Oct','Nov'),
+          at = c (as_date ('2018-04-01'), as_date ('2018-05-01'), as_date ('2018-06-01'), 
+                  as_date ('2018-07-01'), as_date ('2018-08-01'), as_date ('2018-09-01'), 
+                  as_date ('2018-10-01'), as_date ('2018-11-01')))
+    
+    # add tick marks for sampling dates
+    points (x = unique (summaryRespData [['date']]),
+            y = rep (-0.15, length (unique (summaryRespData [['date']]))),
+            pch = 3, lwd = 3, col = '#e37222', cex = 1.5)
   } else {
-    axis (side = 1, labels = rep ('', 7),
-          at = c (as_date ('2018-05-01'), as_date ('2018-06-01'), as_date ('2018-07-01'), 
-                  as_date ('2018-08-01'), as_date ('2018-09-01'), as_date ('2018-10-01'), 
-                  as_date ('2018-11-01')))
+    axis (side = 1, labels = rep ('', 8),
+          at = c (as_date ('2018-04-01'), as_date ('2018-05-01'), as_date ('2018-06-01'), 
+                  as_date ('2018-07-01'), as_date ('2018-08-01'), as_date ('2018-09-01'), 
+                  as_date ('2018-10-01'), as_date ('2018-11-01')))
   }
-  axis (side = 2, las = 1, at = seq (0, 3.2, 0.4))
+  axis (side = 2, las = 1, at = seq (0, 3.2, 0.8))
   
   # add critical dates
   #--------------------------------------------------------------------------------------

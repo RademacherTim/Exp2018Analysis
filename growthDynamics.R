@@ -18,10 +18,10 @@
 #----------------------------------------------------------------------------------------
 if (!existsFunction ('%>%'))     library ('tidyverse')
 if (!existsFunction ('as_date')) library ('lubridate')
-if (!existsFunction ('ggplot')) library ('ggplot2')
-if (!exists ('tColours')) source ('plotingFunctions.R')
-if (!existsFunction ('lmer')) library ('lme4')
+if (!existsFunction ('ggplot'))  library ('ggplot2')
+if (!existsFunction ('lmer'))    library ('lme4')
 if (!existsFunction ('vioplot')) library ('vioplot')
+if (!exists ('tColours')) source ('plotingFunctions.R')
 
 # load ring widths (ringWidths) and the fitted growing season data based on general 
 # additive models from thin-sections measured with WIAD
@@ -29,7 +29,6 @@ if (!existsFunction ('vioplot')) library ('vioplot')
 if (!exists ('growingSeasonDates')) source ('extractGrowingSeasonDates.R')
 if (!exists ('ringWidths')) source ('readRingWidths.R')
 if (!exists ('incrementRingWidths')) source ('readIncrementRingWidths.R')
-
 
 # extract ring width data
 #----------------------------------------------------------------------------------------
@@ -169,14 +168,14 @@ dev.off ()
 #----------------------------------------------------------------------------------------
 PLOTTREE <- FALSE
 png (filename = './fig/Exp2018ChillingAbsoluteVolumeGrowthDynamics.png', width = 800 , height = 700)
-layout (matrix (1:4, nrow = 4), heights = c (1, 1, 1, 1.3))
+layout (matrix (1:4, nrow = 4), heights = c (1, 1, 1, 1.2))
 for (h in c (4.0, 2.5, 1.5, 0.5)) {
   
   # determine panel margins
   if (h != 0.5) {
     par (mar = c (1, 6, 1, 1))
   } else {
-    par (mar = c (5, 6, 1, 1))
+    par (mar = c (4, 6, 1, 1))
   }
   
   # plot 
@@ -184,11 +183,9 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
           select (sampleDate) %>% unlist () - 17532,
         y = tempData %>% filter (treatment == 1, sampleHeight == h) %>% 
           select (Y2018) %>% unlist (),
-        xlim = c (110, 365), ylim = c (0, ifelse (PLOTTREE, 4600, 2400)), 
+        xlim = c (122, 324), ylim = c (0, ifelse (PLOTTREE, 4600, 2050)), 
         axes = FALSE, pch = 19, las = 1, 
-        xlab = ifelse (h != 0.5, '', 'Day of the year'), 
-        ylab = '', 
-        col = 'white') 
+        xlab = '', ylab = '', col = 'white') 
   
   # add critical dates
   #--------------------------------------------------------------------------------------
@@ -209,12 +206,22 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
               select (Y2018) %>% unlist (), pch = 19, 
             col = addOpacity (tColours [['colour']] [1], 0.5)) 
   }
-  # add axis
+  # add x-axis
   if (h != 0.5) {
-    axis (side = 1, at = seq (0, 360, 60), labels = rep ('', 7))
+    axis (side = 1, at = c (91, 121, 152, 182, 213, 244, 274, 305, 335), 
+          labels = rep ('', 9))
   } else {
-    axis (side = 1, at = seq (0, 360, 60), cex.axis = 1.4)
+    axis (side = 1, at = c (91, 121, 152, 182, 213, 244, 274, 305, 335), 
+          labels = c ('Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'), 
+          cex.axis = 1.4)
+    
+    # add tick marks indicating sampling dates
+    points (x = yday (unique (tempData [['sampleDate']])),
+            y =  rep (-100, length (unique (tempData [['sampleDate']]))), 
+            pch = 3, cex = 1.5, col = '#e37222', lwd = 3)
   }  
+  
+  # add y-axis
   if (PLOTTREE) {
     axis (side = 2, at = seq (0, 4000, 1000), labels = seq (0, 4000, 1000), las = 1, 
           cex.axis = 1.4)
@@ -224,7 +231,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
   }
   mtext (side = 2, line = 4, 
          text = expression (paste ('Volume growth (',mu,m,')',sep = '')), 
-         at = ifelse (PLOTTREE, 2000, 1000), cex = 0.7)
+         at = ifelse (PLOTTREE, 2000, 900), cex = 0.7)
   
   # add monotonic GAMs for each tree
   if (PLOTTREE) {
@@ -286,11 +293,11 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
               se (treatmentData [['startOfGrowth']]),
             x1 = mean (treatmentData [['startOfGrowth']]) + 
               se (treatmentData [['startOfGrowth']]), 
-            y0 = ifelse (PLOTTREE, 4400, 2100) + ifelse (t == 1, -100, 100), 
+            y0 = ifelse (PLOTTREE, 4400, 1800) + ifelse (t == 1, -100, 100), 
             col = tColours [['colour']] [t], 
             length = 0, angle = 90, code = 3, lwd = 2)
     points (x = mean (treatmentData [['startOfGrowth']]), 
-            y = ifelse (PLOTTREE, 4400, 2100) + ifelse (t == 1, -100, 100), 
+            y = ifelse (PLOTTREE, 4400, 1800) + ifelse (t == 1, -100, 100), 
             pch = ifelse (t == 1, 19, 23), 
             col = tColours [['colour']] [t], cex = 2.5, bg = 'white', lwd = 2)
     
@@ -299,11 +306,11 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
               se (treatmentData [['endOfSeasonDOY']]),
             x1 = mean (treatmentData [['endOfSeasonDOY']], na.rm = TRUE) + 
               se (treatmentData [['endOfSeasonDOY']]), 
-            y0 = ifelse (PLOTTREE, 4400, 2100) + ifelse (t == 1, -100, 100), 
+            y0 = ifelse (PLOTTREE, 4400, 1800) + ifelse (t == 1, -100, 100), 
             col = tColours [['colour']] [t], 
             length = 0, angle = 90, code = 3, lwd = 2)
     points (x = mean (treatmentData [['endOfSeasonDOY']], na.rm = TRUE), 
-            y = ifelse (PLOTTREE, 4400, 2100) + ifelse (t == 1, -100, 100), 
+            y = ifelse (PLOTTREE, 4400, 1800) + ifelse (t == 1, -100, 100), 
             pch = ifelse (t == 1, 19, 23), 
             col = tColours [['colour']] [t], cex = 2.5, bg = 'white', lwd = 2)
     
@@ -316,11 +323,11 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
                 se (treatmentData [['endOfSeasonDOY']] [treatmentData [['densityFluctuation']]]),
               x1 = mean (treatmentData [['endOfSeasonDOY']] [treatmentData [['densityFluctuation']]], na.rm = TRUE) + 
                 se (treatmentData [['endOfSeasonDOY']] [treatmentData [['densityFluctuation']]]), 
-              y0 = ifelse (PLOTTREE, 4400, 2100) + ifelse (t == 1, -100, 100), 
+              y0 = ifelse (PLOTTREE, 4400, 1800) + ifelse (t == 1, -100, 100), 
               col = '#666666', 
               length = 0, angle = 90, code = 3, lwd = 2)
       points (x = mean (treatmentData [['endOfSeasonDOY']] [treatmentData [['densityFluctuation']]], na.rm = TRUE), 
-              y = ifelse (PLOTTREE, 4400, 2100) + ifelse (t == 1, -100, 100), 
+              y = ifelse (PLOTTREE, 4400, 1800) + ifelse (t == 1, -100, 100), 
               pch = ifelse (t == 1, 19, 24), 
               col = '#666666', cex = 2, bg = 'white', lwd = 2)
       
@@ -328,11 +335,11 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
                 se (treatmentData [['endOfSeasonDOY']] [!treatmentData [['densityFluctuation']]]),
               x1 = mean (treatmentData [['endOfSeasonDOY']] [!treatmentData [['densityFluctuation']]], na.rm = TRUE) + 
                 se (treatmentData [['endOfSeasonDOY']] [!treatmentData [['densityFluctuation']]]), 
-              y0 = ifelse (PLOTTREE, 4400, 2100) + ifelse (t == 1, -100, 100), 
+              y0 = ifelse (PLOTTREE, 4400, 1800) + ifelse (t == 1, -100, 100), 
               col = '#666666', 
               length = 0, angle = 90, code = 3, lwd = 2)
       points (x = mean (treatmentData [['endOfSeasonDOY']] [!treatmentData [['densityFluctuation']]], na.rm = TRUE), 
-              y = ifelse (PLOTTREE, 4400, 2100) + ifelse (t == 1, -100, 100), 
+              y = ifelse (PLOTTREE, 4400, 1800) + ifelse (t == 1, -100, 100), 
               pch = ifelse (t == 1, 19, 25), 
               col = '#666666', cex = 2, bg = 'white', lwd = 2)
       #if (h == 1.5) {

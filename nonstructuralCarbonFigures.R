@@ -253,12 +253,12 @@ for (t in c (1, 4, 5)) {
 #----------------------------------------------------------------------------------------
 png (filename = './fig/Exp2018ChillingSolubleSugarConcentrationsWood.png', width = 400, 
      height = 640)
-layout (matrix (1:3, nrow = 3, byrow = TRUE), height = c (1, 1, 1.2))
+layout (matrix (1:3, nrow = 3, byrow = TRUE), height = c (1, 1, 1.15))
 for (h in 3:1) {
   
   # determine margins
   if (h == 1) {
-    par (mar = c (5, 5, 1, 1))
+    par (mar = c (4, 5, 1, 1))
   } else {
     par (mar = c (1, 5, 1, 1))
   }
@@ -298,19 +298,27 @@ for (h in 3:1) {
          y = summaryDataStem [['meanSugar']] [con], lty = 2, 
          lwd = 2, col = tColours [['colour']] [5])
   
-  # adda axes
+  # add x-axis
   #--------------------------------------------------------------------------------------
   if (h == 1) {
-    axis (side = 1, labels = c ('May','Jun','Jul','Aug','Sep','Oct','Nov'),
-          at = c (as_date ('2018-05-01'), as_date ('2018-06-01'), as_date ('2018-07-01'), 
-                  as_date ('2018-08-01'), as_date ('2018-09-01'), as_date ('2018-10-01'), 
-                  as_date ('2018-11-01')))
+    axis (side = 1, labels = c ('Apr','May','Jun','Jul','Aug','Sep','Oct','Nov', 'Dec'),
+          at = c (as_date ('2018-04-01'), as_date ('2018-05-01'), as_date ('2018-06-01'), 
+                  as_date ('2018-07-01'), as_date ('2018-08-01'), as_date ('2018-09-01'), 
+                  as_date ('2018-10-01'), as_date ('2018-11-01'), as_date ('2018-12-01')))
+  
+    # add tick marks for sampling dates
+    points (x = unique (summaryDataStem [['date']]),
+            y = rep (-0.07, length (unique (summaryDataStem [['date']]))),
+             pch = 3, cex = 1.5, col = '#e37222', lwd = 3)
+    
   } else {
-    axis (side = 1, labels = rep ('', 7),
-          at = c (as_date ('2018-05-01'), as_date ('2018-06-01'), as_date ('2018-07-01'), 
-                  as_date ('2018-08-01'), as_date ('2018-09-01'), as_date ('2018-10-01'), 
-                  as_date ('2018-11-01')))
+    axis (side = 1, labels = rep ('', 9),
+          at = c (as_date ('2018-04-01'), as_date ('2018-05-01'), as_date ('2018-06-01'), 
+                  as_date ('2018-07-01'), as_date ('2018-08-01'), as_date ('2018-09-01'), 
+                  as_date ('2018-10-01'), as_date ('2018-11-01'), as_date ('2018-12-01')))
   }
+  
+  # add y-axis
   axis (side = 2, las = 1, at = seq (0, 1.5, 0.4))
   
   # add critical dates
@@ -330,12 +338,12 @@ dev.off ()
 # plot stem xylem starch concentration by treatment and sampling height
 #----------------------------------------------------------------------------------------
 png (filename = './fig/Exp2018ChillingStarchConcentrationsWood.png', width = 400, height = 640)
-layout (matrix (1:3, nrow = 3, byrow = TRUE), height = c (1, 1, 1.2))
+layout (matrix (1:3, nrow = 3, byrow = TRUE), height = c (1, 1, 1.15))
 for (h in 3:1) {
   
   # determine margins
   if (h == 1) {
-    par (mar = c (5, 5, 1, 1))
+    par (mar = c (4, 5, 1, 1))
   } else {
     par (mar = c (1, 5, 1, 1))
   }
@@ -375,19 +383,27 @@ for (h in 3:1) {
          y = summaryDataStem [['meanStarch']] [con], lty = 2, 
          lwd = 2, col = tColours [['colour']] [5])
   
-  # adda axes
+  # add x-axis
   #--------------------------------------------------------------------------------------
   if (h == 1) {
-    axis (side = 1, labels = c ('May','Jun','Jul','Aug','Sep','Oct','Nov'),
-          at = c (as_date ('2018-05-01'), as_date ('2018-06-01'), as_date ('2018-07-01'), 
-                  as_date ('2018-08-01'), as_date ('2018-09-01'), as_date ('2018-10-01'), 
-                  as_date ('2018-11-01')))
+    axis (side = 1, labels = c ('Apr','May','Jun','Jul','Aug','Sep','Oct','Nov', 'Dec'),
+          at = c (as_date ('2018-04-01'), as_date ('2018-05-01'), as_date ('2018-06-01'), 
+                  as_date ('2018-07-01'), as_date ('2018-08-01'), as_date ('2018-09-01'), 
+                  as_date ('2018-10-01'), as_date ('2018-11-01'), as_date ('2018-12-01')))
+    
+    # add tick marks for sampling dates
+    points (x = unique (summaryDataStem [['date']]),
+            y = rep (-0.02, length (unique (summaryDataStem [['date']]))),
+            pch = 3, cex = 1.5, col = '#e37222', lwd = 3)
+    
   } else {
-    axis (side = 1, labels = rep ('', 7),
-          at = c (as_date ('2018-05-01'), as_date ('2018-06-01'), as_date ('2018-07-01'), 
-                  as_date ('2018-08-01'), as_date ('2018-09-01'), as_date ('2018-10-01'), 
-                  as_date ('2018-11-01')))
+    axis (side = 1, labels = rep ('', 9),
+          at = c (as_date ('2018-04-01'), as_date ('2018-05-01'), as_date ('2018-06-01'), 
+                  as_date ('2018-07-01'), as_date ('2018-08-01'), as_date ('2018-09-01'), 
+                  as_date ('2018-10-01'), as_date ('2018-11-01'), as_date ('2018-12-01')))
   }
+  
+  # add y-axis
   axis (side = 2, las = 1, at = seq (0, 0.5, 0.1))
   
   # add critical dates
@@ -419,9 +435,9 @@ summaryDataRoots <- rootData %>%
 # plot root starch concentration by treatment
 #----------------------------------------------------------------------------------------
 png (filename = './fig/Exp2018ChillingSolubleSugarConcentrationsRoots.png', 
-     width = 400, height = 240)
+     width = 400, height = 200)
 par (mfrow = c (1, 1))
-par (mar = c (5, 5, 1, 1))
+par (mar = c (3, 5, 1, 1))
 con <- summaryDataRoots [['treatment']] == 1
 plot (x = summaryDataRoots [['date']] [con],
       y = summaryDataRoots [['meanSugar']] [con], 
@@ -451,13 +467,19 @@ lines (x = summaryDataRoots [['date']] [con],
        y = summaryDataRoots [['meanSugar']] [con], lty = 2, 
        lwd = 2, col = tColours [['colour']] [5])
 
-# adda axes
+# add axes
 #--------------------------------------------------------------------------------------
-axis (side = 1, labels = c ('May','Jun','Jul','Aug','Sep','Oct','Nov'),
-      at = c (as_date ('2018-05-01'), as_date ('2018-06-01'), as_date ('2018-07-01'), 
+axis (side = 1, labels = c ('Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'),
+      at = c (as_date ('2018-04-01'), as_date ('2018-05-01'), as_date ('2018-06-01'), as_date ('2018-07-01'), 
               as_date ('2018-08-01'), as_date ('2018-09-01'), as_date ('2018-10-01'), 
-              as_date ('2018-11-01')))
+              as_date ('2018-11-01'), as_date ('2018-12-01')))
 axis (side = 2, las = 1, at = seq (0, 1.2, 0.4))
+
+# add tick marks with sampling dates
+#--------------------------------------------------------------------------------------
+points (x = unique (summaryDataRoots [['date']]),
+        y = rep (-0.05, length (unique (summaryDataRoots [['date']]))),
+        pch = 3, cex = 1.5, col = '#e37222', lwd = 3)
 
 # add critical dates
 #--------------------------------------------------------------------------------------
@@ -474,7 +496,7 @@ dev.off ()
 #----------------------------------------------------------------------------------------
 png (filename = './fig/Exp2018ChillingStarchConcentrationsRoots.png', 
      width = 400, height = 240)
-par (mar = c (5, 5, 1, 1))
+par (mar = c (3, 5, 1, 1))
 con <- summaryDataRoots [['treatment']] == 1
 plot (x = summaryDataRoots [['date']] [con],
       y = summaryDataRoots [['meanStarch']] [con], 
@@ -506,11 +528,18 @@ lines (x = summaryDataRoots [['date']] [con],
 
 # adda axes
 #--------------------------------------------------------------------------------------
-axis (side = 1, labels = c ('May','Jun','Jul','Aug','Sep','Oct','Nov'),
-      at = c (as_date ('2018-05-01'), as_date ('2018-06-01'), as_date ('2018-07-01'), 
-              as_date ('2018-08-01'), as_date ('2018-09-01'), as_date ('2018-10-01'), 
-              as_date ('2018-11-01')))
+axis (side = 1, labels = c ('Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'),
+      at = c (as_date ('2018-04-01'), as_date ('2018-05-01'), as_date ('2018-06-01'), 
+              as_date ('2018-07-01'), as_date ('2018-08-01'), as_date ('2018-09-01'), 
+              as_date ('2018-10-01'), as_date ('2018-11-01'), as_date ('2018-12-01')))
 axis (side = 2, las = 1, at = seq (0, 0.5, 0.1))
+
+# add tick marks with sampling dates
+#--------------------------------------------------------------------------------------
+points (x = unique (summaryDataRoots [['date']]),
+        y = rep (-0.025, length (unique (summaryDataRoots [['date']]))),
+        pch = 3, cex = 1.5, col = '#e37222', lwd = 3)
+
 
 # add critical dates
 #--------------------------------------------------------------------------------------
