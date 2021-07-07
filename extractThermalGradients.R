@@ -53,7 +53,7 @@ read_flir_csv <- function (filename, flip = FALSE, rot = FALSE) {
 # define function to extract gradient from ROI
 get_gradient <- function (thermalData, # input thermal data (degC) 
                           xMin, xMax, yMin, yMax, # Coordinates of ROI 
-                          xScale, yScale, dScale, # Parameters to scale image 
+                          xScale, yScale, dScale, scaleOffset, # Parameters to scale image 
                           treeID, image){
   
   # estimate resolution
@@ -76,13 +76,14 @@ get_gradient <- function (thermalData, # input thermal data (degC)
   y <- yMax:(yMin + 1)
   
   # scale pixels to distance above ground
-  h <- (y - yScale [1]) * res + 1.0
+  h <- (y - yScale [1]) * res + scaleOffset
   
   # calculate mean and standard deviation for temperature along the gradient
   tgradient <- rowMeans (as.matrix (selection))
   tgradientSD <- rowSd (as.matrix (selection))
   plot (x = tgradient, 
-        y = h, las = 1)
+        y = h, las = 1,
+        xlim = c (5, 30))
   
   # plot lower collar
   rect (xleft = rep (0, 2), xright = rep (35, 2), ybottom = c (0.85, 1.85), 
@@ -140,8 +141,9 @@ for (i in 1:nrow (imageInfo)){ #1:nrow (imageInfo)){
   thermaldata <- read_flir_csv (filename, imageInfo$flip [i], imageInfo$rotate [i])
   
   # extract tree ids
-  treeIDs <- imageInfo %>% select (tree.ids) %>% unlist () %>% 
-    strsplit (split = ', ') %>% unlist () %>% as.numeric ()
+  treeIDs <- imageInfo %>% dplyr::slice (i) %>% select (tree.ids) %>% 
+    unlist () %>% strsplit (split = ', ') %>% 
+    unlist () %>% as.numeric ()
   
   # loop over each region of interest
   for (n in 1:imageInfo$n.rois [i]) {
@@ -157,6 +159,7 @@ for (i in 1:nrow (imageInfo)){ #1:nrow (imageInfo)){
                            yScale = c (imageInfo$y.scale.1.1 [i], 
                                        imageInfo$y.scale.1.2 [i]),
                            dScale = imageInfo$d.scale.1 [i],
+                           scaleOffset = imageInfo$scale.offset.1 [i],
                            treeID = treeIDs [n], 
                            image = imageInfo$record [i])
     } else if (n == 2) {
@@ -171,6 +174,7 @@ for (i in 1:nrow (imageInfo)){ #1:nrow (imageInfo)){
                            yScale = c (imageInfo$y.scale.2.1 [i], 
                                        imageInfo$y.scale.2.2 [i]),
                            dScale = imageInfo$d.scale.2 [i],
+                           scaleOffset = imageInfo$scale.offset.2 [i],
                            treeID = treeIDs [n], 
                            image = imageInfo$record [i])
     }
@@ -181,10 +185,9 @@ for (i in 1:nrow (imageInfo)){ #1:nrow (imageInfo)){
     if (i == 1 & n == 1) {
       gradients <- tmp; rm (tmp)
     } else {
-      gradients <- gradients %>% add_row (tmp)
+      gradients <- gradients %>% add_row (tmp); rm (tmp)
     }
   }
-  #names (gradients) [i] <- imageInfo$record [i]
 }
 
 dev.off ()
