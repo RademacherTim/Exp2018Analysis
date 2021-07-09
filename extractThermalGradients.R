@@ -123,7 +123,7 @@ imageInfo <- imageInfo %>%
 
 # output graphs for all selected images to pdf
 #pdf ("flir_2018.pdf", width = 16, height = 10)
-for (i in 1:nrow (imageInfo)){ #1:nrow (imageInfo)){
+for (i in 20:nrow (imageInfo)){ #1:nrow (imageInfo)){
   filename <- sprintf ("%s.csv", file.path (datapath, imageInfo$record [i]))
   filename_photo <- sprintf ("%s-photo.jpg", file.path (datapath, imageInfo$record [i]))
   
