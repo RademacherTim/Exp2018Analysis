@@ -35,8 +35,8 @@ read_flir_csv <- function (filename, flip = FALSE, rot = FALSE) {
   
   # extract thermal data and flip matrix, if necessary
   if (flip == TRUE){
-    thermaldata <- raster (matrix (data, nrow = 240, ncol = 76800 / 240) [240:1, ])
-    extent (thermaldata) <- extent (0, 320, 0, 240)
+    thermaldata <- raster (matrix (data, nrow = 320, ncol = 76800 / 320) [1:320, ])
+    extent (thermaldata) <- extent (0, 240, 0, 320)
     
   } else {
     thermaldata <- raster (matrix (data, nrow = 320, ncol = 76800 / 320) [320:1, ])
@@ -51,6 +51,7 @@ read_flir_csv <- function (filename, flip = FALSE, rot = FALSE) {
 }
 
 # define function to extract gradient from ROI
+#----------------------------------------------------------------------------------------
 get_gradient <- function (thermalData, # input thermal data (degC) 
                           xMin, xMax, yMin, yMax, # Coordinates of ROI 
                           xScale, yScale, dScale, scaleOffset, # Parameters to scale image 
@@ -101,29 +102,35 @@ get_gradient <- function (thermalData, # input thermal data (degC)
 }
 
 # set working directory
+#----------------------------------------------------------------------------------------
 orgDir <- getwd ()
 setwd ('/media/tim/dataDisk/PlantGrowth/data/thermalImages/')
 
 # define directory with files
+#----------------------------------------------------------------------------------------
 datapath <- "./selectedImages"
 
 # camera time was not correct for first batch of images and needs to be corrected
+#----------------------------------------------------------------------------------------
 cameraTime <- as_datetime ('2018:08:25 04:34:00', tz = 'EST')
 imageTime <- as_datetime ('2018:08:24 22:38:23', tz = 'EST')
 timeDiff <- time_length (cameraTime - imageTime) # Time difference in seconds
 
 # read file with metadata and delete rows without ROIs
+#----------------------------------------------------------------------------------------
 imageInfo <- read_csv ('metadata_FLIR.csv', col_types = cols ())
 imageInfo <- imageInfo %>% filter (!is.na (n.rois))
 
 # correct imageInfo to include the correct time
+#----------------------------------------------------------------------------------------
 imageInfo <- imageInfo %>%
   mutate (datetime = as_datetime (ifelse (incorrect.timestamp, camera.datetime - timeDiff, 
                                           camera.datetime))) 
 
 # output graphs for all selected images to pdf
-#pdf ("flir_2018.pdf", width = 16, height = 10)
-for (i in 20:nrow (imageInfo)){ #1:nrow (imageInfo)){
+#----------------------------------------------------------------------------------------
+pdf ("flir_2018.pdf", width = 16, height = 10)
+for (i in 1:nrow (imageInfo)) { #1:nrow (imageInfo)){
   filename <- sprintf ("%s.csv", file.path (datapath, imageInfo$record [i]))
   filename_photo <- sprintf ("%s-photo.jpg", file.path (datapath, imageInfo$record [i]))
   
@@ -177,6 +184,51 @@ for (i in 20:nrow (imageInfo)){ #1:nrow (imageInfo)){
                            scaleOffset = imageInfo$scale.offset.2 [i],
                            treeID = treeIDs [n], 
                            image = imageInfo$record [i])
+    } else if (n == 3) {
+      # get gradient
+      tmp <- get_gradient (thermalData = thermaldata,
+                           xMin = imageInfo$x3.1 [i], 
+                           xMax = imageInfo$x3.2 [i], 
+                           yMin = imageInfo$y3.1 [i], 
+                           yMax = imageInfo$y3.2 [i],
+                           xScale = c (imageInfo$x.scale.3.1 [i], 
+                                       imageInfo$x.scale.3.2 [i]),
+                           yScale = c (imageInfo$y.scale.3.1 [i], 
+                                       imageInfo$y.scale.3.2 [i]),
+                           dScale = imageInfo$d.scale.3 [i],
+                           scaleOffset = imageInfo$scale.offset.3 [i],
+                           treeID = treeIDs [n], 
+                           image = imageInfo$record [i])
+    } else if (n == 4) {
+      # get gradient
+      tmp <- get_gradient (thermalData = thermaldata,
+                           xMin = imageInfo$x4.1 [i], 
+                           xMax = imageInfo$x4.2 [i], 
+                           yMin = imageInfo$y4.1 [i], 
+                           yMax = imageInfo$y4.2 [i],
+                           xScale = c (imageInfo$x.scale.4.1 [i], 
+                                       imageInfo$x.scale.4.2 [i]),
+                           yScale = c (imageInfo$y.scale.4.1 [i], 
+                                       imageInfo$y.scale.4.2 [i]),
+                           dScale = imageInfo$d.scale.4 [i],
+                           scaleOffset = imageInfo$scale.offset.4 [i],
+                           treeID = treeIDs [n], 
+                           image = imageInfo$record [i])
+    } else if (n == 5) {
+      # get gradient
+      tmp <- get_gradient (thermalData = thermaldata,
+                           xMin = imageInfo$x5.1 [i], 
+                           xMax = imageInfo$x5.2 [i], 
+                           yMin = imageInfo$y5.1 [i], 
+                           yMax = imageInfo$y5.2 [i],
+                           xScale = c (imageInfo$x.scale.5.1 [i], 
+                                       imageInfo$x.scale.5.2 [i]),
+                           yScale = c (imageInfo$y.scale.5.1 [i], 
+                                       imageInfo$y.scale.5.2 [i]),
+                           dScale = imageInfo$d.scale.5 [i],
+                           scaleOffset = imageInfo$scale.offset.5 [i],
+                           treeID = treeIDs [n], 
+                           image = imageInfo$record [i])
     }
     # add datetime to the data tibble
     tmp <- tmp %>% mutate (datetime = imageInfo$datetime [i])
@@ -189,31 +241,16 @@ for (i in 20:nrow (imageInfo)){ #1:nrow (imageInfo)){
     }
   }
 }
-
 dev.off ()
 
 # This dataframe contains all the gradient data
+#----------------------------------------------------------------------------------------
 gradient_data <- do.call (rbind, gradients)
 
-## Continue to work with gradient data here 
-#......
+# continue to work with gradient data here 
+#----------------------------------------------------------------------------------------
 
 # reset working directory 
+#----------------------------------------------------------------------------------------
 setwd (orgDir)
-
-
-# A FEW LINES OF CODE TO ADJUST Boundaries MANUALLY
-# 
-# file<-"FLIR0134.csv"
-# filename<-file.path(path,file)
-# thermaldata<-read_flir_csv(filename,F,F)
-# plot(thermaldata)
-# xmin<-105
-# xmax<-120
-# ymin<-0
-# ymax<-320
-# get_gradient(xmin,xmax,ymin,ymax,"","")
-# plot(thermaldata)
-# photo<-brick(file.path(path,pfile))
-# plotRGB(photo)
 #========================================================================================
