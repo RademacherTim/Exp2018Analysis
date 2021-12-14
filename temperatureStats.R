@@ -316,7 +316,7 @@ M3 <- lmer (formula = temp ~ datetime + period:height:treatment + (1 | tree / he
 # and 2.0 m in chilled trees throughout chilling
 #----------------------------------------------------------------------------------------
 temp <- tempData %>% filter (datetime > startDate, datetime < endDate) %>% 
-  select (datetime, t.01.2p0m, t.01.1p0m, t.02.2p0m, t.02.1p0m, t.03.2p0m, t.03.1p0m, 
+  dplyr::select (datetime, t.01.2p0m, t.01.1p0m, t.02.2p0m, t.02.1p0m, t.03.2p0m, t.03.1p0m, 
           t.04.2p0m, t.04.1p0m, t.05.2p0m, t.05.1p0m) %>% 
   pivot_longer (cols = !datetime, 
                 names_to =  c ('tree','height'), 
@@ -333,7 +333,7 @@ sum (temp [['temp < 5']] [temp [['height']] == '2p0m'], na.rm = TRUE) /
 # calculate mean temperature during chilling
 #----------------------------------------------------------------------------------------
 temp <- tempData %>% filter (datetime > startDate, datetime < endDate) %>% 
-  select (datetime, t.01.2p0m, t.01.1p0m, t.02.2p0m, t.02.1p0m, t.03.2p0m, t.03.1p0m, 
+  dplyr::select (datetime, t.01.2p0m, t.01.1p0m, t.02.2p0m, t.02.1p0m, t.03.2p0m, t.03.1p0m, 
           t.04.2p0m, t.04.1p0m, t.05.2p0m, t.05.1p0m) %>% 
   pivot_longer (cols = !datetime, 
                 names_to =  c ('tree','height'), 
@@ -352,7 +352,7 @@ se   (temp [['temp']] [temp [['height']] == '2p0m'])
 #----------------------------------------------------------------------------------------
 temp <- tempData %>% filter (datetime > startDate, datetime < endDate) %>% 
   filter (lubridate::hour (datetime) >= 22 | lubridate::hour (datetime) <= 6) %>%
-  select (datetime, t.01.2p0m, t.01.1p0m, t.02.2p0m, t.02.1p0m, t.03.2p0m, t.03.1p0m, 
+  dplyr::select (datetime, t.01.2p0m, t.01.1p0m, t.02.2p0m, t.02.1p0m, t.03.2p0m, t.03.1p0m, 
           t.04.2p0m, t.04.1p0m, t.05.2p0m, t.05.1p0m) %>% 
   pivot_longer (cols = !datetime, 
                 names_to =  c ('tree','height'), 
@@ -371,7 +371,7 @@ se   (temp [['temp']] [temp [['height']] == '2p0m'])
 #----------------------------------------------------------------------------------------
 temp <- tempData %>% filter (datetime > startDate, datetime < endDate) %>% 
   filter (lubridate::hour (datetime) >= 10 & lubridate::hour (datetime) <= 18) %>%
-  select (datetime, t.01.2p0m, t.01.1p0m, t.02.2p0m, t.02.1p0m, t.03.2p0m, t.03.1p0m, 
+  dplyr::select (datetime, t.01.2p0m, t.01.1p0m, t.02.2p0m, t.02.1p0m, t.03.2p0m, t.03.1p0m, 
           t.04.2p0m, t.04.1p0m, t.05.2p0m, t.05.1p0m) %>% 
   pivot_longer (cols = !datetime, 
                 names_to =  c ('tree','height'), 
@@ -392,7 +392,7 @@ se   (temp [['temp']] [temp [['height']] == '2p0m'])
 # successfuly)
 #----------------------------------------------------------------------------------------
 temp <- tempData %>% filter (datetime > startDate, datetime < endDate) %>% 
-  select (datetime, t.01.2p0m, t.01.1p0m, t.02.2p0m, t.02.1p0m, t.03.2p0m, t.03.1p0m, 
+  dplyr::select (datetime, t.01.2p0m, t.01.1p0m, t.02.2p0m, t.02.1p0m, t.03.2p0m, t.03.1p0m, 
           t.04.2p0m, t.04.1p0m, t.05.2p0m, t.05.1p0m) %>% 
   pivot_longer (cols = !datetime, 
                 names_to =  c ('tree','height'), 
@@ -407,7 +407,7 @@ temp <- tempData %>% filter (datetime > startDate, datetime < endDate) %>%
 # Get midday temperatures on the 25th of August 2018
 #----------------------------------------------------------------------------------------
 temp <- tempData %>% filter (datetime > startDate, datetime < endDate) %>% 
-  select (datetime, t.01.2p0m, t.01.1p0m, t.01.1p5m, t.02.2p0m, 
+  dplyr::select (datetime, t.01.2p0m, t.01.1p0m, t.01.1p5m, t.02.2p0m, 
           t.02.1p5m, t.02.1p0m, t.03.2p0m, t.03.1p5m, t.03.1p0m, t.04.2p0m, t.04.1p5m, 
           t.04.1p0m, t.05.2p0m, t.05.1p5m, t.05.1p0m, t.air.1p5m) %>% 
   pivot_longer (cols = !datetime, 

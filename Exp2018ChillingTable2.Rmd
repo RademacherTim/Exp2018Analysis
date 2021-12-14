@@ -328,7 +328,7 @@ tableData <- tableData %>%
 
 ```{r createTable, echo = FALSE}
 kbl (tableData, 
-     caption = 'Table S2 - lists mean and standard error of the mean for A LOT OF VARIABLES. The table was automatically generated from publicly available data set (data set ID here) on the Harvard Forest Data Archive.',
+     caption = 'Table S2 - Lists mean and standard error of the mean for cumulative and individual ring width increment, the cumulative and individual number of cells, the tangential and radial cell size, the tangential, radial, and mean cell-wall thickness, and the cumulative and individual cell-wall area increment for each growth period and height along the stem. The table was automatically generated from publicly available data set (data set ID here) on the Harvard Forest Data Archive.',
      col.names = NULL) %>% 
   kable_styling (font_size = 10) %>% 
   row_spec (c (1, 28), hline_after = TRUE) %>%

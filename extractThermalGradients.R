@@ -130,7 +130,7 @@ imageInfo <- imageInfo %>%
 # output graphs for all selected images to pdf
 #----------------------------------------------------------------------------------------
 pdf ("flir_2018.pdf", width = 16, height = 10)
-for (i in 1:nrow (imageInfo)) { #1:nrow (imageInfo)){
+for (i in 1:nrow (imageInfo)) {
   filename <- sprintf ("%s.csv", file.path (datapath, imageInfo$record [i]))
   filename_photo <- sprintf ("%s-photo.jpg", file.path (datapath, imageInfo$record [i]))
   
@@ -148,7 +148,7 @@ for (i in 1:nrow (imageInfo)) { #1:nrow (imageInfo)){
   thermaldata <- read_flir_csv (filename, imageInfo$flip [i], imageInfo$rotate [i])
   
   # extract tree ids
-  treeIDs <- imageInfo %>% dplyr::slice (i) %>% select (tree.ids) %>% 
+  treeIDs <- imageInfo %>% dplyr::slice (i) %>% dplyr::select (tree.ids) %>% 
     unlist () %>% strsplit (split = ', ') %>% 
     unlist () %>% as.numeric ()
   
@@ -243,14 +243,231 @@ for (i in 1:nrow (imageInfo)) { #1:nrow (imageInfo)){
 }
 dev.off ()
 
-# This dataframe contains all the gradient data
-#----------------------------------------------------------------------------------------
-gradient_data <- do.call (rbind, gradients)
-
-# continue to work with gradient data here 
-#----------------------------------------------------------------------------------------
-
 # reset working directory 
 #----------------------------------------------------------------------------------------
 setwd (orgDir)
+
+# addthe nearest 15 minute interval to match met station and thermistor data format 
+#----------------------------------------------------------------------------------------
+gradients <- gradients %>%
+  add_row (datetime = as_datetime ('2018-04-19 14:30:00'), .before = 1) %>%
+  mutate (timeSlice = as_datetime (cut (datetime, breaks = '15 min', ordered_result = TRUE))) %>%
+  slice (-1)
+
+# add treatment to gradients tibble (N.B. for temperature compression is control)
+#----------------------------------------------------------------------------------------
+gradients <- gradients %>% mutate (treatment = ifelse (tree <= 1805, 'chilled', 'control')) 
+
+
+# read Fisher station temperature data from Harvard Forest Data Archive and add it to the 
+# tibble
+#----------------------------------------------------------------------------------------
+LOCAL <- TRUE
+if (LOCAL) {
+  tmp <- read_csv (file = './data/hf001-10-15min-m-airt-only.csv',
+                   col_types = cols ())
+} else {
+  fileURL <- url ('https://harvardforest.fas.harvard.edu/data/p00/hf001/hf001-10-15min-m.csv')
+  tmp <- read_csv (file = fileURL, col_types = cols (
+    f.airt = col_character (),
+    f.prec = col_character (),
+    f.rh   = col_character (),
+    f.dewp = col_character (),
+    f.slrr = col_character (),
+    f.parr = col_character (),
+    f.bar  = col_character (),
+    f.wspd = col_character (),
+    f.wres = col_character (),
+    f.wdir = col_character (),
+    f.wdev = col_character (),
+    f.gspd = col_character (),
+    f.s10t = col_character ())
+  ) %>% select (datetime, airt) %>% filter (datetime > min (tempData [['datetime']], na.rm = TRUE), 
+                                            datetime < max (tempData [['datetime']], na.rm = TRUE)) 
+  # Save a local copy 
+  #--------------------------------------------------------------------------------------
+  write_csv (tmp, './data/hf001-10-15min-m-airt-only.csv')
+  LOCAL <- TRUE
+}
+
+# add air temperature to the tibble with phloem temperature gradients
+#----------------------------------------------------------------------------------------
+gradients <- left_join (x = gradients, y = tmp, by = c ('timeSlice' = 'datetime')); rm (tmp)
+
+# calculate temperature difference from air temperature 
+#----------------------------------------------------------------------------------------
+gradients <- gradients %>% mutate (deltaT = t - airt)
+
+# bin height by 10cm increments
+#----------------------------------------------------------------------------------------
+gradients <- gradients %>% 
+  mutate (height = cut (h, breaks = seq (0, 10, by = 0.1), ordered_results = TRUE))
+
+# bin by days
+#----------------------------------------------------------------------------------------
+gradients <- gradients %>% mutate (date = date (datetime))
+
+# summarise by treatment and heights
+#----------------------------------------------------------------------------------------
+tg <- gradients %>% group_by (treatment, date, height) %>%
+  summarise (meanDeltaT = mean (deltaT),
+             sdDeltaT = sd (deltaT), .groups = 'drop') %>% 
+  filter (!is.na (height))
+
+# source thermistor data
+#----------------------------------------------------------------------------------------
+if (!exists ('tempData')) source ('readTemperatureData.R')
+
+# plot mean temperature gradients 
+#----------------------------------------------------------------------------------------
+par (mfrow = c (1, 1), mar = c (5, 5, 1, 1))
+con <- tg$treatment == 'control' & tg$date == as_date ('2018-08-24') 
+plot (x = tg$meanDeltaT [con], y = as.numeric (tg$height [con]) * 0.1, typ = 'l',
+      axes = FALSE, xlim = c (-25, 1), ylim = c (0, 3.9), 
+      col = 'white', lwd = 2, 
+      xlab = expression (paste ('Temperature deviation (',degree,'C)', sep = '')),
+      ylab = 'Height above ground (m)')
+axis (side = 1) 
+axis (side = 2, las = 1)
+abline (v = 0, col = '#66666666')
+#rect (xleft = -12, xright = 2, ybottom = 0.85, ytop = 1.15, lty = 0, col = '#66666666')
+#rect (xleft = -12, xright = 2, ybottom = 1.85, ytop = 2.15, lty = 0, col = '#66666666')
+polygon (x = c (tg$meanDeltaT [con] - tg$sdDeltaT [con], 
+                rev (tg$meanDeltaT [con] + tg$sdDeltaT [con])),
+         y = c (as.numeric (tg$height [con]) * 0.1 - 0.1, 
+                rev (as.numeric (tg$height [con]) * 0.1 - 0.1)),
+         col = addOpacity (tColours [['colour']] [1], 0.4), lty = 0)
+lines (x = tg$meanDeltaT [con], y = as.numeric (tg$height [con]) * 0.1 - 0.1, 
+       col = tColours [['colour']] [1], lwd = 2)
+
+# add midnight measurement for chilled lines
+#----------------------------------------------------------------------------------------
+con <- tg$treatment == 'chilled' & tg$date == as_date ('2018-08-24') 
+polygon (x = c (tg$meanDeltaT [con] - tg$sdDeltaT [con], 
+                rev (tg$meanDeltaT [con] + tg$sdDeltaT [con])),
+         y = c (as.numeric (tg$height [con]) * 0.1 - 0.1, 
+                rev (as.numeric (tg$height [con]) * 0.1 - 0.1)),
+         col = addOpacity (tColours [['colour']] [6], 0.4), lty = 0)
+lines (x = tg$meanDeltaT [con], y = as.numeric (tg$height [con]) * 0.1 - 0.1, 
+       col = tColours [['colour']] [6], lwd = 2, lty = 2)
+
+# add midday measwurement for chilled lines
+#----------------------------------------------------------------------------------------
+con <- tg$treatment == 'chilled' & tg$date == as_date ('2018-08-25') 
+polygon (x = c (tg$meanDeltaT [con] - tg$sdDeltaT [con], 
+                rev (tg$meanDeltaT [con] + tg$sdDeltaT [con])),
+         y = c (as.numeric (tg$height [con]) * 0.1 - 0.1, 
+                rev (as.numeric (tg$height [con]) * 0.1 - 0.1)),
+         col = addOpacity (tColours [['colour']] [4], 0.4), lty = 0)
+lines (x = tg$meanDeltaT [con], y = as.numeric (tg$height [con]) * 0.1 - 0.1, 
+       col = tColours [['colour']] [4], lwd = 2)
+
+# extract thermistor data from under the collars at the time of measurement
+#----------------------------------------------------------------------------------------
+temp <- tempData %>% 
+  filter ((datetime > as_datetime ('2018-08-24 22:00:00') & 
+             datetime <= as_datetime ('2018-08-24 23:00:00')) |
+          (datetime > as_datetime ('2018-08-25 14:00:00') & 
+             datetime <= as_datetime ('2018-08-25 15:00:00'))) %>%
+  dplyr::select (datetime, t.01.1p0m, t.01.1p5m, t.01.2p0m, t.02.1p0m, t.02.1p5m, t.02.2p0m, 
+                 t.03.1p0m, t.03.1p5m, t.03.2p0m, t.04.1p0m, t.04.1p5m, t.04.2p0m, 
+                 t.05.1p0m, t.05.1p5m, t.05.2p0m, t.06.1p5m, t.07.1p5m, t.08.1p5m, 
+                 t.10.1p5m, t.air.1p5m) %>% 
+  pivot_longer (cols = !datetime, names_to =  c ('tree','height'), 
+                names_prefix = 't.', 
+                names_pattern = '(.*)\\.(.*)', 
+                values_to = 'temp') %>%
+  mutate (height = as.numeric (paste (substr (height, 1, 1), 
+                                      substr (height, 3, 3), sep = '.'))) %>%
+  mutate (date = date (datetime),
+          treatment = ifelse (tree %in% c ('01','02','03','04','05'), 'chilled', 
+                              ifelse (tree %in% c ('06','07','08','09','10'), 'control', 'air'))) %>%
+  group_by (date, treatment, height) %>% 
+  summarise (meanT = mean (temp, na.rm = TRUE),
+             sdT = sd (temp, na.rm = TRUE), .groups = 'drop')
+temp <- temp %>% mutate (deltaT = meanT - meanT [treatment == 'air'])
+# add the control tree thermistor data
+con <- temp$treatment == 'control'
+segments (y0 = 1.5, 
+          x0 = mean (temp$deltaT [con] - temp$sdT [con]),
+          x1 = mean (temp$deltaT [con] + temp$sdT [con]),
+          col = tColours [['colour']] [1], lwd = 3)
+points (x = mean (temp$deltaT [con]),
+        y = 1.5, pch = 19, cex = 2, col = tColours [['colour']] [1])
+# add the midnight chilled tree thermistor data
+con <- temp$treatment == 'chilled' & temp$date == as_date ('2018-08-24')
+segments (y0 = c (1, 1.5, 2.0), 
+          x0 = temp$deltaT [con] - temp$sdT [con],
+          x1 = temp$deltaT [con] + temp$sdT [con],
+          col = tColours [['colour']] [6], lwd = 3)
+points (x = temp$deltaT [con],
+        y = c (1, 1.5, 2), pch = 23, lwd = 3, cex = 2, 
+        bg = 'white', col = tColours [['colour']] [6])
+# add the midnight chilled tree thermistor data
+con <- temp$treatment == 'chilled' & temp$date == as_date ('2018-08-25')
+segments (y0 = c (1, 1.5, 2.0), 
+          x0 = temp$deltaT [con] - temp$sdT [con],
+          x1 = temp$deltaT [con] + temp$sdT [con],
+          col = tColours [['colour']] [4], lwd = 3)
+points (x = temp$deltaT [con],
+        y = c (1, 1.5, 2), pch = 23, lwd = 3, cex = 2, 
+        bg = 'white', col = tColours [['colour']] [4])
+
+
+# plot temperature deviations after the chilling was switched off for supp
+con <- tg$treatment == 'control' & tg$date == as_date ('2018-09-14') 
+plot (x = tg$meanDeltaT [con], y = as.numeric (tg$height [con]) * 0.1, typ = 'l',
+      axes = FALSE, xlim = c (-10, 2), ylim = c (0, 4), 
+      col = 'white', lwd = 2, 
+      xlab = expression (paste ('Temperature deviation (',degree,'C)', sep = '')),
+      ylab = 'Height above ground (m)')
+axis (side = 1) 
+axis (side = 2, las = 1)
+rect (xleft = -12, xright = 2, ybottom = 0.85, ytop = 1.15, lty = 0, col = '#66666666')
+rect (xleft = -12, xright = 2, ybottom = 1.85, ytop = 2.15, lty = 0, col = '#66666666')
+polygon (x = c (tg$meanDeltaT [con] - tg$sdDeltaT [con], 
+                rev (tg$meanDeltaT [con] + tg$sdDeltaT [con])),
+         y = c (as.numeric (tg$height [con]) * 0.1 - 0.1, 
+                rev (as.numeric (tg$height [con]) * 0.1 - 0.1)),
+         col = addOpacity (tColours [['colour']] [1], 0.4), lty = 0)
+lines (x = tg$meanDeltaT [con], y = as.numeric (tg$height [con]) * 0.1 - 0.1, 
+       col = tColours [['colour']] [1], lwd = 2, lty = 2)
+
+# add midday measurement for chilled lines
+con <- tg$treatment == 'chilled' & tg$date == as_date ('2018-09-14') 
+polygon (x = c (tg$meanDeltaT [con] - tg$sdDeltaT [con], 
+                rev (tg$meanDeltaT [con] + tg$sdDeltaT [con])),
+         y = c (as.numeric (tg$height [con]) * 0.1 - 0.1, 
+                rev (as.numeric (tg$height [con]) * 0.1 - 0.1)),
+         col = addOpacity (tColours [['colour']] [5], 0.4), lty = 0)
+lines (x = tg$meanDeltaT [con], y = as.numeric (tg$height [con]) * 0.1 - 0.1, 
+       col = tColours [['colour']] [5], lwd = 2, lty = 2)
+
+# pivot temperature data longer
+#----------------------------------------------------------------------------------------
+tmp <- tempData %>% 
+  select (datetime, t.oak.1p5m, t.air.2p0m, t.01.2p0m, t.01.1p5m, t.01.1p0m,  t.02.2p0m, 
+          t.02.1p5m, t.02.1p0m, t.03.2p0m, t.03.1p5m, t.03.1p0m, t.04.2p0m, t.04.1p5m, 
+          t.04.1p0m, t.05.2p0m, t.05.1p5m, t.05.1p0m, t.06.1p5m, t.07.1p5m, t.08.1p5m, 
+          t.10.1p5m) %>%
+  pivot_longer (cols = !datetime, names_to =  c ('tree','height'), 
+                names_prefix = 't.', 
+                names_pattern = '(.*)\\.(.*)', 
+                values_to = 'temp') %>% 
+  filter (!is.nan (temp),
+          !is.na (temp),
+          substr (tree, 1, 3) != 'end',
+          substr (tree, 1, 4) != 'line') %>%
+  mutate (treeID = tree) %>%
+  mutate (height = as.numeric (paste (substr (height, 1, 1), substr (height, 3, 3), sep = '.'))) %>%
+  mutate (tree = ifelse (tree == 'oak', -1799, ifelse (tree == 'air', -1800, tree))) %>%
+  mutate (tree = as.numeric (tree) + 1800)
+
+# subset to only the relevant dates and periods
+#----------------------------------------------------------------------------------------
+tmp <- tmp %>% filter ()
+
+left_join  (x = gradients, y = tmp [tmp$treeID == 'air' & tmp$height != '1p5m'], by = c ('timeSlice'= 'datetime'))
+
+
 #========================================================================================
