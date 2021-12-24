@@ -376,7 +376,7 @@ mod3 <-lmer (formula = endOfSeasonDOY ~ (1 | treeId) + treatment:sampleHeight,
              data = tempData, REML = TRUE)
 summary (mod3); rm (tempData)
 
-# How much growth (fraction) had occured at the start of the experiment?
+# How much growth (fraction) had occurred at the start of the experiment?
 #----------------------------------------------------------------------------------------
 tempData <- ringWidths %>% filter (treatment %in% c (1, 5)) %>% group_by (sampleHeight, treeId) %>%
   mutate (maxRGI = max (Y2018, na.rm = TRUE)) %>%

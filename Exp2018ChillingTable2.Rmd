@@ -18,7 +18,7 @@ options (warn = -1)
 
 # Read anatomical data
 #----------------------------------------------------------------------------------------
-microcoreData <- read_csv (file = './data/anatomicalDataExp2018Chilling.csv',
+microcoreData <- read_csv (file = './data/anatomicalData_HF_Exp2018_Rademacher.csv',
                            col_types = cols ())
 
 # Summarise data to extract important variables for volume and mass growth by period
@@ -26,14 +26,14 @@ microcoreData <- read_csv (file = './data/anatomicalDataExp2018Chilling.csv',
 periodSummary <- microcoreData %>% group_by (TREE, treatment, sampleHeight, exPeriod) %>% 
   summarise (RW        = max  (RADDISTR.BAND, na.rm = TRUE), # ring with  (μm)
              cumCells  = max  (cumNCells, na.rm = TRUE),     # cumulative number of cells (n)
-             lumenD    = mean (DRAD,     na.rm = TRUE),     # radial lumen diameter (μm) 
-             CWT       = mean (CWTTAN,   na.rm = TRUE),     # tangential cell-wall thickness (μm)
-             CWTALL    = mean (CWTALL,   na.rm = TRUE),     # mean cell-wall thickness (μm)  
-             cumCWA    = max  (cumCWA,   na.rm = TRUE),     # cumulative cell-wall area (μm^2)
-             CWA       = mean (CWA,      na.rm = TRUE),     # cell-wall area  (μm^2) 
-             nCells    = mean (nCells,   na.rm = TRUE),     # mean number of cells per 20-μm band
-             lumenDTan = mean (DTAN,     na.rm = TRUE),     # tangential lumen diameter (μm)  
-             CWTRad    = mean (CWTRAD,   na.rm = TRUE),     # radial cell-wall thickness (μm)   
+             lumenD    = mean (DRAD,     na.rm = TRUE),      # radial lumen diameter (μm) 
+             CWT       = mean (CWTTAN,   na.rm = TRUE),      # tangential cell-wall thickness (μm)
+             CWTALL    = mean (CWTALL,   na.rm = TRUE),      # mean cell-wall thickness (μm)  
+             cumCWA    = max  (cumCWA,   na.rm = TRUE),      # cumulative cell-wall area (μm^2)
+             CWA       = mean (CWA,      na.rm = TRUE),      # cell-wall area  (μm^2) 
+             nCells    = mean (nCells,   na.rm = TRUE),      # mean number of cells per 20-μm band
+             lumenDTan = mean (DTAN,     na.rm = TRUE),      # tangential lumen diameter (μm)  
+             CWTRad    = mean (CWTRAD,   na.rm = TRUE),      # radial cell-wall thickness (μm)   
              .groups  = 'keep') %>% 
   ungroup () 
 
@@ -223,7 +223,7 @@ periodSummary <- periodSummary %>% arrange (TREE, sampleHeight, exPeriod) %>%
           sampleHeight = factor (sampleHeight, 
                                  levels = c (4.0, 2.5, 2.0, 1.5, 1.0, 0.5, NA)))
 
-# Calcualte means and standard error of the means for each treatment and sampling height 
+# Calculate means and standard error of the means for each treatment and sampling height 
 # combination
 #----------------------------------------------------------------------------------------
 tableData <- periodSummary %>% 

@@ -433,7 +433,7 @@ for (h in c (4.0, 2.5, 1.5, 0.5)) {
 }
 if (PLOT) dev.off ()
 
-# Introduce 1 and 2m for which there is not sufficient data to fit a GAM  
+# introduce 1 and 2 m for which there is not sufficient data to fit a GAM  
 #----------------------------------------------------------------------------------------
 growingSeasonDates <- growingSeasonDates %>% 
   add_row (treeId        = rep (c (1:5, 11:15), each = 2),
